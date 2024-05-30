@@ -1,10 +1,12 @@
 #include "assets/asset_manager.hpp"
 #include "common.hpp"
 #include "components/sprite.hpp"
+#include "components/collisions.hpp"
 #include "gui/inspector.hpp"
 #include "velocity.hpp"
 #include "keyinput.hpp"
 #include <fmt/printf.h>
+
 namespace an {
 struct Alive {
     static constexpr auto name = "Alive";
@@ -50,6 +52,7 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
 [[nodiscard]] auto make_player(entt::registry &registry) -> entt::entity {
     const auto entity = registry.create();
     an::emplace<an::Player>(registry, entity);
+    an::emplace<CharacterBody>(registry, entity);
     using KE = an::KeyboardEvent;
     auto &vel = registry.get<Velocity>(entity);
     auto &manager = registry.ctx().get<an::KeyManager>();

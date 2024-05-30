@@ -11,6 +11,7 @@
 #include "assets/assets_loader.hpp"
 #include "gui/inspector.hpp"
 #include "components/velocity.hpp"
+#include "components/collisions.hpp"
 #include "components/sprite.hpp"
 #include "components/player.hpp"
 #include "components/relations.hpp"
@@ -64,9 +65,14 @@ auto main() -> int {
         an::destroy_unparented(registry);
         an::propagate_parent_transform(registry);
 
+
         an::render_sprites(registry);
 
         an::move_things(registry);
+
+        an::static_vs_character_collision_system(registry);
+
+        an::debug_draw_bodies(registry);
 
         rlImGuiBegin();
 
