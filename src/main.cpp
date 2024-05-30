@@ -20,7 +20,9 @@ void load_resources(an::AssetManager &asset_manager) {
     using S = an::SoundEnum;
 
     auto player_img = an::load_asset(LoadImage, "player/player-test.png");
+    auto test_tile = an::load_asset(LoadImage, "map/test-tile.png");
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
+    asset_manager.register_texture(test_tile, T::TEST_TILE);
 }
 
 void setup_raylib() {
