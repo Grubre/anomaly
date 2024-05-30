@@ -55,6 +55,10 @@ auto main() -> int {
     load_resources(asset_manager);
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
                                    an::Player, an::Velocity>(&registry);
+
+    // camera
+    registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 1.f);
+
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
@@ -89,14 +93,20 @@ auto main() -> int {
         // DRAW SYSTEMS
         // ======================================
 
-        an::render_sprites(registry);
-
         an::move_things(registry);
+
+        auto pos = registry.get<an::GlobalTransform>(player);
+        registry.ctx().get<Camera2D>().target = pos.transform.position;
 
         an::static_vs_character_collision_system(registry);
         an::character_vs_character_collision_system(registry);
 
+        BeginMode2D(registry.ctx().get<Camera2D>());
+
+        an::render_sprites(registry);
         an::debug_draw_bodies(registry);
+
+        EndMode2D();
         // ======================================
         // DRAW GUI
         // ======================================
