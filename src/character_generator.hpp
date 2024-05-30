@@ -5,7 +5,6 @@
 #include <array>
 #include <cstdint>
 #include <span>
-#include <type_traits>
 #include <variant>
 #include <vector>
 #include "components/props.hpp"
@@ -26,6 +25,14 @@ constexpr std::array possible_hair_colors{
 using ShirtColor = Color;
 using PantsColor = Color;
 using HairColor = Color;
+struct Accessory {
+    std::uint32_t accessory_num;
+};
+
+[[nodiscard]] auto get_random_shirt_color() -> ShirtColor;
+[[nodiscard]] auto get_random_pants_color() -> PantsColor;
+[[nodiscard]] auto get_random_hair_color() -> HairColor;
+[[nodiscard]] auto get_random_accessory() -> Accessory;
 
 struct CharacterTraits {
     ShirtColor shirt_color{};
@@ -34,15 +41,6 @@ struct CharacterTraits {
 
     accesories_mask_t accesories_mask{};
 };
-
-struct DayConfig {
-    std::uint32_t num_guaranteed_traits;
-    std::uint32_t num_probable_traits;
-    std::uint32_t num_used_probable_traits;
-    std::uint32_t num_anomalies;
-};
-
-using ProbableTrait = std::variant<ShirtColor, PantsColor, HairColor>;
 
 template <typename T>
 concept ReactionToProp = requires(T t) {
@@ -57,6 +55,7 @@ struct TwitchNear {
     PropType type;
 };
 
+using ProbableTrait = std::variant<ShirtColor, PantsColor, HairColor, Accessory>;
 using GuaranteedTrait = std::variant<Avoid, TwitchNear>;
 
 struct AnomalyTraits {
@@ -64,17 +63,30 @@ struct AnomalyTraits {
     std::vector<GuaranteedTrait> guaranteed_traits;
 };
 
+struct DayConfig {
+    std::uint32_t num_guaranteed_traits{};
+    std::uint32_t num_probable_traits{};
+    std::uint32_t num_used_probable_traits{};
+    std::uint32_t num_anomalies{};
+};
+
+struct ResolvedDay {
+    AnomalyTraits anomaly_traits;
+    std::vector<CharacterTraits> characters;
+};
+
 [[nodiscard]] auto get_config_for_day(std::uint32_t day_number) -> DayConfig;
 
 class CharacterGenerator {
   public:
     constexpr static float accessory_gen_chance = 0.1f;
+    constexpr static double emplace_probable_trait_chance = 0.5;
 
     explicit CharacterGenerator(std::uint32_t seed, std::uint32_t characters_cnt) : seed(seed) {
         generate_characters(characters_cnt);
     }
 
-    [[nodiscard]] auto new_day(const DayConfig &config) -> AnomalyTraits;
+    [[nodiscard]] auto new_day(const DayConfig &config) -> ResolvedDay;
     [[nodiscard]] auto get_original_character_traits() const -> std::span<const CharacterTraits>;
 
   private:
