@@ -1,6 +1,7 @@
 #include "assets/asset_manager.hpp"
 #include "common.hpp"
 #include "components/sprite.hpp"
+#include "gui/inspector.hpp"
 #include "velocity.hpp"
 #include "keyinput.hpp"
 #include <fmt/printf.h>
@@ -43,7 +44,6 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
     emplace<Alive>(registry,entity);
     emplace<DebugName>(registry,entity,"Player");
     emplace<Sprite>(registry,entity,TextureEnum::PLAYER_TEXTURE);
-    registry.emplace<Player>(entity);
     safe_emplace<Player>(registry, entity);
 }
 

@@ -20,7 +20,7 @@ void load_resources(an::AssetManager &asset_manager) {
     using S = an::SoundEnum;
 
     auto player_img = an::load_asset(LoadImage, "pleyer/pleyer-test.png");
-    asset_manager.register_texture(player_img, T::PLAYER_TEXTURE, 100, 200);
+    asset_manager.register_texture(player_img, T::PLAYER_TEXTURE, 64, 72);
 }
 
 void setup_raylib() {
@@ -38,8 +38,8 @@ void setup_raylib() {
 }
 
 auto main() -> int {
-    // setup
     setup_raylib();
+
     rlImGuiSetup(true);
     auto registry = entt::registry();
     auto &key_manager = registry.ctx().emplace<an::KeyManager>();
@@ -54,9 +54,10 @@ auto main() -> int {
 
     auto entity = registry.create();
     an::emplace<an::ShaderComponent>(registry, entity, base_shader);
-    an::emplace<an::Sprite>(registry, entity);
+    an::emplace<an::LocalTransform>(registry, entity);
+    // an::emplace<an::Sprite>(registry, entity);
 
-    while(!WindowShouldClose()) {
+    while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
