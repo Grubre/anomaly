@@ -58,10 +58,14 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
     auto &vel = registry.get<Velocity>(entity);
     auto &manager = registry.ctx().get<an::KeyManager>();
     auto &player = registry.get<Player>(entity);
-    manager.subscribe(KE::DOWN, KEY_S, [&]() { vel.y += player.speed; });
-    manager.subscribe(KE::DOWN, KEY_W, [&]() { vel.y -= player.speed; });
-    manager.subscribe(KE::DOWN, KEY_A, [&]() { vel.x -= player.speed; });
-    manager.subscribe(KE::DOWN, KEY_D, [&]() { vel.x += player.speed; });
+    manager.subscribe(KE::DOWN, KeyEnum::MOVE_DOWN, [&]() { vel.y += player.speed; });
+    manager.subscribe(KE::DOWN, KeyEnum::MOVE_UP, [&]() { vel.y -= player.speed; });
+    manager.subscribe(KE::DOWN, KeyEnum::MOVE_LEFT, [&]() { vel.x -= player.speed; });
+    manager.subscribe(KE::DOWN, KeyEnum::MOVE_RIGHT, [&]() { vel.x += player.speed; });
     return entity;
+}
+void update_player(entt::registry& registry,entt::entity& entity){
+//    Vector2 movement = {0,0};
+//    if(IsKeyDown())
 }
 } // namespace an

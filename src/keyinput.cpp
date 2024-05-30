@@ -7,7 +7,7 @@
     return Subscriber{type, std::move(callback), id++};
 }
 
-auto an::KeyManager::subscribe(KeyboardEvent type, raylib_key_t key, callback_t &&callback) -> subscriber_id_t {
+auto an::KeyManager::subscribe(KeyboardEvent type, KeyboardKey key, callback_t &&callback) -> subscriber_id_t {
     auto subscriber = make_subscriber(std::move(callback), type);
     const auto id = subscriber.id;
     subscribers[key].push_back(std::move(subscriber));
@@ -19,6 +19,19 @@ void an::KeyManager::unsubscribe(subscriber_id_t id) {
         subs.erase(std::remove_if(subs.begin(), subs.end(), [id](const auto &sub) { return sub.id == id; }),
                    subs.end());
     }
+}
+auto an::KeyManager::subscribe(an::KeyboardEvent type, an::KeyEnum key,
+                               an::KeyManager::callback_t &&callback) -> an::KeyManager::subscriber_id_t {
+    auto subscriber = make_subscriber(std::move(callback), type);
+    const auto id = subscriber.id;
+    subscribers[keys.at(static_cast<size_t>(key))].push_back(std::move(subscriber));
+    return id;
+}
+auto an::KeyManager::get_key(const an::KeyEnum id) -> KeyboardKey {
+    return keys.at(static_cast<size_t>(id));
+}
+void an::KeyManager::assign_key(const KeyboardKey key, const KeyEnum id) {
+    keys.at(static_cast<size_t>(id)) = key;
 }
 
 void an::notify_keyboard_press_system(an::KeyManager &manager) {
