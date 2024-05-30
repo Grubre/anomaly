@@ -33,8 +33,8 @@ void load_resources(an::AssetManager &asset_manager) {
 
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man.png"), T::BASE_CHARACTER);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::CHARACTER_SHIRT);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::CHARACTER_PANTS);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64, 72);
 
     asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);

@@ -38,7 +38,7 @@ struct Sprite {
     uint16_t sprite_id = 0;
     Vector2 offset = Vector2(0.5f, 0.5f);
 
-    void draw(entt::registry& registry, const Transform &tr) const {
+    void draw(const Transform &tr, const TintShader& tint_shader) const {
         auto src_rect = asset.rect(sprite_id);
 
         auto width = src_rect.width * tr.scale.x;
@@ -63,13 +63,13 @@ struct CharacterSprite {
     TextureAsset shirt;
     TextureAsset pants;
 
-    Color hair_color = ColorAlpha(GREEN, 0.5f);
+    Color hair_color = GREEN;
     Color shirt_color = BLUE;
     Color pants_color = RED;
 
     Vector2 hair_offset = Vector2(0.5f, 0.5f);
-    Vector2 shirt_offset = Vector2(0.5f, 1.5f);
-    Vector2 pants_offset = Vector2(0.5f, 1.5f);
+    Vector2 shirt_offset = Vector2(0.5f, 0.5f);
+    Vector2 pants_offset = Vector2(0.5f, 0.5f);
     Vector2 base_offset = Vector2(0.5f, 0.5f);
 
     uint16_t sprite_id = 0;
@@ -88,13 +88,12 @@ struct CharacterSprite {
         BeginShaderMode(tint_shader.shader);
 
         DrawTexturePro(asset.texture, src_rect, Rectangle{tr.position.x, tr.position.y, width, height},
-                       Vector2Multiply(offset, Vector2(width, height)), RAD2DEG * tr.rotation, BLACK);
+                       Vector2Multiply(offset, Vector2(width, height)), RAD2DEG * tr.rotation, WHITE);
 
         EndShaderMode();
     }
 
-    void draw(entt::registry& registry, const Transform &tr) const {
-        auto tint_shader = registry.ctx().get<TintShader>();
+    void draw(const Transform &tr, const TintShader& tint_shader) const {
         draw_component(tr, base_offset, base, WHITE, tint_shader);
         draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
         draw_component(tr, pants_offset, pants, pants_color, tint_shader);
@@ -157,13 +156,16 @@ inline void emplace<CharacterSprite>(entt::registry &registry, entt::entity enti
 
 inline void render_drawables(entt::registry &registry) {
     auto drawables = registry.view<Drawable, GlobalTransform, Visible>();
+
+    auto tint_shader = registry.ctx().get<TintShader>();
+
     for (auto &&[entity, drawable, transform] : drawables.each()) {
         if (registry.all_of<ShaderComponent>(entity)) {
             const auto &shader = registry.get<ShaderComponent>(entity).shader;
             BeginShaderMode(shader);
         }
 
-        std::visit([&](auto &drawable) { drawable.draw(registry, transform.transform); }, drawable.sprite);
+        std::visit([&](auto &drawable) { drawable.draw(transform.transform, tint_shader); }, drawable.sprite);
 
         if (registry.all_of<ShaderComponent>(entity)) {
             EndShaderMode();
