@@ -63,10 +63,11 @@ auto main() -> int {
     default_keys(key_manager);
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
+    an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
                                    an::Player, an::Velocity, an::CharacterBody, an::StaticBody,an::Prop,
                                    an::FollowEntityCharState, an::EscapeCharState, an::AvoidTraitComponent>(&registry);
-
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N,[&](){an::save_props(registry);});
     // camera
     registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 2.f);
 
