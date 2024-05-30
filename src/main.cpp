@@ -19,8 +19,8 @@ void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
 
-    auto player_img = an::load_asset(LoadImage, "pleyer/pleyer-test.png");
-    asset_manager.register_texture(player_img, T::PLAYER_TEXTURE, 64, 72);
+    auto player_img = an::load_asset(LoadImage, "player/player-test.png");
+    asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
 }
 
 void setup_raylib() {
@@ -38,6 +38,7 @@ void setup_raylib() {
 }
 
 auto main() -> int {
+    // setup
     setup_raylib();
 
     rlImGuiSetup(true);
@@ -58,6 +59,7 @@ auto main() -> int {
     // an::emplace<an::Sprite>(registry, entity);
 
     while (!WindowShouldClose()) {
+        an::notify_keyboard_press_system(key_manager);
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
