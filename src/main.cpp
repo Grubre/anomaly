@@ -8,10 +8,8 @@
 #include <entt.hpp>
 #include "keyinput.hpp"
 #include "assets/asset_manager.hpp"
-#include "assets/assets_loader.hpp"
 #include "gui/inspector.hpp"
 #include "components/velocity.hpp"
-#include "components/collisions.hpp"
 #include "components/sprite.hpp"
 #include "components/player.hpp"
 #include "components/relations.hpp"
@@ -25,7 +23,12 @@ void load_resources(an::AssetManager &asset_manager) {
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
     asset_manager.register_texture(test_tile, T::TEST_TILE);
 }
-
+void default_keys(an::KeyManager &key_manager) {
+    key_manager.assign_key(KEY_W, an::KeyEnum::MOVE_UP);
+    key_manager.assign_key(KEY_S, an::KeyEnum::MOVE_DOWN);
+    key_manager.assign_key(KEY_A, an::KeyEnum::MOVE_LEFT);
+    key_manager.assign_key(KEY_D, an::KeyEnum::MOVE_RIGHT);
+}
 void setup_raylib() {
     const auto display = GetCurrentMonitor();
     const int screen_width = GetMonitorWidth(display);
@@ -47,10 +50,13 @@ auto main() -> int {
     rlImGuiSetup(true);
     auto registry = entt::registry();
     auto &key_manager = registry.ctx().emplace<an::KeyManager>();
+    default_keys(key_manager);
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
                                    an::Player, an::Velocity>(&registry);
+    auto entity = registry.create();
+    an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
     // shader
@@ -64,16 +70,14 @@ auto main() -> int {
         // UPDATE SYSTEMS
         // ======================================
         an::notify_keyboard_press_system(key_manager);
-
-
+        an::destroy_unparented(registry);
+        an::propagate_parent_transform(registry);
+        an::update_player(registry, player);
         BeginDrawing();
         ClearBackground(RAYWHITE);
         // ======================================
         // DRAW SYSTEMS
         // ======================================
-        an::destroy_unparented(registry);
-        an::propagate_parent_transform(registry);
-
 
         an::render_sprites(registry);
 
