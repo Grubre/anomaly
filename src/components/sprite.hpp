@@ -7,7 +7,7 @@
 #include "../assets/asset_manager.hpp"
 #include "common.hpp"
 
-namespace bh {
+namespace an {
 
 struct Visible {};
 
@@ -47,7 +47,7 @@ inline void emplace<Sprite, TextureEnum>(entt::registry &registry, entt::entity 
     emplace<GlobalTransform>(registry, entity);
     emplace<Visible>(registry, entity);
     auto texture = registry.ctx().get<AssetManager>().get_texture(id);
-    bh::safe_emplace<Sprite>(registry, entity, texture, uint16_t{});
+    an::safe_emplace<Sprite>(registry, entity, texture, uint16_t{});
 }
 
 inline void render_sprites(entt::registry &registry) {
@@ -72,4 +72,4 @@ inline void render_sprites(entt::registry &registry) {
         }
     }
 }
-} // namespace bh
+} // namespace an

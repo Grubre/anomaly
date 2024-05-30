@@ -3,7 +3,7 @@
 #include <expected>
 #include <filesystem>
 
-namespace bh {
+namespace an {
 
 [[nodiscard]] auto get_asset_path(const std::filesystem::path &resource_path) -> Expected<std::filesystem::path> {
     // If we have a resources directory defined, use that
@@ -22,4 +22,4 @@ namespace bh {
     return std::unexpected(std::string{"Resource not found: "} + resource_path.string());
 }
 
-} // namespace bh
+} // namespace an

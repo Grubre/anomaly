@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <entt.hpp>
 
-namespace bh {
+namespace an {
 enum class KeyboardEvent : uint8_t { PRESS, RELEASE, UP, DOWN };
 class KeyManager {
   public:
@@ -29,4 +29,4 @@ class KeyManager {
 
 void notify_keyboard_press_system(KeyManager &manager);
 
-} // namespace bh
+} // namespace an

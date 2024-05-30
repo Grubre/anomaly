@@ -12,10 +12,11 @@
 #include "components/player.hpp"
 #include "components/relations.hpp"
 
-void load_resources(bh::AssetManager &asset_manager) {
-    using T = bh::TextureEnum;
-    using S = bh::SoundEnum;
-    auto player_img = bh::load_asset(LoadImage, "player.png");
+void load_resources(an::AssetManager &asset_manager) {
+    using T = an::TextureEnum;
+    using S = an::SoundEnum;
+
+    auto player_img = an::load_asset(LoadImage, "player.png");
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE, 100, 200);
 }
 
@@ -38,27 +39,27 @@ auto main() -> int {
     setup_raylib();
     rlImGuiSetup(true);
     auto registry = entt::registry();
-    auto &key_manager = registry.ctx().emplace<bh::KeyManager>();
-    auto &asset_manager = registry.ctx().emplace<bh::AssetManager>();
+    auto &key_manager = registry.ctx().emplace<an::KeyManager>();
+    auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
-    auto inspector = bh::Inspector<bh::LocalTransform, bh::GlobalTransform, bh::Sprite, bh::Alive, bh::Health,
-                                   bh::Player, bh::Velocity>(&registry);
+    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
+                                   an::Player, an::Velocity>(&registry);
     // player
-    [[maybe_unused]] auto player = bh::make_player(registry);
+    [[maybe_unused]] auto player = an::make_player(registry);
     // shader
-    auto base_shader = bh::load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
+    auto base_shader = an::load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
     while (!WindowShouldClose()) {
-        bh::notify_keyboard_press_system(key_manager);
+        an::notify_keyboard_press_system(key_manager);
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        bh::destroy_unparented(registry);
-        bh::propagate_parent_transform(registry);
+        an::destroy_unparented(registry);
+        an::propagate_parent_transform(registry);
 
-        bh::render_sprites(registry);
+        an::render_sprites(registry);
 
-        bh::move_things(registry);
+        an::move_things(registry);
 
         rlImGuiBegin();
 

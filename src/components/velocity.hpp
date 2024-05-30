@@ -6,7 +6,7 @@
 #include <entt.hpp>
 #include "common.hpp"
 
-namespace bh {
+namespace an {
 
 struct Transform {
     static constexpr auto name = "Transform";
@@ -87,4 +87,4 @@ void move_things(entt::registry &registry) {
     }
 }
 
-} // namespace bh
+} // namespace an
