@@ -3,11 +3,13 @@
 #include <entt.hpp>
 #include <imgui.h>
 #include <string>
+#include <sstream>
 #include "assets/asset_manager.hpp"
 #include "common.hpp"
 #include "velocity.hpp"
 #include "sprite.hpp"
 #include "gui/inspector.hpp"
+#include "fstream"
 namespace an {
 enum class PropType : uint8_t { TREE, ROCK, LAMP, BENCH, CNT };
 inline const char *get_prop_name(const PropType type) {
@@ -89,5 +91,29 @@ inline void update_props(entt::registry &registry) {
         }
     }
 }
-
+inline void save_props(entt::registry &registry){
+auto view = registry.view<Prop,GlobalTransform>();
+    std::ofstream MyFile("props.dat");
+    for (auto &&[entity, prop,transform] : view.each()) {
+        MyFile << static_cast<int>(prop.type) << " " << transform.transform.position.x << " " << transform.transform.position.y << std::endl;
+    }
+}
+inline std::ifstream get_ifstream(const char * filename){
+    return std::ifstream(filename);
+}
+inline void load_props(entt::registry& registry, std::ifstream strm){
+    std::string line;
+    while (getline(strm,line)){
+        auto entity = registry.create();
+        std::stringstream ss(line);
+        std::string tmp;
+        getline(ss,tmp,' ');
+        emplace<Prop,PropType>(registry,entity,static_cast<PropType>(std::stoi(tmp)));
+        auto &transform = registry.get<LocalTransform>(entity);
+        getline(ss,tmp,' ');
+        transform.transform.position.x = std::stof(tmp);
+        getline(ss,tmp,' ');
+        transform.transform.position.y = std::stof(tmp);
+    }
+}
 } // namespace an
