@@ -14,12 +14,26 @@ namespace an {
 struct StaticBody {
     Vector2 pos;
     Vector2 size;
+
+    static constexpr auto name = "Static Body";
+    
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
+        ImGui::DragFloat2("Position", &pos.x, 1);
+        ImGui::DragFloat2("Size", &size.x, 1);
+    }
 };
 
 /// Movable character body - a circle with center in pos and radius of radius
 struct CharacterBody {
     Vector2 pos;
     float radius;
+
+    static constexpr auto name = "Character Body";
+    
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
+        ImGui::DragFloat2("Position", &pos.x, 1);
+        ImGui::DragFloat("Radius", &radius, 1);
+    }
 };
 
 std::optional<Vector2> static_vs_character_resolve_vector(StaticBody s, CharacterBody c) {

@@ -1,4 +1,5 @@
 #include "assets/assets_loader.hpp"
+#include "components/collisions.hpp"
 #include "components/common.hpp"
 #include "components/sprite.hpp"
 #include <raylib.h>
@@ -54,7 +55,7 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
-                                   an::Player, an::Velocity>(&registry);
+                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody>(&registry);
 
     // camera
     registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 1.f);
