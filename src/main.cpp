@@ -1,4 +1,6 @@
 #include "assets/assets_loader.hpp"
+#include "character_generator.hpp"
+#include "characters.hpp"
 #include "components/character_state.hpp"
 #include "components/collisions.hpp"
 #include "components/common.hpp"
@@ -67,11 +69,11 @@ auto main() -> int {
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
                                    an::Player, an::Velocity, an::CharacterBody, an::StaticBody,an::Prop,
                                    an::FollowEntityCharState, an::EscapeCharState, 
-                                   an::AvoidTraitComponent, an::ShakeTraitComponent>(&registry);
+                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N,[&](){an::save_props(registry);});
     // camera
-    registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 2.f);
+    registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth()/2, (float)GetScreenHeight()/2), Vector2(), 0.f, 2.f);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
@@ -95,6 +97,13 @@ auto main() -> int {
     //an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 100.f);
     an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
     an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
+
+    // test character generator
+    // auto char_gen = an::CharacterGenerator(0, 5);
+    //
+    // for(const auto &traits : char_gen.get_original_character_traits()) {
+    //     const auto character = an::make_character(registry, traits);
+    // }
 
     while (!WindowShouldClose()) {
         // ======================================
