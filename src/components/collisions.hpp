@@ -1,7 +1,6 @@
 #pragma once
 
 #include "components/velocity.hpp"
-#include "fmt/base.h"
 #include <algorithm>
 #include <optional>
 #include <raylib.h>
@@ -16,7 +15,7 @@ struct StaticBody {
     Vector2 size;
 
     static constexpr auto name = "Static Body";
-    
+
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
         ImGui::DragFloat2("Position", &pos.x, 1);
         ImGui::DragFloat2("Size", &size.x, 1);
@@ -29,7 +28,7 @@ struct CharacterBody {
     float radius;
 
     static constexpr auto name = "Character Body";
-    
+
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
         ImGui::DragFloat2("Position", &pos.x, 1);
         ImGui::DragFloat("Radius", &radius, 1);
@@ -40,7 +39,7 @@ std::optional<Vector2> static_vs_character_resolve_vector(StaticBody s, Characte
     auto px = std::clamp(c.pos.x, s.pos.x, s.pos.x + s.size.x);
     auto py = std::clamp(c.pos.y, s.pos.y, s.pos.y + s.size.y);
 
-    auto diff = Vector2Subtract(c.pos, Vector2(px,py));
+    auto diff = Vector2Subtract(c.pos, Vector2(px, py));
     auto is_intersecting = Vector2LengthSqr(diff) <= c.radius * c.radius;
 
     if (!is_intersecting) {
@@ -69,7 +68,6 @@ std::optional<Vector2> character_vs_character_resolve_vector(CharacterBody a, Ch
     return resolve;
 }
 
-
 inline void static_vs_character_collision_system(entt::registry &registry) {
     auto static_view = registry.view<StaticBody, GlobalTransform>();
     auto char_view = registry.view<CharacterBody, GlobalTransform>();
@@ -89,7 +87,7 @@ inline void static_vs_character_collision_system(entt::registry &registry) {
 
             if (resolve) {
                 auto vector = resolve.value();
-                auto& local = registry.get<LocalTransform>(c);
+                auto &local = registry.get<LocalTransform>(c);
                 local.transform.position = Vector2Add(local.transform.position, vector);
             }
         }
@@ -116,10 +114,10 @@ inline void character_vs_character_collision_system(entt::registry &registry) {
                 auto a_move = Vector2Scale(vector, 0.5f);
                 auto b_move = Vector2Negate(a_move);
 
-                auto& local_a = registry.get<LocalTransform>(a);
+                auto &local_a = registry.get<LocalTransform>(a);
                 local_a.transform.position = Vector2Add(local_a.transform.position, a_move);
 
-                auto& local_b = registry.get<LocalTransform>(b);
+                auto &local_b = registry.get<LocalTransform>(b);
                 local_b.transform.position = Vector2Add(local_b.transform.position, b_move);
             }
         }
@@ -151,4 +149,4 @@ inline void debug_draw_bodies(entt::registry &registry) {
     }
 }
 
-}
+} // namespace an

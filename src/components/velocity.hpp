@@ -72,14 +72,12 @@ struct Velocity {
         ImGui::Value("X", x);
         ImGui::Value("Y", y);
     }
-    Velocity &operator=(const Vector2 &other){
+    Velocity &operator=(const Vector2 &other) {
         this->x = other.x;
         this->y = other.y;
         return *this;
     }
-    explicit operator Vector2() const {
-        return {x, y};
-    }
+    explicit operator Vector2() const { return {x, y}; }
 };
 
 template <> inline void emplace<Velocity>(entt::registry &registry, entt::entity entity) {
@@ -87,7 +85,7 @@ template <> inline void emplace<Velocity>(entt::registry &registry, entt::entity
     safe_emplace<Velocity>(registry, entity);
 }
 
-void move_things(entt::registry &registry) {
+inline void move_things(entt::registry &registry) {
     auto view = registry.view<Velocity, LocalTransform>();
     for (auto &&[entity, vel, transform] : view.each()) {
         transform.transform.position.x += vel.x;

@@ -44,9 +44,7 @@ struct prop {
         ImGui::DragScalar("Type", ImGuiDataType_U8, &type, 1.0f);
     }
 };
-template <> inline void emplace<prop,PropType>(entt::registry &registry, entt::entity entity, const PropType& type) {
-
-}
+template <> inline void emplace<prop, PropType>(entt::registry &registry, entt::entity entity, const PropType &type) {}
 [[nodiscard]] entt::entity make_prop(entt::registry &registry, const PropType type) {
     const auto entity = registry.create();
     registry.emplace<prop>(entity, type);
@@ -54,7 +52,6 @@ template <> inline void emplace<prop,PropType>(entt::registry &registry, entt::e
     registry.emplace<LocalTransform>(entity);
     registry.emplace<DebugName>(entity, get_prop_name(type));
     registry.emplace<Visible>(entity);
-    registry.emplace<Sprite>(entity, TextureEnum::TEST_TILE);
     return entity;
 }
 } // namespace an
