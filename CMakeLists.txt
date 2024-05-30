@@ -21,6 +21,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   set(COMPILE_FLAGS -Wall -Wextra -Wpedantic -Wconversion)
 endif()
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  add_compile_definitions(AN_DEBUG)
+endif()
+
 if(MSVC)
   add_compile_options(/W4)
   add_compile_options(/permissive-)

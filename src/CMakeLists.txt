@@ -7,6 +7,7 @@ set(SOURCE_FILES
     assets/asset_manager.cpp
     assets/assets_loader.cpp
     character_generator.cpp
+    components/collisions.cpp
 )
 
 file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)

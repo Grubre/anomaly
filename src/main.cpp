@@ -18,6 +18,7 @@
 #include "components/sprite.hpp"
 #include "components/player.hpp"
 #include "components/relations.hpp"
+#include "components/props.hpp"
 
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
@@ -27,6 +28,10 @@ void load_resources(an::AssetManager &asset_manager) {
     auto test_tile = an::load_asset(LoadImage, "map/test-tile.png");
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
     asset_manager.register_texture(test_tile, T::TEST_TILE);
+    asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
+    asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
+    asset_manager.register_texture(an::load_asset(LoadImage, "props/tree.png"), T::TREE);
+    asset_manager.register_texture(an::load_asset(LoadImage, "props/rock.png"), T::ROCK);
 }
 void default_keys(an::KeyManager &key_manager) {
     key_manager.assign_key(KEY_W, an::KeyEnum::MOVE_UP);
@@ -59,7 +64,7 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
-                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody,
+                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody,an::Prop,
                                    an::FollowEntityCharState, an::EscapeCharState, an::AvoidTraitComponent>(&registry);
 
     // camera
@@ -95,6 +100,7 @@ auto main() -> int {
         an::destroy_unparented(registry);
         an::propagate_parent_transform(registry);
         an::update_player(registry, player);
+        an::update_props(registry);
 
         // Characters systems
         an::trait_systems(registry);
