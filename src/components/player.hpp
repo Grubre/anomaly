@@ -6,6 +6,7 @@
 #include "velocity.hpp"
 #include "keyinput.hpp"
 #include <fmt/printf.h>
+#include <raylib.h>
 
 namespace an {
 struct Alive {
@@ -45,6 +46,7 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
     emplace<Health>(registry,entity);
     emplace<Alive>(registry,entity);
     emplace<DebugName>(registry,entity,"Player");
+    emplace<CharacterBody>(registry, entity, Vector2(), 20.f);
     emplace<Sprite>(registry,entity,TextureEnum::PLAYER_TEXTURE);
     safe_emplace<Player>(registry, entity);
 }
@@ -52,7 +54,6 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
 [[nodiscard]] auto make_player(entt::registry &registry) -> entt::entity {
     const auto entity = registry.create();
     an::emplace<an::Player>(registry, entity);
-    an::emplace<CharacterBody>(registry, entity);
     using KE = an::KeyboardEvent;
     auto &vel = registry.get<Velocity>(entity);
     auto &manager = registry.ctx().get<an::KeyManager>();
