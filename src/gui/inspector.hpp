@@ -8,7 +8,7 @@
 #include <optional>
 #include <variant>
 
-namespace bh {
+namespace an {
 struct DebugName {
     std::string name;
 };
@@ -199,7 +199,7 @@ template <InspectableComponent... Component> struct Inspector {
                             return;
                         }
 
-                        bh::safe_emplace<Component>(*registry, entity, std::get<Component>(generated_component));
+                        an::safe_emplace<Component>(*registry, entity, std::get<Component>(generated_component));
                     }(),
                     ...);
             }
@@ -246,4 +246,4 @@ template <InspectableComponent... Component> struct Inspector {
     std::array<bool, sizeof...(Component)> component_filter{};
 };
 
-} // namespace bh
+} // namespace an

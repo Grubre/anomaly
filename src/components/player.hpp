@@ -4,7 +4,7 @@
 #include "velocity.hpp"
 #include "keyinput.hpp"
 #include <fmt/printf.h>
-namespace bh {
+namespace an {
 struct Alive {
     static constexpr auto name = "Alive";
     static void inspect() { ImGui::Text("Entity Alive :>"); }
@@ -49,10 +49,10 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
 
 [[nodiscard]] auto make_player(entt::registry &registry) -> entt::entity {
     const auto entity = registry.create();
-    bh::emplace<bh::Player>(registry, entity);
-    using KE = bh::KeyboardEvent;
+    an::emplace<an::Player>(registry, entity);
+    using KE = an::KeyboardEvent;
     auto &vel = registry.get<Velocity>(entity);
-    auto &manager = registry.ctx().get<bh::KeyManager>();
+    auto &manager = registry.ctx().get<an::KeyManager>();
     auto &player = registry.get<Player>(entity);
     manager.subscribe(KE::DOWN, KEY_S, [&]() { vel.y += player.speed; });
     manager.subscribe(KE::DOWN, KEY_W, [&]() { vel.y -= player.speed; });
@@ -60,4 +60,4 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
     manager.subscribe(KE::DOWN, KEY_D, [&]() { vel.x += player.speed; });
     return entity;
 }
-} // namespace bh
+} // namespace an

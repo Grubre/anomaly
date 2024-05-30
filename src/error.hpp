@@ -3,7 +3,7 @@
 #include <string>
 #include <fmt/printf.h>
 
-namespace bh {
+namespace an {
 using Error = std::string;
 template <typename T> using Expected = std::expected<T, Error>;
 
@@ -20,4 +20,4 @@ template <typename T> auto unwrap(const Expected<T> &exp) -> T {
     return exp.value();
 }
 
-} // namespace bh
+} // namespace an

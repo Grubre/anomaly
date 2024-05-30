@@ -1,7 +1,7 @@
 #pragma once
 #include <entt.hpp>
 
-namespace bh {
+namespace an {
 
 template <typename T, typename... Args>
 void safe_emplace(entt::registry &registry, entt::entity entity, const Args &...args) {
@@ -16,4 +16,4 @@ void emplace(entt::registry &registry, entt::entity entity, const Args &...args)
     safe_emplace<T>(registry, entity, args...);
 }
 
-} // namespace bh
+} // namespace an
