@@ -30,6 +30,12 @@ void load_resources(an::AssetManager &asset_manager) {
     auto test_tile = an::load_asset(LoadImage, "map/test-tile.png");
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
     asset_manager.register_texture(test_tile, T::TEST_TILE);
+
+    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
+    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
+    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
+    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
+
     asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/tree.png"), T::TREE);
@@ -94,8 +100,8 @@ auto main() -> int {
     auto test_char_collider = registry.create();
     an::emplace<an::GlobalTransform>(registry, test_char_collider);
     an::emplace<an::CharacterBody>(registry, test_char_collider, Vector2(), 50.f);
-    //an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 100.f);
-    an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
+    an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 100.f);
+    // an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
     an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
 
     // test character generator
@@ -135,7 +141,7 @@ auto main() -> int {
 
         BeginMode2D(registry.ctx().get<Camera2D>());
 
-        an::render_sprites(registry);
+        an::render_drawables(registry);
         an::debug_draw_bodies(registry);
 
         EndMode2D();
