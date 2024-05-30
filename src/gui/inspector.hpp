@@ -91,6 +91,14 @@ template <InspectableComponent... Component> struct Inspector {
             display_entity_list_entry(entity);
         }
 
+        if (ImGui::BeginPopupContextWindow()) {
+            if (ImGui::MenuItem("Create new entity")) {
+                const auto entity = registry->create();
+                an::emplace<an::DebugName>(*registry, entity, "New entity");
+            }
+            ImGui::EndPopup();
+        }
+
         ImGui::EndChild();
     }
 
@@ -176,6 +184,13 @@ template <InspectableComponent... Component> struct Inspector {
         entt::entity entity = *current_entity;
 
         ImGui::BeginChild("Entity Inspector", size, 1);
+        if (ImGui::Button("Delete")) {
+            registry->destroy(entity);
+            current_entity = std::nullopt;
+            ImGui::EndChild();
+            return;
+        }
+
         ImGui::SeparatorText("Entity data");
 
         ImGui::BeginGroup();
