@@ -31,10 +31,10 @@ void load_resources(an::AssetManager &asset_manager) {
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
     asset_manager.register_texture(test_tile, T::TEST_TILE);
 
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man.png"), T::BASE_CHARACTER);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::CHARACTER_SHIRT);
+    asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::CHARACTER_PANTS);
 
     asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
@@ -67,12 +67,13 @@ auto main() -> int {
 
     rlImGuiSetup(true);
     auto registry = entt::registry();
+    an::init_tint_shader(registry);
     auto &key_manager = registry.ctx().emplace<an::KeyManager>();
     default_keys(key_manager);
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
+    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
                                    an::Player, an::Velocity, an::CharacterBody, an::StaticBody,an::Prop,
                                    an::FollowEntityCharState, an::EscapeCharState, 
                                    an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState>(&registry);
