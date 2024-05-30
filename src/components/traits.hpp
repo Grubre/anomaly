@@ -21,7 +21,7 @@ struct AvoidTraitComponent {
 
 inline void avoid_trait_system(entt::registry& registry) {
     auto char_view = registry.view<AvoidTraitComponent, GlobalTransform>();
-    auto prop_view = registry.view<prop, GlobalTransform>();
+    auto prop_view = registry.view<Prop, GlobalTransform>();
 
     for (auto &&[char_entity, avoid_trait, char_tr] : char_view.each()) {
         for (auto &&[prop_entity, prop, prop_tr] : prop_view.each()) {
