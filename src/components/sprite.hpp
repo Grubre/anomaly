@@ -38,6 +38,10 @@ struct Sprite {
     }
 };
 
+struct ShaderComponent {
+    Shader shader;
+};
+
 template <>
 inline void emplace<Sprite, TextureEnum>(entt::registry &registry, entt::entity entity, const TextureEnum &id) {
     emplace<GlobalTransform>(registry, entity);
@@ -55,8 +59,17 @@ inline void render_sprites(entt::registry &registry) {
         auto width = rect.width * tr.scale.x;
         auto height = rect.height * tr.scale.y;
 
+        if(registry.all_of<ShaderComponent>(entity)) {
+            const auto& shader = registry.get<ShaderComponent>(entity).shader;
+            BeginShaderMode(shader);
+        }
+
         DrawTexturePro(sprite.asset.texture, rect, Rectangle{tr.position.x, tr.position.y, width, height},
                        Vector2(width / 2.f, height / 2.f), RAD2DEG * tr.rotation, WHITE);
+
+        if(registry.all_of<ShaderComponent>(entity)) {
+            EndShaderMode();
+        }
     }
 }
 } // namespace bh

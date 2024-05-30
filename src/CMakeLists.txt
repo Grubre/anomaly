@@ -3,6 +3,9 @@ set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 set(SOURCE_FILES
     main.cpp
+    keyinput.cpp
+    assets/asset_manager.cpp
+    assets/assets_loader.cpp
 )
 
 file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)

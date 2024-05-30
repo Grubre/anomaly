@@ -1,3 +1,4 @@
+#include "assets/assets_loader.hpp"
 #include <raylib.h>
 #include <rlImGui.h>
 #include <imgui.h>
@@ -23,5 +24,19 @@ auto main() -> int {
     setup_raylib();
     rlImGuiSetup(true);
     auto registry = entt::registry();
+
+    auto base_shader = bh::load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
+
+    while(!WindowShouldClose()) {
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+        rlImGuiBegin();
+        ImGui::ShowDemoWindow();
+        rlImGuiEnd();
+
+        EndDrawing();
+    }
     return 0;
 }
+
