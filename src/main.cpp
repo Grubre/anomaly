@@ -1,12 +1,16 @@
 #include "assets/assets_loader.hpp"
+#include "components/character_state.hpp"
 #include "components/collisions.hpp"
 #include "components/common.hpp"
+#include "components/props.hpp"
 #include "components/sprite.hpp"
+#include <cmath>
 #include <raylib.h>
 #include <rlImGui.h>
 #include <imgui.h>
 #include <fmt/printf.h>
 #include <entt.hpp>
+#include "components/traits.hpp"
 #include "keyinput.hpp"
 #include "assets/asset_manager.hpp"
 #include "gui/inspector.hpp"
@@ -55,7 +59,8 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
-                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody>(&registry);
+                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody,
+                                   an::FollowEntityCharState, an::EscapeCharState, an::AvoidTraitComponent>(&registry);
 
     // camera
     registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 2.f);
@@ -78,7 +83,9 @@ auto main() -> int {
     // test char collider
     auto test_char_collider = registry.create();
     an::emplace<an::GlobalTransform>(registry, test_char_collider);
-    an::emplace<an::CharacterBody>(registry, test_char_collider, Vector2(800.f,800.f), 50.f);
+    an::emplace<an::CharacterBody>(registry, test_char_collider, Vector2(), 50.f);
+    an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f);
+    an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
 
     while (!WindowShouldClose()) {
         // ======================================
@@ -88,6 +95,11 @@ auto main() -> int {
         an::destroy_unparented(registry);
         an::propagate_parent_transform(registry);
         an::update_player(registry, player);
+
+        // Characters systems
+        an::trait_systems(registry);
+        an::character_states_systems(registry);
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
         // ======================================

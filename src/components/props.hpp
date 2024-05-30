@@ -8,7 +8,7 @@
 #include "gui/inspector.hpp"
 namespace an {
 enum class PropType : uint8_t { TREE, ROCK, LAMP, BENCH, CNT };
-const char *get_prop_name(const PropType type) {
+inline const char *get_prop_name(const PropType type) {
     switch (type) {
     case PropType::TREE:
         return "Tree";
@@ -22,7 +22,7 @@ const char *get_prop_name(const PropType type) {
         return "None";
     }
 }
-PropType get_prop_type(const std::string &name) {
+inline PropType get_prop_type(const std::string &name) {
     if (name == "Tree") {
         return PropType::TREE;
     } else if (name == "Rock") {
@@ -45,7 +45,7 @@ struct prop {
     }
 };
 template <> inline void emplace<prop, PropType>(entt::registry &registry, entt::entity entity, const PropType &type) {}
-[[nodiscard]] entt::entity make_prop(entt::registry &registry, const PropType type) {
+[[nodiscard]] inline entt::entity make_prop(entt::registry &registry, const PropType type) {
     const auto entity = registry.create();
     registry.emplace<prop>(entity, type);
     registry.emplace<GlobalTransform>(entity);
