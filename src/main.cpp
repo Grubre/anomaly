@@ -73,14 +73,16 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
-                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody,an::Prop,
-                                   an::FollowEntityCharState, an::EscapeCharState, 
-                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState>(&registry);
+    auto inspector =
+        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health, an::Player,
+                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
+                      an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState>(
+            &registry);
 
-    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N,[&](){an::save_props(registry);});
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     // camera
-    registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth()/2, (float)GetScreenHeight()/2), Vector2(), 0.f, 2.f);
+    registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
+                                     2.f);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
@@ -95,7 +97,7 @@ auto main() -> int {
     // test collider
     auto test_collider = registry.create();
     an::emplace<an::GlobalTransform>(registry, test_collider);
-    an::emplace<an::StaticBody>(registry, test_collider, Vector2(100.f,100.f), Vector2(500.f, 300.f));
+    an::emplace<an::StaticBody>(registry, test_collider, Vector2(100.f, 100.f), Vector2(500.f, 300.f));
 
     // test char collider
     auto test_char_collider = registry.create();
@@ -126,19 +128,22 @@ auto main() -> int {
         an::trait_systems(registry);
         an::character_states_systems(registry);
 
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        // ======================================
-        // DRAW SYSTEMS
-        // ======================================
-
         an::move_things(registry);
 
         auto pos = registry.get<an::GlobalTransform>(player);
         registry.ctx().get<Camera2D>().target = pos.transform.position;
 
-        an::static_vs_character_collision_system(registry);
-        an::character_vs_character_collision_system(registry);
+        for (int i = 0; i < 4; i++) {
+            an::static_vs_character_collision_system(registry);
+            an::character_vs_character_collision_system(registry);
+            an::propagate_parent_transform(registry);
+        }
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        // ======================================
+        // DRAW SYSTEMS
+        // ======================================
 
         BeginMode2D(registry.ctx().get<Camera2D>());
 
