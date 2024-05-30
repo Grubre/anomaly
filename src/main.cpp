@@ -57,7 +57,6 @@ void setup_raylib() {
 
     fmt::println("Resolution is: {}x{}", screen_width, screen_height);
     InitWindow(screen_width, screen_height, "Hello World");
-    ToggleFullscreen();
     InitAudioDevice();
 }
 
@@ -79,7 +78,8 @@ auto main() -> int {
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState>(
             &registry);
 
-    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N,[&](){an::save_props(registry);});
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&](){ an::spawn_prop(registry);});
     // camera
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      2.f);

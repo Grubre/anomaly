@@ -109,6 +109,17 @@ inline void update_props(entt::registry &registry) {
         }
     }
 }
+inline auto spawn_prop(entt::registry & registry)->entt::entity{
+    static unsigned num =0;
+    auto entity= registry.create();
+    emplace<Prop,PropType>(registry,entity,static_cast<PropType>(0));
+    auto &prop = registry.get<Prop>(entity);
+    registry.remove<DebugName>(entity);
+    emplace<DebugName>(registry, entity, get_prop_name(prop.type)+std::to_string(num++));
+    auto &transform = registry.get<LocalTransform>(entity);
+    transform.transform.position = GetScreenToWorld2D(GetMousePosition(),registry.ctx().get<Camera2D>());
+    return entity;
+}
 inline void save_props(entt::registry &registry){
 auto view = registry.view<Prop,GlobalTransform>();
     std::ofstream MyFile("props.dat");
