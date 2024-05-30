@@ -20,8 +20,10 @@ void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
 
-    auto player_img = an::load_asset(LoadImage, "pleyer/pleyer-test.png");
-    asset_manager.register_texture(player_img, T::PLAYER_TEXTURE, 64, 72);
+    auto player_img = an::load_asset(LoadImage, "player/player-test.png");
+    auto test_tile = an::load_asset(LoadImage, "map/test-tile.png");
+    asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
+    asset_manager.register_texture(test_tile, T::TEST_TILE);
 }
 
 void setup_raylib() {
@@ -39,6 +41,7 @@ void setup_raylib() {
 }
 
 auto main() -> int {
+    // setup
     setup_raylib();
 
     rlImGuiSetup(true);
@@ -53,15 +56,21 @@ auto main() -> int {
     // shader
     auto base_shader = an::load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
 
-    auto entity = registry.create();
-    an::emplace<an::ShaderComponent>(registry, entity, base_shader);
-    an::emplace<an::LocalTransform>(registry, entity);
+    an::emplace<an::ShaderComponent>(registry, player, base_shader);
     // an::emplace<an::Sprite>(registry, entity);
 
     while (!WindowShouldClose()) {
+        // ======================================
+        // UPDATE SYSTEMS
+        // ======================================
+        an::notify_keyboard_press_system(key_manager);
+
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
-
+        // ======================================
+        // DRAW SYSTEMS
+        // ======================================
         an::destroy_unparented(registry);
         an::propagate_parent_transform(registry);
 
@@ -74,12 +83,17 @@ auto main() -> int {
 
         an::debug_draw_bodies(registry);
 
+        // ======================================
+        // DRAW GUI
+        // ======================================
         rlImGuiBegin();
 
         ImGui::ShowDemoWindow();
         inspector.draw_gui();
 
         rlImGuiEnd();
+
+        DrawFPS(10, 10);
 
         EndDrawing();
     }
