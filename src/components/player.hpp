@@ -54,14 +54,6 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
 [[nodiscard]] auto make_player(entt::registry &registry) -> entt::entity {
     const auto entity = registry.create();
     an::emplace<an::Player>(registry, entity);
-    using KE = an::KeyboardEvent;
-    auto &vel = registry.get<Velocity>(entity);
-    auto &manager = registry.ctx().get<an::KeyManager>();
-    auto &player = registry.get<Player>(entity);
-    manager.subscribe(KE::DOWN, KeyEnum::MOVE_DOWN, [&]() { vel.y += player.speed; });
-    manager.subscribe(KE::DOWN, KeyEnum::MOVE_UP, [&]() { vel.y -= player.speed; });
-    manager.subscribe(KE::DOWN, KeyEnum::MOVE_LEFT, [&]() { vel.x -= player.speed; });
-    manager.subscribe(KE::DOWN, KeyEnum::MOVE_RIGHT, [&]() { vel.x += player.speed; });
     return entity;
 }
 void update_player(entt::registry &registry, entt::entity &entity) {
