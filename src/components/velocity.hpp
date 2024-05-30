@@ -56,13 +56,13 @@ struct GlobalTransform {
 };
 
 template <> inline void emplace<LocalTransform>(entt::registry &registry, entt::entity entity) {
-    registry.emplace_or_replace<GlobalTransform>(entity);
-    registry.emplace_or_replace<LocalTransform>(entity);
+    safe_emplace<GlobalTransform>(registry, entity);
+    safe_emplace<LocalTransform>(registry, entity);
 }
 
 template <> inline void emplace<GlobalTransform>(entt::registry &registry, entt::entity entity) {
-    registry.emplace_or_replace<GlobalTransform>(entity);
-    registry.emplace_or_replace<LocalTransform>(entity);
+    safe_emplace<GlobalTransform>(registry, entity);
+    safe_emplace<LocalTransform>(registry, entity);
 }
 struct Velocity {
     static constexpr auto name = "Velocity";

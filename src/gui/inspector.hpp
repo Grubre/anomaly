@@ -215,7 +215,7 @@ template <InspectableComponent... Component> struct Inspector {
                             return;
                         }
 
-                        an::safe_emplace<Component>(*registry, entity, std::get<Component>(generated_component));
+                        an::emplace<Component>(*registry, entity, std::get<Component>(generated_component));
                     }(),
                     ...);
             }

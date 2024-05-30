@@ -6,7 +6,7 @@
 
 namespace an {
 
-enum class TextureEnum { PLAYER_TEXTURE, TEST_TILE,CNT };
+enum class TextureEnum { PLAYER_TEXTURE, TEST_TILE, TREE,BENCH,LAMP,ROCK,CNT };
 enum class SoundEnum { WIN = 0 , CNT};
 
 struct TextureAsset {
