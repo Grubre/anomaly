@@ -40,12 +40,6 @@ template <InspectableComponent... Component> struct Inspector {
     void draw_gui() {
         ImGui::Begin("Inspector");
 
-        if (!current_entity) {
-            ImGui::Text("No entity selected");
-            ImGui::End();
-            return;
-        }
-
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0)); // Optional: reduce spacing between items
 
         // Split main window horizontally
@@ -54,6 +48,13 @@ template <InspectableComponent... Component> struct Inspector {
         ImGui::EndGroup();
 
         ImGui::SameLine();
+
+        if (!current_entity) {
+            ImGui::Text("No entity selected");
+            ImGui::PopStyleVar();
+            ImGui::End();
+            return;
+        }
 
         // Begin right column
         ImGui::BeginGroup();

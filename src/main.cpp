@@ -1,3 +1,6 @@
+#include "assets/assets_loader.hpp"
+#include "components/common.hpp"
+#include "components/sprite.hpp"
 #include <raylib.h>
 #include <rlImGui.h>
 #include <imgui.h>
@@ -16,7 +19,7 @@ void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
 
-    auto player_img = an::load_asset(LoadImage, "player.png");
+    auto player_img = an::load_asset(LoadImage, "pleyer/pleyer-test.png");
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE, 100, 200);
 }
 
@@ -48,9 +51,12 @@ auto main() -> int {
     [[maybe_unused]] auto player = an::make_player(registry);
     // shader
     auto base_shader = an::load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
-    while (!WindowShouldClose()) {
-        an::notify_keyboard_press_system(key_manager);
 
+    auto entity = registry.create();
+    an::emplace<an::ShaderComponent>(registry, entity, base_shader);
+    an::emplace<an::Sprite>(registry, entity);
+
+    while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -70,6 +76,7 @@ auto main() -> int {
 
         EndDrawing();
     }
+
     CloseAudioDevice();
     rlImGuiShutdown();
     CloseWindow();
