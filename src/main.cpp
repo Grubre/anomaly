@@ -65,7 +65,8 @@ auto main() -> int {
     load_resources(asset_manager);
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
                                    an::Player, an::Velocity, an::CharacterBody, an::StaticBody,an::Prop,
-                                   an::FollowEntityCharState, an::EscapeCharState, an::AvoidTraitComponent>(&registry);
+                                   an::FollowEntityCharState, an::EscapeCharState, 
+                                   an::AvoidTraitComponent, an::ShakeTraitComponent>(&registry);
 
     // camera
     registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 2.f);
@@ -89,7 +90,8 @@ auto main() -> int {
     auto test_char_collider = registry.create();
     an::emplace<an::GlobalTransform>(registry, test_char_collider);
     an::emplace<an::CharacterBody>(registry, test_char_collider, Vector2(), 50.f);
-    an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f);
+    //an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 100.f);
+    an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
     an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
 
     while (!WindowShouldClose()) {
