@@ -6,7 +6,6 @@ set(SOURCE_FILES
     keyinput.cpp
     assets/asset_manager.cpp
     assets/assets_loader.cpp
-        components/props.hpp
     character_generator.cpp
 )
 
