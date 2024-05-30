@@ -58,7 +58,7 @@ auto main() -> int {
                                    an::Player, an::Velocity, an::CharacterBody, an::StaticBody>(&registry);
 
     // camera
-    registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 1.f);
+    registry.ctx().emplace<Camera2D>(Vector2(GetScreenWidth()/2, GetScreenHeight()/2), Vector2(), 0.f, 2.f);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
