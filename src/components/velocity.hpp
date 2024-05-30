@@ -72,7 +72,16 @@ struct Velocity {
         ImGui::Value("X", x);
         ImGui::Value("Y", y);
     }
+    Velocity &operator=(const Vector2 &other){
+        this->x = other.x;
+        this->y = other.y;
+        return *this;
+    }
+    explicit operator Vector2() const {
+        return {x, y};
+    }
 };
+
 template <> inline void emplace<Velocity>(entt::registry &registry, entt::entity entity) {
     emplace<LocalTransform>(registry, entity);
     safe_emplace<Velocity>(registry, entity);
