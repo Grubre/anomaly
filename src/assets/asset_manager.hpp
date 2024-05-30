@@ -6,7 +6,7 @@
 
 namespace bh {
 
-enum class TextureEnum { BULLET_TEXTURE = 0, PLAYER_TEXTURE, CNT };
+enum class TextureEnum { PLAYER_TEXTURE, CNT };
 enum class SoundEnum { WIN = 0 , CNT};
 
 struct TextureAsset {
@@ -25,7 +25,7 @@ class AssetManager {
 
   private:
     std::array<TextureAsset, static_cast<size_t>(TextureEnum::CNT)> textures;
-    std::array<Sound,static_cast<size_t>(SoundEnum::CNT)> sounds;
+    std::array<Sound, static_cast<size_t>(SoundEnum::CNT)> sounds;
 };
 
 /*
