@@ -176,6 +176,7 @@ auto main() -> int {
 
         an::visualize_walk_areas(registry);
 
+        an::y_sort(registry);
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
         an::debug_trait_systems(registry);

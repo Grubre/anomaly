@@ -192,6 +192,7 @@ inline void emplace<CharacterSprite>(entt::registry &registry, entt::entity enti
 
 inline void render_drawables(entt::registry &registry) {
     auto drawables = registry.view<Drawable, GlobalTransform, Visible>();
+    drawables.use<Visible>();
 
     auto tint_shader = registry.ctx().get<TintShader>();
 
@@ -215,5 +216,13 @@ inline void render_drawables(entt::registry &registry) {
             EndShaderMode();
         }
     }
+}
+
+inline void y_sort(entt::registry &registry) {
+    registry.sort<Visible>([&](const entt::entity lhs, const entt::entity rhs) {
+        auto y_lhs = registry.get<GlobalTransform>(lhs).transform.position.y;
+        auto y_rhs = registry.get<GlobalTransform>(rhs).transform.position.y;
+        return y_lhs < y_rhs;
+    });
 }
 } // namespace an
