@@ -24,6 +24,7 @@
 #include "components/city.hpp"
 #include "gui/inspect_window.hpp"
 #include "components/marker.hpp"
+
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
@@ -35,7 +36,8 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("player/player-test.png", T::PLAYER_TEXTURE);
     load_image("map/test-tile.png", T::TEST_TILE);
     // player
-    load_image("player/player_man.png", T::BASE_CHARACTER);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/base_walk_animation.png"), T::BASE_CHARACTER, 64,
+                                   72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64,
@@ -55,7 +57,7 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("ui/tlo.png", T::UI_BACKGROUND);
     // other
     load_image("other/marker.png", T::MARKER);
-    load_image("other/bullet.png",T::BULLET);
+    load_image("other/bullet.png", T::BULLET);
     // map
     load_image("map/city-tile-N1.png", T::CITY_TILE_N1);
     load_image("map/city-tile-square.png", T::CITY_TILE_SQUARE);
@@ -200,13 +202,15 @@ auto main() -> int {
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::AvoidTraitComponent,
                       an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
                       an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
-                      an::Marker, an::CharacterStateMachine>(&registry);
+                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
     // camera
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      3.f);
+
+    auto post_process_texture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 0.f));
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f, -1.f));
@@ -222,6 +226,8 @@ auto main() -> int {
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
+    registry.emplace<an::IdleState>(player);
+    registry.emplace<an::Animation>(player, 0.1f, 0.f, 0u, 4u);
     key_manager.subscribe(an::KeyboardEvent::PRESS, an::KeyEnum::INTERACT,
                           [&]() { an::check_nearby_npc(registry, player); });
     // shader
@@ -248,80 +254,93 @@ auto main() -> int {
                             .num_used_probable_traits = 3,
                             .num_anomalies = 5,
                         });
-an::propagate_parent_transform(registry);
-
-// particle
-auto drunk_p = an::make_particle(an::ParticleType::DRUNK, 3, 6, {20, 20}, {2, 2}, 5, an::ParticleAnimationType::SPIN_R,
-                                 true, true);
-key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J, [&]() {
-    an::emit_particles(registry, player, drunk_p, 5, {0, -5});
-});
-while (!WindowShouldClose()) {
-    // ======================================
-    // UPDATE SYSTEMS
-    // ======================================
-    an::notify_keyboard_press_system(key_manager);
-    an::destroy_unparented(registry);
-    an::update_player(registry, player);
-    an::update_props(registry);
-    an::player_shooting(registry, player);
-    an::update_marker_system(registry, player);
-    an::update_particle_system(registry);
-    an::update_bullets(registry);
-
-    // Characters systems
-    an::trait_systems(registry);
-    an::character_states_systems(registry);
-
-    an::move_things(registry);
     an::propagate_parent_transform(registry);
 
-    auto pos = registry.get<an::GlobalTransform>(player);
-    registry.ctx().get<Camera2D>().target = pos.transform.position;
+    // particle
+    auto drunk_p = an::make_particle(an::ParticleType::DRUNK, 3, 6, {20, 20}, {2, 2}, 5,
+                                     an::ParticleAnimationType::SPIN_R, true, true);
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J, [&]() {
+        an::emit_particles(registry, player, drunk_p, 5, {0, -5});
+    });
+    while (!WindowShouldClose()) {
+        // ======================================
+        // UPDATE SYSTEMS
+        // ======================================
+        an::notify_keyboard_press_system(key_manager);
+        an::destroy_unparented(registry);
+        an::update_player(registry, player);
+        an::update_props(registry);
+        an::player_shooting(registry, player);
+        an::update_marker_system(registry, player);
+        an::update_particle_system(registry);
+        an::update_bullets(registry);
 
-    for (int i = 0; i < 4; i++) {
-        an::static_vs_character_collision_system(registry);
-        an::character_vs_character_collision_system(registry);
+        // Characters systems
+        an::trait_systems(registry);
+        an::character_states_systems(registry);
+
+        an::move_things(registry);
         an::propagate_parent_transform(registry);
+
+        auto pos = registry.get<an::GlobalTransform>(player);
+        registry.ctx().get<Camera2D>().target = pos.transform.position;
+
+        for (int i = 0; i < 4; i++) {
+            an::static_vs_character_collision_system(registry);
+            an::character_vs_character_collision_system(registry);
+            an::propagate_parent_transform(registry);
+        }
+
+        an::set_move_state_system(registry);
+        an::update_character_animations(registry);
+
+        BeginTextureMode(post_process_texture);
+        ClearBackground(RAYWHITE);
+        // ======================================
+        // DRAW SYSTEMS
+        // ======================================
+
+        BeginMode2D(registry.ctx().get<Camera2D>());
+
+        an::render_city_tiles(registry);
+
+        an::y_sort(registry);
+
+        an::visualize_walk_areas(registry);
+
+        an::render_drawables(registry);
+        an::debug_draw_bodies(registry);
+        an::debug_trait_systems(registry);
+
+        EndMode2D();
+
+        EndTextureMode();
+
+        BeginDrawing();
+
+        DrawTextureRec(
+            post_process_texture.texture,
+            (Rectangle){0, 0, (float)post_process_texture.texture.width, (float)-post_process_texture.texture.height},
+            (Vector2){0, 0}, WHITE);
+
+        // ======================================
+        // DRAW GUI
+        // ======================================
+
+        rlImGuiBegin();
+        an::update_ui(registry, player);
+        ImGui::ShowDemoWindow();
+        inspector.draw_gui();
+        anomaly_traits_gui(day);
+        rlImGuiEnd();
+
+        DrawFPS(10, 10);
+
+        EndDrawing();
     }
 
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
-    // ======================================
-    // DRAW SYSTEMS
-    // ======================================
-
-    BeginMode2D(registry.ctx().get<Camera2D>());
-
-    an::render_city_tiles(registry);
-
-    an::y_sort(registry);
-
-    an::visualize_walk_areas(registry);
-
-    an::render_drawables(registry);
-    an::debug_draw_bodies(registry);
-    an::debug_trait_systems(registry);
-
-    EndMode2D();
-    // ======================================
-    // DRAW GUI
-    // ======================================
-
-    rlImGuiBegin();
-    an::update_ui(registry, player);
-    ImGui::ShowDemoWindow();
-    inspector.draw_gui();
-    anomaly_traits_gui(day);
-    rlImGuiEnd();
-
-    DrawFPS(10, 10);
-
-    EndDrawing();
-}
-
-CloseAudioDevice();
-rlImGuiShutdown();
-CloseWindow();
-return 0;
+    CloseAudioDevice();
+    rlImGuiShutdown();
+    CloseWindow();
+    return 0;
 }
