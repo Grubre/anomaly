@@ -69,6 +69,7 @@ auto main() -> int {
 
     rlImGuiSetup(true);
     auto registry = entt::registry();
+    an::init_collision_controller(registry);
     an::init_tint_shader(registry);
     auto &key_manager = registry.ctx().emplace<an::KeyManager>();
     default_keys(key_manager);
@@ -137,8 +138,10 @@ auto main() -> int {
         an::update_player(registry, player);
         an::update_props(registry);
         an::player_shooting(registry, player);
-        an::clean_bullets(registry);
+        
         an::update_particle_system(registry);
+        an::update_bullets(registry);
+
         // Characters systems
         an::trait_systems(registry);
         an::character_states_systems(registry);

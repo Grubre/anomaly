@@ -6,6 +6,7 @@
 #include <raylib.h>
 #include <entt.hpp>
 #include <raymath.h>
+#include <vector>
 
 namespace an {
 
@@ -36,6 +37,37 @@ struct CharacterBody {
         ImGui::DragFloat("Mass", &mass, 0.1f);
     }
 };
+
+struct NarrowPair {
+    entt::entity first;
+    entt::entity second;
+};
+
+enum class SASPointKind {
+    BEGIN,
+    END,
+};
+
+struct SortAndSweepPoint {
+    float point;
+    entt::entity entity;
+    SASPointKind kind;
+};
+
+struct CollisionController {
+    std::vector<NarrowPair> narrow_queue;
+    std::vector<SortAndSweepPoint> sas_list;
+    std::unordered_set<entt::entity> active_sas;
+};
+
+inline void init_collision_controller(entt::registry &registry) {
+    registry.ctx().emplace<CollisionController>();
+    registry.on_construct<CharacterBody>().connect<[](entt::registry& registry, entt::entity entity) {
+        auto &controller = registry.ctx().get<CollisionController>();
+        controller.sas_list.emplace_back(0.f, entity, SASPointKind::BEGIN);
+        controller.sas_list.emplace_back(0.f, entity, SASPointKind::END);
+    }>();
+}
 
 bool is_in_static(an::StaticBody s, Vector2 point);
 auto static_vs_character_resolve_vector(an::StaticBody s, an::CharacterBody c) -> std::optional<Vector2>;

@@ -40,7 +40,7 @@ struct Player {
     float speed = 256;
 
     float shooting_speed = 0.05f;
-    float bullet_speed = 500.f;
+    float bullet_speed = 1000.f;
     float to_next_shot = shooting_speed;
 
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
@@ -90,14 +90,19 @@ void update_player(entt::registry &registry, entt::entity &entity) {
 }
 
 struct Bullet {
-    float time_left = 0.5f;
+    Vector2 start_vel;
+    float total_time = 0.5f;
+    float time_left = total_time;
 };
 
-inline void clean_bullets(entt::registry &registry) {
-    auto view = registry.view<Bullet>();
+inline void update_bullets(entt::registry &registry) {
+    auto view = registry.view<Bullet, Velocity>();
 
-    for (auto &&[entity, bullet] : view.each()) {
+    for (auto &&[entity, bullet, vel] : view.each()) {
         bullet.time_left -= GetFrameTime();
+
+        vel = Vector2Scale(bullet.start_vel, bullet.time_left / bullet.total_time);
+
         if (bullet.time_left <= 0.f) {
             registry.destroy(entity);
         }
@@ -114,10 +119,10 @@ inline void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 
     auto spread_angle = d(gen);
     dir = Vector2Rotate(dir, spread_angle);
 
-    emplace<Bullet>(registry, bullet);
     emplace<GlobalTransform>(registry, bullet);
     emplace<CharacterBody>(registry, bullet, Vector2(), 10.f, 10.f);
     emplace<Velocity>(registry, bullet, dir.x * speed, dir.y * speed);
+    emplace<Bullet>(registry, bullet, dir.x * speed, dir.y * speed);
 
     auto& tr = registry.get<LocalTransform>(bullet);
 
