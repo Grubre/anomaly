@@ -1,5 +1,6 @@
 #pragma once
 
+#include "components/collisions.hpp"
 #include "components/velocity.hpp"
 #include <fmt/format.h>
 #include <imgui.h>
@@ -82,7 +83,7 @@ struct RandomWalkState {
 };
 
 inline void random_walk_state_system(entt::registry &registry) {
-    constexpr float epsilon = 1.f;
+    constexpr float epsilon = 40.f;
     auto view = registry.view<RandomWalkState, LocalTransform>();
 
     for (auto &&[entity, state, transform] : view.each()) {
@@ -94,8 +95,11 @@ inline void random_walk_state_system(entt::registry &registry) {
             state.time_elapsed += GetFrameTime();
             if (state.time_elapsed >= state.wait_time) {
                 state.time_elapsed = 0.f;
-                state.target =
-                    Vector2Add(state.target, Vector2{get_random_float(-100.f, 100.f), get_random_float(-100.f, 100.f)});
+
+                state.target = Vector2Add(state.target, Vector2{get_random_float(-100.f, 100.f), get_random_float(-100.f, 100.f)});
+                while (is_in_any_static(registry, state.target)) {
+                    state.target = Vector2Add(state.target, Vector2{get_random_float(-100.f, 100.f), get_random_float(-100.f, 100.f)});
+                }
             }
             continue;
         }

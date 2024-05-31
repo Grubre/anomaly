@@ -26,19 +26,23 @@ struct StaticBody {
 struct CharacterBody {
     Vector2 pos;
     float radius;
+    float mass = 1.f;
 
     static constexpr auto name = "Character Body";
 
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
         ImGui::DragFloat2("Position", &pos.x, 1);
         ImGui::DragFloat("Radius", &radius, 1);
+        ImGui::DragFloat("Mass", &mass, 0.1f);
     }
 };
 
+bool is_in_static(an::StaticBody s, Vector2 point);
 auto static_vs_character_resolve_vector(an::StaticBody s, an::CharacterBody c) -> std::optional<Vector2>;
 auto character_vs_character_resolve_vector(CharacterBody a, CharacterBody b) -> std::optional<Vector2>;
 void static_vs_character_collision_system(entt::registry &registry);
 void character_vs_character_collision_system(entt::registry &registry);
+bool is_in_any_static(entt::registry &registry, Vector2 point);
 void debug_draw_bodies(entt::registry &registry);
 
 } // namespace an

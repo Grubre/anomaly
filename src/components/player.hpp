@@ -116,12 +116,12 @@ inline void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 
 
     emplace<Bullet>(registry, bullet);
     emplace<GlobalTransform>(registry, bullet);
-    emplace<CharacterBody>(registry, bullet, Vector2(), 10.f);
+    emplace<CharacterBody>(registry, bullet, Vector2(), 10.f, 10.f);
     emplace<Velocity>(registry, bullet, dir.x * speed, dir.y * speed);
 
     auto& tr = registry.get<LocalTransform>(bullet);
 
-    tr.transform.position = Vector2Add(start, Vector2Scale(dir, 50.f));
+    tr.transform.position = Vector2Add(start, Vector2Scale(dir, 30.f));
 }
 
 inline void player_shooting(entt::registry &registry, entt::entity &entity) {

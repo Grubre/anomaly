@@ -1,4 +1,5 @@
 #include "walk_area.hpp"
+#include "components/collisions.hpp"
 
 [[nodiscard]] auto an::WalkArea::calculate_area() const -> float {
     return std::abs(left_top.x - right_bottom.x) * std::abs(left_top.y - right_bottom.y);
@@ -15,6 +16,7 @@
 [[nodiscard]] auto an::WalkArea::sample_random_point() const -> Vector2 {
         float x = an::get_random_float(left_top.x, right_bottom.x);
         float y = an::get_random_float(left_top.y, right_bottom.y);
+
         return Vector2{x, y};
     }
 

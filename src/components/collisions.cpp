@@ -1,4 +1,12 @@
 #include "collisions.hpp"
+#include "components/common.hpp"
+#include <cstdlib>
+#include <raylib.h>
+#include <raymath.h>
+
+bool an::is_in_static(an::StaticBody s, Vector2 point) {
+    return s.pos.x <= point.x && s.pos.y <= point.y && point.x <= s.pos.x + s.size.x && point.y <= s.pos.y + s.size.y;
+}
 
 auto an::static_vs_character_resolve_vector(an::StaticBody s, an::CharacterBody c) -> std::optional<Vector2> {
     auto px = std::clamp(c.pos.x, s.pos.x, s.pos.x + s.size.x);
@@ -13,7 +21,10 @@ auto an::static_vs_character_resolve_vector(an::StaticBody s, an::CharacterBody 
 
     auto dist = Vector2Length(diff);
     auto norm_vec = Vector2Normalize(diff);
+
     auto resolve = Vector2Scale(norm_vec, c.radius - dist);
+    auto perp = Vector2Scale(Vector2(-resolve.y, resolve.x), 0.01f);
+    resolve = Vector2Add(resolve, perp);
 
     return resolve;
 }
@@ -76,8 +87,10 @@ void an::character_vs_character_collision_system(entt::registry &registry) {
 
             if (resolve) {
                 auto vector = resolve.value();
-                auto a_move = Vector2Scale(vector, 0.5f);
-                auto b_move = Vector2Negate(a_move);
+                auto total_mass = a_body.mass + b_body.mass;
+
+                auto a_move = Vector2Scale(vector, b_body.mass / total_mass);
+                auto b_move = Vector2Scale(vector, -a_body.mass / total_mass);
 
                 auto &local_a = registry.get<LocalTransform>(a);
                 local_a.transform.position = Vector2Add(local_a.transform.position, a_move);
@@ -87,6 +100,18 @@ void an::character_vs_character_collision_system(entt::registry &registry) {
             }
         }
     }
+}
+
+bool an::is_in_any_static(entt::registry &registry, Vector2 point) {
+    auto static_view = registry.view<StaticBody, GlobalTransform>();
+
+    for (auto &&[s, s_body, s_tr] : static_view.each()) {
+        if (is_in_static(s_body, point)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void an::debug_draw_bodies(entt::registry &registry) {
