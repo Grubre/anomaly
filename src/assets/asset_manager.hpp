@@ -26,6 +26,7 @@ enum class TextureEnum {
     CITY_TILE_N1,
     CITY_TILE_SQUARE,
     MARKER,
+    BULLET,
     CNT
 };
 enum class SoundEnum { WIN = 0, CNT };

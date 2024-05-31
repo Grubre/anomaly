@@ -55,6 +55,7 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("ui/tlo.png", T::UI_BACKGROUND);
     // other
     load_image("other/marker.png", T::MARKER);
+    load_image("other/bullet.png",T::BULLET);
     // map
     load_image("map/city-tile-N1.png", T::CITY_TILE_N1);
     load_image("map/city-tile-square.png", T::CITY_TILE_SQUARE);
