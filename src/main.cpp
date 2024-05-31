@@ -85,8 +85,27 @@ struct Anomaly {
 };
 } // namespace an
 
-void anomaly_traits_gui(entt::registry& registry) {
-
+void anomaly_traits_gui(an::AnomalyTraits &day) {
+    ImGui::Begin("Anomaly traits");
+    ImGui::SeparatorText("Anomaly traits");
+    for (auto &trait : day.probable_traits) {
+        ImGui::Text("%s: ", probable_trait_name_to_str(trait).data());
+        ImGui::SameLine();
+        std::visit(entt::overloaded{
+                       [&](const auto &color) {
+                           ImGui::ColorButton("Color",
+                                              ImVec4((float)color.color.r / 255.f, (float)color.color.g / 255.f,
+                                                     (float)color.color.b / 255.f, 1.f));
+                       },
+                       [&](const an::Accessory &accessory) { ImGui::Text("Accessory: %d", accessory.accessory_num); },
+                   },
+                   trait);
+    }
+    // for (auto &trait : day.guaranteed_traits) {
+    //     ImGui::Text("Guaranteed trait");
+    //     ImGui::Text("Trait type: %s", probable_trait_name_to_str(trait).data());
+    // }
+    ImGui::End();
 }
 
 auto create_connected_walk_areas(entt::registry &registry, uint32_t number) -> entt::entity {
@@ -136,8 +155,8 @@ auto main() -> int {
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      2.f);
 
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f,0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f,-1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f, -1.f));
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
