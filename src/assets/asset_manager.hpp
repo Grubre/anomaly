@@ -6,24 +6,46 @@
 
 namespace an {
 
-enum class TextureEnum { PLAYER_TEXTURE, BASE_CHARACTER, CHARACTER_SHIRT, CHARACTER_PANTS, CHARACTER_HAIR, TEST_TILE, TREE, BENCH, LAMP, ROCK, CNT };
-enum class SoundEnum { WIN = 0 , CNT};
+enum class TextureEnum {
+    PLAYER_TEXTURE,
+    BASE_CHARACTER,
+    CHARACTER_SHIRT,
+    CHARACTER_PANTS,
+    CHARACTER_HAIR,
+    TEST_TILE,
+    TREE,
+    BENCH,
+    LAMP,
+    ROCK,
+    CNT
+};
+enum class SoundEnum { WIN = 0, CNT };
 
 struct TextureAsset {
-  Texture2D texture;
-  uint16_t cell_size_x;
-  uint16_t cell_size_y;
+    Texture2D texture;
+    uint16_t cell_size_x;
+    uint16_t cell_size_y;
 
-  [[nodiscard]] Rectangle rect(uint16_t sprite_id) const {
+    [[nodiscard]] Rectangle rect(uint16_t sprite_id, bool flip_h, bool flip_v) const {
         auto columns_in_texture = texture.width / cell_size_x;
 
         auto row = sprite_id / columns_in_texture;
         auto column = sprite_id % columns_in_texture;
 
+        int width = cell_size_x;
+        if (flip_h) {
+            width = -width;
+        }
+
+        int height = cell_size_y;
+        if (flip_v) {
+            height = -height;
+        }
+
         return Rectangle{.x = static_cast<float>(column * cell_size_x),
                          .y = static_cast<float>(row * cell_size_y),
-                         .width = static_cast<float>(cell_size_x),
-                         .height = static_cast<float>(cell_size_y)};
+                         .width = static_cast<float>(width),
+                         .height = static_cast<float>(height)};
     }
 };
 
