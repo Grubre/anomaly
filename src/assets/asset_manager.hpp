@@ -56,6 +56,11 @@ struct TextureAsset {
                          .width = static_cast<float>(width),
                          .height = static_cast<float>(height)};
     }
+
+    void unload() {
+        UnloadTexture(texture);
+        texture.id = 0;
+    }
 };
 
 class AssetManager {

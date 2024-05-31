@@ -239,6 +239,7 @@ auto main() -> int {
                                      an::ParticleAnimationType::SPIN_R, true, true);
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J,
                           [&]() { an::emit_particles(registry, player, drunk_p, 5, {0, -5}); });
+
     while (!WindowShouldClose()) {
         // ======================================
         // UPDATE SYSTEMS
@@ -290,6 +291,7 @@ auto main() -> int {
         // ======================================
         // DRAW GUI
         // ======================================
+
         rlImGuiBegin();
         an::update_ui(registry, player);
         ImGui::ShowDemoWindow();
