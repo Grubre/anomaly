@@ -66,6 +66,45 @@ struct FollowPathState {
     }
 };
 
+struct RandomWalkState {
+    static constexpr auto name = "Random Walk State";
+
+    float speed{};
+    Vector2 target{};
+    float wait_time{};
+    float time_elapsed{0.f};
+
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
+        ImGui::DragFloat("Speed", &speed, 1);
+        ImGui::DragFloat2("Vector", &target.x, 1);
+        ImGui::DragFloat("Wait Time", &wait_time, 1);
+    }
+};
+
+inline void random_walk_state_system(entt::registry &registry) {
+    constexpr float epsilon = 1.f;
+    auto view = registry.view<RandomWalkState, LocalTransform>();
+
+    for (auto &&[entity, state, transform] : view.each()) {
+        const auto target = state.target;
+        const auto dir = Vector2Normalize(Vector2Subtract(target, transform.transform.position));
+        const auto delta = Vector2Scale(dir, state.speed * GetFrameTime());
+
+        if (Vector2Distance(state.target, transform.transform.position) < epsilon) {
+            state.time_elapsed += GetFrameTime();
+            if (state.time_elapsed >= state.wait_time) {
+                state.time_elapsed = 0.f;
+                state.target =
+                    Vector2Add(state.target, Vector2{get_random_float(-100.f, 100.f), get_random_float(-100.f, 100.f)});
+            }
+            continue;
+        }
+
+        transform.transform.position = Vector2Add(transform.transform.position, delta);
+        state.time_elapsed += GetFrameTime();
+    }
+}
+
 inline void follow_path_state_system(entt::registry &registry) {
     constexpr float epsilon = 1.f;
     auto view = registry.view<FollowPathState, LocalTransform>();
@@ -127,6 +166,7 @@ inline void character_states_systems(entt::registry &registry) {
     follow_entity_character_state_system(registry);
     escape_character_state_system(registry);
     follow_path_state_system(registry);
+    random_walk_state_system(registry);
 }
 
 } // namespace an
