@@ -20,6 +20,7 @@ struct FollowEntityCharState {
     entt::entity entity;
     float time_left;
     float speed;
+    float last_speed_update_time;
 
     static constexpr auto name = "Follow Entity Character State";
 

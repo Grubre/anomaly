@@ -1,4 +1,6 @@
 #include "character_state.hpp"
+#include <algorithm>
+#include <raylib.h>
 namespace an {
 void FollowEntityCharState::inspect(entt::registry &registry, entt::entity entity) {
     ImGui::DragFloat("Time Left", &time_left, 1);
@@ -41,13 +43,19 @@ void remove_character_state(entt::registry &registry, entt::entity entity) {
     registry.remove<FollowEntityCharState>(entity);
 }
 void follow_player_if_bullet(entt::registry &registry, entt::entity character, entt::entity bullet) {
-    if (registry.all_of<Character>(character) && !registry.all_of<FollowEntityCharState>(character) &&
-        registry.all_of<Bullet>(bullet)) {
-        remove_character_state(registry, character);
-
-        auto b = registry.get<Bullet>(bullet);
-
-        emplace<FollowEntityCharState>(registry, character, b.player, INFINITY, 100.f);
+    if (registry.all_of<Character>(character) && registry.all_of<Bullet>(bullet)) {
+        if (registry.all_of<FollowEntityCharState>(character)) {
+            auto &state = registry.get<FollowEntityCharState>(character);
+            if (GetTime() >= state.last_speed_update_time + 0.5f) {
+                state.speed += 50.f;
+                state.time_left += 1.f;
+                state.last_speed_update_time = GetTime();
+            }
+        } else {
+            remove_character_state(registry, character);
+            auto b = registry.get<Bullet>(bullet);
+            emplace<FollowEntityCharState>(registry, character, b.player, 5.f, 100.f, GetTime());
+        }
     }
 }
 void random_walk_state_system(entt::registry &registry) {
