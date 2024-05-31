@@ -22,8 +22,10 @@ enum class TextureEnum {
     B_SUS,
     B_LEGIT,
     B_BACK,
+    UI_BACKGROUND,
     CITY_TILE_N1,
     CITY_TILE_SQUARE,
+    MARKER,
     CNT
 };
 enum class SoundEnum { WIN = 0, CNT };

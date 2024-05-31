@@ -52,6 +52,9 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("ui/back_btn.png", T::B_BACK);
     load_image("ui/legit_btn.png", T::B_LEGIT);
     load_image("ui/sus_btn.png", T::B_SUS);
+    load_image("ui/tlo.png", T::UI_BACKGROUND);
+    // other
+    load_image("other/marker.png", T::MARKER);
     // map
     load_image("map/city-tile-N1.png", T::CITY_TILE_N1);
     load_image("map/city-tile-square.png", T::CITY_TILE_SQUARE);
@@ -143,12 +146,11 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector =
-        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
-                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityState,
-                      an::EscapeState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character, an::Mark,
-                      an::Interrupted, an::ShowUI, an::CharacterStateMachine>(&registry);;
+    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
+                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
+                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
+                                   an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character,
+                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -156,15 +158,15 @@ auto main() -> int {
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      3.f);
 
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f,0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f,-1.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f,1.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f,0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(-1.f,-1.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f,0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(1.f,-1.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f,1.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f,1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f, 0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(-1.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f, 0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(1.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f, 1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f, 1.f));
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
@@ -235,9 +237,8 @@ auto main() -> int {
     // particle
     auto drunk_p = an::make_particle(an::ParticleType::DRUNK, 3, 6, {20, 20}, {2, 2}, 5,
                                      an::ParticleAnimationType::SPIN_R, true, true);
-    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J, [&]() {
-        an::emit_particles(registry, player, drunk_p, 5, {0, -5});
-    });
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J,
+                          [&]() { an::emit_particles(registry, player, drunk_p, 5, {0, -5}); });
     while (!WindowShouldClose()) {
         // ======================================
         // UPDATE SYSTEMS

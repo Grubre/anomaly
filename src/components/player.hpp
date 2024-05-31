@@ -39,9 +39,9 @@ struct Player {
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity);
 };
 
-template <> inline void emplace<Player>(entt::registry &registry, entt::entity entity);
+template <> void emplace<Player>(entt::registry &registry, entt::entity entity);
 
-[[nodiscard]]auto make_player(entt::registry &registry) -> entt::entity ;
+[[nodiscard]] auto make_player(entt::registry &registry) -> entt::entity;
 void update_player(entt::registry &registry, entt::entity &entity);
 
 struct Bullet {
