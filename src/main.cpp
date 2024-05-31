@@ -25,27 +25,34 @@
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
+
+    const auto load_image = [&](const char *path, an::TextureEnum id) {
+        asset_manager.register_texture(an::load_asset(LoadImage, path), id);
+    };
     // tmp
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/player-test.png"), T::PLAYER_TEXTURE);
-    asset_manager.register_texture(an::load_asset(LoadImage, "map/test-tile.png"), T::TEST_TILE);
+    load_image("player/player-test.png", T::PLAYER_TEXTURE);
+    load_image("map/test-tile.png", T::TEST_TILE);
     // player
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man.png"), T::BASE_CHARACTER);
+    load_image("player/player_man.png", T::BASE_CHARACTER);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64,
                                    72);
     // props
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/tree_1.png"), T::TREE);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/rock.png"), T::ROCK);
+    load_image("props/bench.png", T::BENCH);
+    load_image("props/lamp.png", T::LAMP);
+    load_image("props/tree_1.png", T::TREE);
+    load_image("props/rock.png", T::ROCK);
     // particles
-    asset_manager.register_texture(an::load_asset(LoadImage, "particles/drunk.png"), T::DRUNK_PARTICLE);
-    asset_manager.register_texture(an::load_asset(LoadImage, "particles/smrodek.png"), T::STINKY_PARTICLE);
-    //ui
-    asset_manager.register_texture(an::load_asset(LoadImage, "ui/back_btn.png"), T::B_BACK);
-    asset_manager.register_texture(an::load_asset(LoadImage, "ui/legit_btn.png"), T::B_LEGIT);
-    asset_manager.register_texture(an::load_asset(LoadImage, "ui/sus_btn.png"), T::B_SUS);
+    load_image("particles/drunk.png", T::DRUNK_PARTICLE);
+    load_image("particles/smrodek.png", T::STINKY_PARTICLE);
+    // ui
+    load_image("ui/back_btn.png", T::B_BACK);
+    load_image("ui/legit_btn.png", T::B_LEGIT);
+    load_image("ui/sus_btn.png", T::B_SUS);
+    // map
+    load_image("map/city-tile-N1.png", T::CITY_TILE_N1);
+    load_image("map/city-tile-square.png", T::CITY_TILE_SQUARE);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -114,7 +121,7 @@ auto main() -> int {
         an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle,an::Character>(&registry);
+                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -159,19 +166,19 @@ auto main() -> int {
         float x_r = an::get_uniform_float() * 2.f - 1.f;
         float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
-        
+
         an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f,
                                          walk_area);
 
         if (i < num_anomalies) {
-            //an::emplace<an::ShakeTraitComponent>(registry, character, an::PropType::TREE, 100.f, 5000.f);
+            // an::emplace<an::ShakeTraitComponent>(registry, character, an::PropType::TREE, 100.f, 5000.f);
             an::emplace<an::AvoidTraitComponent>(registry, character, an::PropType::TREE, 100.f, 200.f);
             an::emplace<an::Anomaly>(registry, character);
             an::emplace<an::DebugName>(registry, character, "Anomaly");
         } else {
             an::emplace<an::DebugName>(registry, character, "NPC");
         }
-        
+
         i++;
     }
     an::propagate_parent_transform(registry);

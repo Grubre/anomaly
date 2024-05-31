@@ -6,8 +6,27 @@
 
 namespace an {
 
-enum class TextureEnum { PLAYER_TEXTURE, BASE_CHARACTER, CHARACTER_SHIRT, CHARACTER_PANTS, CHARACTER_HAIR, TEST_TILE, TREE, BENCH, LAMP, ROCK,DRUNK_PARTICLE,STINKY_PARTICLE,B_SUS,B_LEGIT,B_BACK, CNT };
-enum class SoundEnum { WIN = 0 , CNT};
+enum class TextureEnum {
+    PLAYER_TEXTURE,
+    BASE_CHARACTER,
+    CHARACTER_SHIRT,
+    CHARACTER_PANTS,
+    CHARACTER_HAIR,
+    TEST_TILE,
+    TREE,
+    BENCH,
+    LAMP,
+    ROCK,
+    DRUNK_PARTICLE,
+    STINKY_PARTICLE,
+    B_SUS,
+    B_LEGIT,
+    B_BACK,
+    CITY_TILE_N1,
+    CITY_TILE_SQUARE,
+    CNT
+};
+enum class SoundEnum { WIN = 0, CNT };
 
 struct TextureAsset {
     Texture2D texture;
