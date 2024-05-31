@@ -1,6 +1,6 @@
 #include "inspect_window.hpp"
 namespace an{
-void draw_inspect_dialog(entt::registry &registry, entt::entity entity) {
+void draw_inspect_dialog(entt::registry &registry,entt::entity player ,entt::entity npc) {
     auto io = ImGui::GetIO();
     auto asset_manager = registry.ctx().get<an::AssetManager>();
     auto sus_btn = asset_manager.get_texture(an::TextureEnum::B_SUS).texture;
@@ -13,15 +13,27 @@ void draw_inspect_dialog(entt::registry &registry, entt::entity entity) {
     ImGui::SetNextWindowSize({x, y});
     ImGui::SetNextWindowPos({(io.DisplaySize.x - x) / 2, (io.DisplaySize.y - y) / 2});
 
-    ImGui::Begin("Dialog");
+    ImGui::Begin("Dialog", nullptr,ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
     ImGui::Text("Hello, world!");
+    ImGui::SetCursorPosY((y - 72 * 6) / 3);
+    ImGui::SetCursorPosX((x - 64 * 6) / 2);
+    ImGui::Image((void *)&character, {64 * 6, 72 * 6});
 
-    ImGui::Image((void *)&character, {64 * 4, 72 * 4});
-    ImGui::ImageButton((void *)&sus_btn, {300, 200});
+    ImGui::SetCursorPosX((x - 300 * 3) / 2);
+    if (ImGui::ImageButton((void *)&sus_btn, {300, 200})) {
+        registry.emplace_or_replace<Mark>(npc);
+        registry.remove<ShowUI>(player);
+    }
     ImGui::SameLine();
-    ImGui::ImageButton((void *)&legit_btn, {300, 200});
+    if (ImGui::ImageButton((void *)&legit_btn, {300, 200})) {
+        registry.remove<Mark>(npc);
+        registry.remove<ShowUI>(player);
+    }
     ImGui::SameLine();
-    ImGui::ImageButton((void *)&back_btn, {300, 200});
+    if (ImGui::ImageButton((void *)&back_btn, {300, 200})) {
+        registry.remove<ShowUI>(player);
+        remove_interrupt(registry,npc);
+    }
     ImGui::End();
 }
 void update_ui(entt::registry &registry, entt::entity entity) {
@@ -36,7 +48,7 @@ void update_ui(entt::registry &registry, entt::entity entity) {
             remove_interrupt(registry,npc);
             continue;
         }
-        draw_inspect_dialog(registry, npc);
+        draw_inspect_dialog(registry, entity,npc);
         co++;
     }
 }

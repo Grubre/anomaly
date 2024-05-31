@@ -21,10 +21,10 @@ void check_nearby_npc(entt::registry &registry, entt::entity entity) {
     auto view = registry.view<Character, GlobalTransform>();
     auto co = 0;
     for (auto &&[npc, transform] : view.each()) {
-        if (Vector2Distance(registry.get<GlobalTransform>(entity).transform.position, transform.transform.position) <
-            40) {
+        auto dis=Vector2Distance(registry.get<GlobalTransform>(entity).transform.position, transform.transform.position);
+        if ( dis<70){
             co++;
-            if(co==1&&registry.all_of<ShowUI>(entity)){
+            if((co==1||dis>30)&&registry.all_of<ShowUI>(entity)){
                 registry.erase<ShowUI>(entity);
                 continue;
             }
@@ -37,7 +37,7 @@ void check_interrupted_npc(entt::registry &registry, entt::entity entity) {
     auto view = registry.view<Interrupted, GlobalTransform>();
     for (auto &&[npc, transform] : view.each()) {
         if (Vector2Distance(registry.get<GlobalTransform>(entity).transform.position, transform.transform.position) >
-            60) {
+            80) {
             registry.remove<ShowUI>(entity);
             registry.remove<Interrupted>(npc);
         }
