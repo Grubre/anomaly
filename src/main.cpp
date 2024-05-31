@@ -105,7 +105,7 @@ auto main() -> int {
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
     auto inspector =
-        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health, an::Player,
+        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
                       an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle>(&registry);
