@@ -49,7 +49,7 @@ inline void avoid_trait_system(entt::registry& registry) {
             auto delta_len = Vector2LengthSqr(delta);
             if (delta_len <= avoid_trait.radius * avoid_trait.radius) {
                 auto escape_dir = Vector2Normalize(delta);
-                registry.remove<FollowEntityCharState>(char_entity);
+                remove_character_state(registry, char_entity);
                 safe_emplace<EscapeCharState>(registry, char_entity, 5.f, escape_dir, avoid_trait.escape_speed);
             }
         }

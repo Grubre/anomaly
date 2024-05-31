@@ -1,9 +1,13 @@
 #pragma once
 
+#include "characters.hpp"
 #include "components/collisions.hpp"
+#include "components/common.hpp"
 #include "components/velocity.hpp"
 #include "components/walk_area.hpp"
+#include "components/player.hpp"
 #include <algorithm>
+#include <cmath>
 #include <fmt/format.h>
 #include <imgui.h>
 #include <raylib.h>
@@ -85,6 +89,26 @@ struct RandomWalkState {
         ImGui::DragFloat("Wait Time", &wait_time, 1);
     }
 };
+
+inline void remove_character_state(entt::registry &registry, entt::entity entity) {
+    registry.remove<EscapeCharState>(entity);
+    registry.remove<RandomWalkState>(entity);
+    registry.remove<FollowPathState>(entity);
+    registry.remove<EscapeCharState>(entity);
+    registry.remove<FollowEntityCharState>(entity);
+}
+
+inline void follow_player_if_bullet(entt::registry& registry, entt::entity character, entt::entity bullet) {
+    if (registry.all_of<Character>(character)
+     && !registry.all_of<FollowEntityCharState>(character)
+     && registry.all_of<Bullet>(bullet)) {
+        remove_character_state(registry, character);
+
+        auto b = registry.get<Bullet>(bullet);
+
+        emplace<FollowEntityCharState>(registry, character, b.player, INFINITY, 100.f);
+    }
+}
 
 inline void random_walk_state_system(entt::registry &registry) {
     constexpr float epsilon = 40.f;

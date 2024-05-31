@@ -1,3 +1,5 @@
+#pragma once
+
 #include "assets/asset_manager.hpp"
 #include "common.hpp"
 #include "components/sprite.hpp"
@@ -27,7 +29,7 @@ struct Health {
     }
 };
 
-void deal_damage(entt::registry &registry, entt::entity &entity, int amount) {
+inline void deal_damage(entt::registry &registry, entt::entity &entity, int amount) {
     auto &health = registry.get<Health>(entity);
     health.health -= amount;
     if (health.health <= 0) {
@@ -63,12 +65,12 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
     safe_emplace<Player>(registry, entity);
 }
 
-[[nodiscard]] auto make_player(entt::registry &registry) -> entt::entity {
+[[nodiscard]] inline auto make_player(entt::registry &registry) -> entt::entity {
     const auto entity = registry.create();
     an::emplace<an::Player>(registry, entity);
     return entity;
 }
-void update_player(entt::registry &registry, entt::entity &entity) {
+inline void update_player(entt::registry &registry, entt::entity &entity) {
     auto &key_manager = registry.ctx().get<an::KeyManager>();
     auto &player = registry.get<Player>(entity);
     auto &vel = registry.get<Velocity>(entity);
@@ -91,6 +93,7 @@ void update_player(entt::registry &registry, entt::entity &entity) {
 
 struct Bullet {
     Vector2 start_vel;
+    entt::entity player;
     float total_time = 0.5f;
     float time_left = total_time;
 };
@@ -109,7 +112,7 @@ inline void update_bullets(entt::registry &registry) {
     }
 }
 
-inline void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, float speed) {
+inline void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, float speed, entt::entity player) {
     static std::random_device rd{};
     static std::mt19937 gen{rd()};
     static std::normal_distribution<float> d{ 0.f, PI / 32.f };
@@ -122,7 +125,7 @@ inline void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 
     emplace<GlobalTransform>(registry, bullet);
     emplace<CharacterBody>(registry, bullet, Vector2(), 10.f, 10.f);
     emplace<Velocity>(registry, bullet, dir.x * speed, dir.y * speed);
-    emplace<Bullet>(registry, bullet, dir.x * speed, dir.y * speed);
+    emplace<Bullet>(registry, bullet, dir.x * speed, dir.y * speed, player);
 
     auto& tr = registry.get<LocalTransform>(bullet);
 
@@ -143,7 +146,7 @@ inline void player_shooting(entt::registry &registry, entt::entity &entity) {
 
             auto dir = Vector2Normalize(Vector2Subtract(mouse_pos, transform.transform.position));
 
-            make_player_bullet(registry, transform.transform.position, dir, player.bullet_speed);
+            make_player_bullet(registry, transform.transform.position, dir, player.bullet_speed, entity);
 
             player.to_next_shot += player.shooting_speed;
 
