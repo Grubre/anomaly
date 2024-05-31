@@ -46,8 +46,11 @@ void an::connect_walk_areas(an::WalkArea &a, an::WalkArea &b) {
 }
 
 void an::visualize_walk_areas(entt::registry &registry) {
-    auto view = registry.view<WalkArea, an::Visible>();
+    auto view = registry.view<WalkArea>();
     for (auto &&[entity, walk_area] : view.each()) {
+        if (!walk_area.is_visible()) {
+            continue;
+        }
         DrawRectangleV(walk_area.get_left_top(),
                        Vector2{walk_area.get_right_bottom().x - walk_area.get_left_top().x,
                                walk_area.get_right_bottom().y - walk_area.get_left_top().y},
