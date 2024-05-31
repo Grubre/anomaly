@@ -63,14 +63,12 @@ void setup_raylib() {
     InitAudioDevice();
 }
 
-namespace an{
+namespace an {
 struct Anomaly {
     static constexpr auto name = "Anomaly";
-    static void inspect() {
-        ImGui::Text("Is anomaly");
-    }
+    static void inspect() { ImGui::Text("Is anomaly"); }
 };
-}
+} // namespace an
 
 auto main() -> int {
     // setup
@@ -95,6 +93,7 @@ auto main() -> int {
     // camera
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      2.f);
+    an::init_edge_detection_shader(registry);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
@@ -118,11 +117,11 @@ auto main() -> int {
     const auto num_anomalies = 5;
     auto char_gen = an::CharacterGenerator(0, 50);
     auto day = char_gen.new_day(an::DayConfig{
-            .num_guaranteed_traits = 1,
-            .num_probable_traits = 3,
-            .num_used_probable_traits = 2,
-            .num_anomalies = num_anomalies,
-            });
+        .num_guaranteed_traits = 1,
+        .num_probable_traits = 3,
+        .num_used_probable_traits = 2,
+        .num_anomalies = num_anomalies,
+    });
 
     auto i = 0u;
     for (const auto &traits : char_gen.get_original_character_traits()) {
@@ -132,7 +131,7 @@ auto main() -> int {
         float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
         an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f);
-        if(i < num_anomalies) {
+        if (i < num_anomalies) {
             an::emplace<an::Anomaly>(registry, character);
             an::emplace<an::DebugName>(registry, character, "Anomaly");
         } else {

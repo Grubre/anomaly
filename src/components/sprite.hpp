@@ -18,20 +18,33 @@ struct TintShader {
     int loc;
 };
 
-inline void init_tint_shader(entt::registry& registry) {
-    const Shader tint_shader = load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");;
+inline void init_tint_shader(entt::registry &registry) {
+    const Shader tint_shader = load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
+
     const int tint_loc = GetShaderLocation(tint_shader, "tint");
 
-    registry.ctx().emplace<TintShader>(tint_shader,tint_loc);
+    registry.ctx().emplace<TintShader>(tint_shader, tint_loc);
 }
-
-
 
 struct Visible {};
 
 struct ShaderComponent {
     Shader shader;
 };
+
+struct EdgeDetectionShader {
+    Shader shader;
+    int resolution_loc;
+};
+
+struct Selected {};
+
+inline void init_edge_detection_shader(entt::registry &registry) {
+    const Shader shader = an::load_asset(LoadShader, "shaders/base.vs", "shaders/scuffed_edge_detection.fs");
+    const auto resolution = GetShaderLocation(shader, "resolution");
+
+    registry.ctx().emplace<EdgeDetectionShader>(shader, resolution);
+}
 
 struct Sprite {
     TextureAsset asset;
@@ -40,14 +53,24 @@ struct Sprite {
     bool flip_h = false;
     bool flip_v = false;
 
-    void draw(const Transform &tr, [[maybe_unused]] const TintShader& tint_shader) const {
+    void draw(const Transform &tr, const EdgeDetectionShader *shader) const {
         auto src_rect = asset.rect(sprite_id, flip_h, flip_v);
 
         auto width = std::abs(src_rect.width) * tr.scale.x;
         auto height = std::abs(src_rect.height) * tr.scale.y;
+        auto size_vec = Vector2{width, height};
+
+        if (shader != nullptr) {
+            BeginShaderMode(shader->shader);
+            SetShaderValue(shader->shader, shader->resolution_loc, &size_vec, SHADER_UNIFORM_VEC2);
+        }
 
         DrawTexturePro(asset.texture, src_rect, Rectangle{tr.position.x, tr.position.y, width, height},
                        Vector2Multiply(offset, Vector2(width, height)), RAD2DEG * tr.rotation, WHITE);
+
+        if (shader != nullptr) {
+            EndShaderMode();
+        }
     }
 
     static constexpr auto name = "Sprite";
@@ -82,9 +105,11 @@ struct CharacterSprite {
     bool flip_h = false;
     bool flip_v = false;
 
-    void draw_component(const Transform &tr, Vector2 offset, TextureAsset asset, Color color, TintShader tint_shader) const {
+    void draw_component(const Transform &tr, Vector2 offset, TextureAsset asset, Color color,
+                        TintShader tint_shader) const {
 
-        auto norm_color = Vector4((float)color.r / 255.f, (float)color.g / 255.f, (float)color.b / 255.f, (float)color.a / 255.f);
+        auto norm_color =
+            Vector4((float)color.r / 255.f, (float)color.g / 255.f, (float)color.b / 255.f, (float)color.a / 255.f);
 
         SetShaderValue(tint_shader.shader, tint_shader.loc, &norm_color, SHADER_UNIFORM_VEC4);
 
@@ -101,7 +126,7 @@ struct CharacterSprite {
         EndShaderMode();
     }
 
-    void draw(const Transform &tr, const TintShader& tint_shader) const {
+    void draw(const Transform &tr, const TintShader &tint_shader) const {
         draw_component(tr, base_offset, base, WHITE, tint_shader);
         draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
         draw_component(tr, pants_offset, pants, pants_color, tint_shader);
@@ -171,14 +196,22 @@ inline void render_drawables(entt::registry &registry) {
     auto tint_shader = registry.ctx().get<TintShader>();
 
     for (auto &&[entity, drawable, transform] : drawables.each()) {
-        if (registry.all_of<ShaderComponent>(entity)) {
+        bool has_shader = registry.all_of<ShaderComponent>(entity);
+        if (has_shader) {
             const auto &shader = registry.get<ShaderComponent>(entity).shader;
             BeginShaderMode(shader);
         }
 
-        std::visit([&](auto &drawable) { drawable.draw(transform.transform, tint_shader); }, drawable.sprite);
+        bool is_selected = registry.all_of<Selected>(entity);
 
-        if (registry.all_of<ShaderComponent>(entity)) {
+        std::visit(entt::overloaded{[&](CharacterSprite &sprite) { sprite.draw(transform.transform, tint_shader); },
+                                    [&](Sprite &sprite) {
+                                        sprite.draw(transform.transform,
+                                                    is_selected ? &registry.ctx().get<EdgeDetectionShader>() : nullptr);
+                                    }},
+                   drawable.sprite);
+
+        if (has_shader) {
             EndShaderMode();
         }
     }
