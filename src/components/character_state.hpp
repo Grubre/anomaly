@@ -45,7 +45,7 @@ struct FollowPathState {
     std::uint32_t current_point{0u};
     float time_elapsed{0.f};
 
-    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) ;
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity);
 };
 
 struct RandomWalkState {
@@ -63,7 +63,7 @@ struct RandomWalkState {
 
 void remove_character_state(entt::registry &registry, entt::entity entity);
 
-void follow_player_if_bullet(entt::registry& registry, entt::entity character, entt::entity bullet);
+void follow_player_if_bullet(entt::registry &registry, entt::entity character, entt::entity bullet);
 
 void random_walk_state_system(entt::registry &registry);
 

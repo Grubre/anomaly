@@ -12,6 +12,8 @@ set(SOURCE_FILES
     components/walk_area.cpp
         gui/inspect_window.hpp
         components/character_state.cpp
+        components/particles.cpp
+        components/player.cpp
 )
 
 file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
