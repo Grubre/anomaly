@@ -172,8 +172,9 @@ auto main() -> int {
     // particle
     auto drunk_p = an::make_particle(an::ParticleType::DRUNK, 3, 6, {20, 20}, {2, 2}, 5,
                                      an::ParticleAnimationType::SPIN_R, true, true);
-    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J,
-                          [&]() { an::emit_particles(registry, player, drunk_p, 5, {0, -5}); });
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J, [&]() {
+        an::emit_particles(registry, player, drunk_p, 5, {0, -5});
+    });
     while (!WindowShouldClose()) {
         // ======================================
         // UPDATE SYSTEMS

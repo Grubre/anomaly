@@ -19,11 +19,11 @@ inline entt::entity make_character(entt::registry &registry, const CharacterTrai
                                  TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
     auto &sprite = std::get<CharacterSprite>(registry.get<Drawable>(entity).sprite);
 
-    an::emplace<an::CharacterBody>(registry, entity, Vector2{}, 10.f, (float)random() / RAND_MAX);
+    an::emplace<an::CharacterBody>(registry, entity, Vector2{}, 10.f, get_uniform_float());
 
-    sprite.hair_color = traits.hair_color;
-    sprite.shirt_color = traits.shirt_color;
-    sprite.pants_color = traits.pants_color;
+    sprite.hair_color = traits.hair_color.color;
+    sprite.shirt_color = traits.shirt_color.color;
+    sprite.pants_color = traits.pants_color.color;
 
     return entity;
 }

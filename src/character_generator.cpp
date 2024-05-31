@@ -12,9 +12,9 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     for (auto i = 0u; i < characters_cnt; i++) {
         CharacterTraits traits{};
 
-        traits.shirt_color = possible_shirt_colors.at(color_dist(gen));
-        traits.pants_color = possible_shirt_colors.at(color_dist(gen));
-        traits.hair_color = possible_hair_colors.at(hair_dist(gen));
+        traits.shirt_color.color = possible_shirt_colors.at(color_dist(gen));
+        traits.pants_color.color = possible_shirt_colors.at(color_dist(gen));
+        traits.hair_color.color = possible_hair_colors.at(hair_dist(gen));
 
         traits.accesories_mask = accesories_mask_t{};
 
@@ -26,6 +26,33 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 
         generated_characters.push_back(traits);
     }
+}
+[[nodiscard]] auto an::probable_trait_name_to_str(const an::ProbableTrait &trait) -> std::string_view {
+    return std::visit(entt::overloaded{[](const an::ShirtColor &) { return "ShirtColor"; },
+                                       [](const an::PantsColor &) { return "PantsColor"; },
+                                       [](const an::HairColor &) { return "HairColor"; },
+                                       [](const an::Accessory &) { return "Accessory"; }},
+                      trait);
+}
+
+[[nodiscard]] auto an::probable_trait_to_str(const an::ProbableTrait &trait) -> std::string {
+    return std::visit(
+        entt::overloaded{
+            [&](const an::ShirtColor &color) {
+                return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
+                                   color.color.b);
+            },
+            [&](const an::PantsColor &color) {
+                return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
+                                   color.color.b);
+            },
+            [&](const an::HairColor &color) {
+                return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
+                                   color.color.b);
+            },
+            [&](const an::Accessory &accessory) { return fmt::format("Accessory: ({})", accessory.accessory_num); },
+        },
+        trait);
 }
 
 [[nodiscard]] auto generate_bool_vec(std::size_t size, std::uint32_t num_ones) -> std::vector<bool> {
@@ -94,6 +121,7 @@ auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
     for (auto i = 0u; i < probable_traits_mask.size(); i++) {
         if (probable_traits_mask[i]) {
             anomaly_traits.probable_traits.push_back(random_probable_traits.at(i));
+            fmt::println("Trait[{}]: {}", i, probable_trait_to_str(random_probable_traits.at(i)));
         }
     }
 

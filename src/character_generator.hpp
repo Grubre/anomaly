@@ -18,9 +18,15 @@ constexpr std::array possible_shirt_colors{
 
 constexpr std::array possible_hair_colors{BLACK, YELLOW, RED, BROWN};
 
-using ShirtColor = Color;
-using PantsColor = Color;
-using HairColor = Color;
+struct ShirtColor {
+    Color color;
+};
+struct PantsColor {
+    Color color;
+};
+struct HairColor {
+    Color color;
+};
 struct Accessory {
     std::uint32_t accessory_num;
 };
@@ -31,16 +37,16 @@ struct Accessory {
 [[nodiscard]] auto get_random_accessory() -> Accessory;
 
 struct CharacterTraits {
-    ShirtColor shirt_color{};
-    PantsColor pants_color{};
+    an::ShirtColor shirt_color{};
+    an::PantsColor pants_color{};
     HairColor hair_color{};
 
-    accesories_mask_t accesories_mask{};
+    an::accesories_mask_t accesories_mask{};
 };
 
 template <typename T>
 concept ReactionToProp = requires(T t) {
-    { t.type } -> std::same_as<PropType>;
+    { t.type } -> std::same_as<an::PropType>;
 };
 
 struct Avoid {
@@ -53,6 +59,9 @@ struct TwitchNear {
 
 using ProbableTrait = std::variant<ShirtColor, PantsColor, HairColor, Accessory>;
 using GuaranteedTrait = std::variant<Avoid, TwitchNear>;
+
+[[nodiscard]] auto probable_trait_name_to_str(const an::ProbableTrait &trait) -> std::string_view;
+[[nodiscard]] auto probable_trait_to_str(const ProbableTrait &trait) -> std::string;
 
 struct AnomalyTraits {
     std::vector<ProbableTrait> probable_traits;
