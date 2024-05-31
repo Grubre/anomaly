@@ -6,16 +6,12 @@
 void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     generated_characters.reserve(characters_cnt);
 
-    std::mt19937 gen(seed);
-    std::uniform_int_distribution<std::size_t> color_dist(0, possible_shirt_colors.size() - 1);
-    std::uniform_int_distribution<std::size_t> hair_dist(0, possible_hair_colors.size() - 1);
-
     for (auto i = 0u; i < characters_cnt; i++) {
         CharacterTraits traits{};
 
-        traits.shirt_color.color = possible_shirt_colors.at(color_dist(gen));
-        traits.pants_color.color = possible_shirt_colors.at(color_dist(gen));
-        traits.hair_color.color = possible_hair_colors.at(hair_dist(gen));
+        traits.shirt_color = get_random_shirt_color();
+        traits.pants_color = get_random_pants_color();
+        traits.hair_color = get_random_hair_color();
 
         traits.accesories_mask = accesories_mask_t{};
 
@@ -39,15 +35,7 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 [[nodiscard]] auto an::probable_trait_to_str(const an::ProbableTrait &trait) -> std::string {
     return std::visit(
         entt::overloaded{
-            [&](const an::ShirtColor &color) {
-                return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
-                                   color.color.b);
-            },
-            [&](const an::PantsColor &color) {
-                return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
-                                   color.color.b);
-            },
-            [&](const an::HairColor &color) {
+            [&](const auto &color) {
                 return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
                                    color.color.b);
             },
@@ -56,13 +44,10 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
         trait);
 }
 
-
-[[nodiscard]] auto an::guaranteed_trait_to_str(const GuaranteedTrait& trait) -> std::string {
+[[nodiscard]] auto an::guaranteed_trait_to_str(const GuaranteedTrait &trait) -> std::string {
     return std::visit(
         entt::overloaded{
-            [](const an::Avoid &avoid) {
-                return fmt::format("Avoid: ({})", an::get_prop_name(avoid.type));
-            },
+            [](const an::Avoid &avoid) { return fmt::format("Avoid: ({})", an::get_prop_name(avoid.type)); },
             [](const an::TwitchNear &twitch_near) {
                 return fmt::format("TwitchNear: ({})", an::get_prop_name(twitch_near.type));
             },
