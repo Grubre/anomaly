@@ -23,7 +23,7 @@ auto an::static_vs_character_resolve_vector(an::StaticBody s, an::CharacterBody 
     auto norm_vec = Vector2Normalize(diff);
 
     auto resolve = Vector2Scale(norm_vec, c.radius - dist);
-    auto perp = Vector2Scale(Vector2(-resolve.y, resolve.x), 0.01f);
+    auto perp = Vector2Scale(Vector2(-resolve.y, resolve.x), 0.1f);
     resolve = Vector2Add(resolve, perp);
 
     return resolve;

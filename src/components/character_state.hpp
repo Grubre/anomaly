@@ -2,6 +2,7 @@
 
 #include "components/collisions.hpp"
 #include "components/velocity.hpp"
+#include <algorithm>
 #include <fmt/format.h>
 #include <imgui.h>
 #include <raylib.h>
@@ -94,16 +95,22 @@ inline void random_walk_state_system(entt::registry &registry) {
         if (Vector2Distance(state.target, transform.transform.position) < epsilon) {
             state.time_elapsed += GetFrameTime();
             if (state.time_elapsed >= state.wait_time) {
+                state.wait_time = get_uniform_float() * 3.f + 2.f;
+                state.speed = std::clamp(get_uniform_float() * 120.f + 50.f ,50.f, 120.f);
                 state.time_elapsed = 0.f;
 
-                state.target = Vector2Add(state.target, Vector2{get_random_float(-100.f, 100.f), get_random_float(-100.f, 100.f)});
-                while (is_in_any_static(registry, state.target)) {
-                    state.target = Vector2Add(state.target, Vector2{get_random_float(-100.f, 100.f), get_random_float(-100.f, 100.f)});
+                Vector2 candidate_target =
+                    Vector2Add(state.target, Vector2{get_random_float(-300.f, 300.f), get_random_float(-100.f, 100.f)});
+                while (is_in_any_static(registry, candidate_target)) {
+                    candidate_target = Vector2Add(
+                        state.target, Vector2{get_random_float(-300.f, 300.f), get_random_float(-100.f, 100.f)});
                 }
+                state.target = candidate_target;
             }
             continue;
         }
 
+        DrawCircleV(state.target, 5, ColorAlpha(BLACK, 0.5f));
         transform.transform.position = Vector2Add(transform.transform.position, delta);
         state.time_elapsed += GetFrameTime();
     }

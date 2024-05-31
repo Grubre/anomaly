@@ -33,12 +33,12 @@ void load_resources(an::AssetManager &asset_manager) {
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64,
                                    72);
-    //props
+    // props
     asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/tree.png"), T::TREE);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/rock.png"), T::ROCK);
-    //particles
+    // particles
     asset_manager.register_texture(an::load_asset(LoadImage, "particles/drunk.png"), T::DRUNK_PARTICLE);
     asset_manager.register_texture(an::load_asset(LoadImage, "particles/smrodek.png"), T::STINKY_PARTICLE);
 }
@@ -63,6 +63,15 @@ void setup_raylib() {
     InitAudioDevice();
 }
 
+namespace an{
+struct Anomaly {
+    static constexpr auto name = "Anomaly";
+    static void inspect() {
+        ImGui::Text("Is anomaly");
+    }
+};
+}
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -79,7 +88,7 @@ auto main() -> int {
         an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea>(&registry);
+                      an::RandomWalkState, an::WalkArea, an::Anomaly>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -105,15 +114,17 @@ auto main() -> int {
     // an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
     an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
 
-    // test character generator
-    // auto char_gen = an::CharacterGenerator(0, 5);
-    //
-    // for(const auto &traits : char_gen.get_original_character_traits()) {
-    //     const auto character = an::make_character(registry, traits);
-    // }
-
+    // test anomalies and npcs
+    const auto num_anomalies = 5;
     auto char_gen = an::CharacterGenerator(0, 50);
+    auto day = char_gen.new_day(an::DayConfig{
+            .num_guaranteed_traits = 1,
+            .num_probable_traits = 3,
+            .num_used_probable_traits = 2,
+            .num_anomalies = num_anomalies,
+            });
 
+    auto i = 0u;
     for (const auto &traits : char_gen.get_original_character_traits()) {
         const auto character = an::make_character(registry, traits);
         auto &local_transform = registry.get<an::LocalTransform>(character);
@@ -121,6 +132,13 @@ auto main() -> int {
         float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
         an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f);
+        if(i < num_anomalies) {
+            an::emplace<an::Anomaly>(registry, character);
+            an::emplace<an::DebugName>(registry, character, "Anomaly");
+        } else {
+            an::emplace<an::DebugName>(registry, character, "NPC");
+        }
+        i++;
     }
 
     while (!WindowShouldClose()) {
@@ -136,7 +154,6 @@ auto main() -> int {
 
         // Characters systems
         an::trait_systems(registry);
-        an::character_states_systems(registry);
 
         an::move_things(registry);
         an::propagate_parent_transform(registry);
@@ -164,6 +181,7 @@ auto main() -> int {
         an::debug_draw_bodies(registry);
         an::debug_trait_systems(registry);
 
+        an::character_states_systems(registry);
         EndMode2D();
         // ======================================
         // DRAW GUI
