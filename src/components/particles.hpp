@@ -97,10 +97,10 @@ void update_particle_system(entt::registry &registry) {
             particle.animation_speed = emitter.p_template.animation_speed;
             auto &drawable = registry.get<Drawable>(pa_t);
             auto &pa_transform = registry.get<LocalTransform>(pa_t);
-            if (emitter.p_template.can_flip_x, random() % 2 == 0) {
+            if (emitter.p_template.can_flip_x && random() % 2 == 0) {
                 std::visit([](auto &sprite) { sprite.flip_v = true; }, drawable.sprite);
             }
-            if (emitter.p_template.can_flip_y, random() % 2 == 0) {
+            if (emitter.p_template.can_flip_y && random() % 2 == 0) {
                 std::visit([](auto &sprite) { sprite.flip_h = true; }, drawable.sprite);
             }
             pa_transform.transform.position.x =
