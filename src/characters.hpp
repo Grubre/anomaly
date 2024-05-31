@@ -7,7 +7,10 @@
 
 namespace an {
 
-struct Character {};
+struct Character {
+    static constexpr auto name = "Character";
+    static void inspect() { ImGui::Text("EPIC NPC"); }
+};
 
 inline entt::entity make_character(entt::registry &registry, const CharacterTraits &traits) {
     auto entity = registry.create();
@@ -16,7 +19,7 @@ inline entt::entity make_character(entt::registry &registry, const CharacterTrai
                                  TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
     auto &sprite = std::get<CharacterSprite>(registry.get<Drawable>(entity).sprite);
 
-    an::emplace<an::CharacterBody>(registry, entity, Vector2{}, 10.f, (float)rand() / RAND_MAX);
+    an::emplace<an::CharacterBody>(registry, entity, Vector2{}, 10.f, (float)random() / RAND_MAX);
 
     sprite.hair_color = traits.hair_color;
     sprite.shirt_color = traits.shirt_color;

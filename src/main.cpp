@@ -21,13 +21,14 @@
 #include "components/relations.hpp"
 #include "components/walk_area.hpp"
 #include "components/particles.hpp"
+#include "gui/inspect_window.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
-
+    // tmp
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player-test.png"), T::PLAYER_TEXTURE);
     asset_manager.register_texture(an::load_asset(LoadImage, "map/test-tile.png"), T::TEST_TILE);
-
+    // player
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man.png"), T::BASE_CHARACTER);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
@@ -41,6 +42,10 @@ void load_resources(an::AssetManager &asset_manager) {
     // particles
     asset_manager.register_texture(an::load_asset(LoadImage, "particles/drunk.png"), T::DRUNK_PARTICLE);
     asset_manager.register_texture(an::load_asset(LoadImage, "particles/smrodek.png"), T::STINKY_PARTICLE);
+    //ui
+    asset_manager.register_texture(an::load_asset(LoadImage, "ui/back_btn.png"), T::B_BACK);
+    asset_manager.register_texture(an::load_asset(LoadImage, "ui/legit_btn.png"), T::B_LEGIT);
+    asset_manager.register_texture(an::load_asset(LoadImage, "ui/sus_btn.png"), T::B_SUS);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -108,7 +113,7 @@ auto main() -> int {
         an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle>(&registry);
+                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle,an::Character>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -178,7 +183,7 @@ auto main() -> int {
         an::update_player(registry, player);
         an::update_props(registry);
         an::player_shooting(registry, player);
-        
+
         an::update_particle_system(registry);
         an::update_bullets(registry);
 
@@ -220,7 +225,7 @@ auto main() -> int {
 
         ImGui::ShowDemoWindow();
         inspector.draw_gui();
-
+        an::draw_inspect_dialog(registry);
         rlImGuiEnd();
 
         DrawFPS(10, 10);

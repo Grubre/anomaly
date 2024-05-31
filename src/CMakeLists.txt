@@ -10,6 +10,7 @@ set(SOURCE_FILES
     components/collisions.cpp
         components/particles.hpp
     components/walk_area.cpp
+        gui/inspect_window.hpp
 )
 
 file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
