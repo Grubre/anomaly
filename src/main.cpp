@@ -17,10 +17,9 @@
 #include "assets/asset_manager.hpp"
 #include "gui/inspector.hpp"
 #include "components/velocity.hpp"
-#include "components/sprite.hpp"
 #include "components/player.hpp"
 #include "components/relations.hpp"
-#include "components/props.hpp"
+#include "components/walk_area.hpp"
 
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
@@ -60,7 +59,6 @@ void setup_raylib() {
     InitWindow(screen_width, screen_height, "Hello World");
     InitAudioDevice();
 }
-
 auto main() -> int {
     // setup
     setup_raylib();
@@ -73,10 +71,11 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
-                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
-                                   an::FollowEntityCharState, an::EscapeCharState, an::AvoidTraitComponent,
-                                   an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState>(&registry);
+    auto inspector =
+        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health, an::Player,
+                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
+                      an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
+                      an::RandomWalkState, an::WalkArea>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -152,6 +151,8 @@ auto main() -> int {
         // ======================================
 
         BeginMode2D(registry.ctx().get<Camera2D>());
+
+        an::visualize_walk_areas(registry);
 
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
