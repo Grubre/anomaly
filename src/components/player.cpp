@@ -61,11 +61,15 @@ void update_bullets(entt::registry &registry) {
             registry.destroy(entity);
         }
         auto view3 = registry.view<Character,GlobalTransform>();
+        auto flag = false;
         for(auto &&[cha, cha_tran]:view3.each()){
             if(Vector2Distance(trans.transform.position,cha_tran.transform.position)<20){
                 registry.destroy(cha);
-                registry.destroy(entity);
+               flag= true;
             }
+        }
+        if(flag){
+            registry.destroy(entity);
         }
     }
 }
