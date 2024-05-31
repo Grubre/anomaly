@@ -110,7 +110,7 @@ inline void update_props(entt::registry &registry) {
     }
 }
 inline auto spawn_prop(entt::registry & registry)->entt::entity{
-    static unsigned num =0;
+    static unsigned num = 0;
     auto entity= registry.create();
     emplace<Prop,PropType>(registry,entity,static_cast<PropType>(0));
     auto &prop = registry.get<Prop>(entity);

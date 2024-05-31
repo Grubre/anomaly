@@ -88,9 +88,8 @@ template <> inline void emplace<Velocity>(entt::registry &registry, entt::entity
 inline void move_things(entt::registry &registry) {
     auto view = registry.view<Velocity, LocalTransform>();
     for (auto &&[entity, vel, transform] : view.each()) {
-        transform.transform.position.x += vel.x;
-        transform.transform.position.y += vel.y;
-        vel.x = vel.y = 0;
+        transform.transform.position.x += vel.x * GetFrameTime();
+        transform.transform.position.y += vel.y * GetFrameTime();
     }
 }
 

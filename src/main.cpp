@@ -125,15 +125,17 @@ auto main() -> int {
         // ======================================
         an::notify_keyboard_press_system(key_manager);
         an::destroy_unparented(registry);
-        an::propagate_parent_transform(registry);
         an::update_player(registry, player);
         an::update_props(registry);
+        an::player_shooting(registry, player);
+        an::clean_bullets(registry);
 
         // Characters systems
         an::trait_systems(registry);
         an::character_states_systems(registry);
 
         an::move_things(registry);
+        an::propagate_parent_transform(registry);
 
         auto pos = registry.get<an::GlobalTransform>(player);
         registry.ctx().get<Camera2D>().target = pos.transform.position;

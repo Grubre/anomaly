@@ -5,8 +5,11 @@
 #include "gui/inspector.hpp"
 #include "velocity.hpp"
 #include "keyinput.hpp"
+#include <cstdlib>
 #include <fmt/printf.h>
+#include <random>
 #include <raylib.h>
+#include <raymath.h>
 
 namespace an {
 struct Alive {
@@ -35,9 +38,16 @@ void deal_damage(entt::registry &registry, entt::entity &entity, int amount) {
 struct Player {
     static constexpr auto name = "Player";
     float speed = 256;
+
+    float shooting_speed = 0.05f;
+    float bullet_speed = 500.f;
+    float to_next_shot = shooting_speed;
+
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
         static constexpr auto minimum = 0;
         ImGui::DragFloat("Speed", &speed, 0.5f, minimum, 1000);
+        ImGui::DragFloat("Bullet Speed", &bullet_speed, 0.5f, minimum, 10000);
+        ImGui::DragFloat("Shooting Speed", &shooting_speed, 0.001f, minimum, 10);
     }
 };
 
@@ -76,6 +86,67 @@ void update_player(entt::registry &registry, entt::entity &entity) {
     if (IsKeyDown(key_manager.get_key(KeyEnum::MOVE_RIGHT))) {
         movement.x += 1;
     }
-    vel = Vector2Scale(Vector2Normalize(movement), player.speed*GetFrameTime());
+    vel = Vector2Scale(Vector2Normalize(movement), player.speed);
 }
+
+struct Bullet {
+    float time_left = 0.5f;
+};
+
+inline void clean_bullets(entt::registry &registry) {
+    auto view = registry.view<Bullet>();
+
+    for (auto &&[entity, bullet] : view.each()) {
+        bullet.time_left -= GetFrameTime();
+        if (bullet.time_left <= 0.f) {
+            registry.destroy(entity);
+        }
+    }
+}
+
+inline void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, float speed) {
+    static std::random_device rd{};
+    static std::mt19937 gen{rd()};
+    static std::normal_distribution<float> d{ 0.f, PI / 32.f };
+
+    auto bullet = registry.create();
+
+    auto spread_angle = d(gen);
+    dir = Vector2Rotate(dir, spread_angle);
+
+    emplace<Bullet>(registry, bullet);
+    emplace<GlobalTransform>(registry, bullet);
+    emplace<CharacterBody>(registry, bullet, Vector2(), 10.f);
+    emplace<Velocity>(registry, bullet, dir.x * speed, dir.y * speed);
+
+    auto& tr = registry.get<LocalTransform>(bullet);
+
+    tr.transform.position = Vector2Add(start, Vector2Scale(dir, 50.f));
+}
+
+inline void player_shooting(entt::registry &registry, entt::entity &entity) {
+
+    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        auto &player = registry.get<Player>(entity);
+
+        player.to_next_shot -= GetFrameTime();
+
+        while (player.to_next_shot <= 0.f) {
+            auto mouse_pos = GetScreenToWorld2D(GetMousePosition(),registry.ctx().get<Camera2D>());
+
+            auto &transform = registry.get<GlobalTransform>(entity);
+
+            auto dir = Vector2Normalize(Vector2Subtract(mouse_pos, transform.transform.position));
+
+            make_player_bullet(registry, transform.transform.position, dir, player.bullet_speed);
+
+            player.to_next_shot += player.shooting_speed;
+
+            auto &player_local = registry.get<LocalTransform>(entity);
+
+            player_local.transform.position = Vector2Subtract(player_local.transform.position, Vector2Scale(dir, 1.f));
+        }
+    }
+}
+
 } // namespace an
