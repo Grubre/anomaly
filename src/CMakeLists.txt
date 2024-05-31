@@ -16,6 +16,8 @@ set(SOURCE_FILES
         components/player.cpp
         components/props.cpp
         components/relations.cpp
+        components/marker.cpp
+        components/marker.hpp
 )
 
 file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)

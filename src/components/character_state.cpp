@@ -1,4 +1,5 @@
 #include "character_state.hpp"
+#include "marker.hpp"
 #include <algorithm>
 #include <raylib.h>
 namespace an {
@@ -82,8 +83,10 @@ void random_walk_state_system(entt::registry &registry) {
         }
 
         DrawCircleV(state.target, 5, ColorAlpha(BLACK, 0.5f));
-        transform.transform.position = Vector2Add(transform.transform.position, delta);
         state.time_elapsed += GetFrameTime();
+        if(registry.all_of<Interrupted>(entity)){
+            continue;}
+        transform.transform.position = Vector2Add(transform.transform.position, delta);
     }
 }
 void follow_path_state_system(entt::registry &registry) {

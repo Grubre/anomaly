@@ -23,6 +23,7 @@
 #include "components/particles.hpp"
 #include "components/city.hpp"
 #include "gui/inspect_window.hpp"
+#include "components/marker.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
@@ -61,6 +62,7 @@ void default_keys(an::KeyManager &key_manager) {
     key_manager.assign_key(KEY_S, an::KeyEnum::MOVE_DOWN);
     key_manager.assign_key(KEY_A, an::KeyEnum::MOVE_LEFT);
     key_manager.assign_key(KEY_D, an::KeyEnum::MOVE_RIGHT);
+    key_manager.assign_key(KEY_E, an::KeyEnum::INTERACT);
 }
 
 void setup_raylib() {
@@ -126,7 +128,7 @@ auto main() -> int {
         an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character>(&registry);
+                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle,an::Character,an::Mark,an::Interrupted,an::ShowUI>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -141,6 +143,7 @@ auto main() -> int {
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
+    key_manager.subscribe(an::KeyboardEvent::PRESS,an::KeyEnum::INTERACT,[&](){an::check_nearby_npc(registry, player);});
     // shader
     auto base_shader = an::load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
 
@@ -206,7 +209,7 @@ auto main() -> int {
         an::update_player(registry, player);
         an::update_props(registry);
         an::player_shooting(registry, player);
-
+        an::update_marker_system(registry,player);
         an::update_particle_system(registry);
         an::update_bullets(registry);
 
@@ -249,10 +252,9 @@ auto main() -> int {
         // DRAW GUI
         // ======================================
         rlImGuiBegin();
-
+        an::update_ui(registry,player);
         ImGui::ShowDemoWindow();
         inspector.draw_gui();
-        an::draw_inspect_dialog(registry);
         rlImGuiEnd();
 
         DrawFPS(10, 10);

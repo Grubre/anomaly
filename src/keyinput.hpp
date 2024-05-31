@@ -6,7 +6,7 @@
 #include "assets/asset_manager.hpp"
 namespace an {
 enum class KeyboardEvent : uint8_t { PRESS, RELEASE, UP, DOWN };
-enum class KeyEnum : uint8_t {MOVE_UP,MOVE_DOWN,MOVE_LEFT,MOVE_RIGHT,CNT};
+enum class KeyEnum : uint8_t {MOVE_UP,MOVE_DOWN,MOVE_LEFT,MOVE_RIGHT,INTERACT,CNT};
 class KeyManager {
   public:
     using callback_t = std::function<void()>;
