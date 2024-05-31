@@ -153,10 +153,17 @@ auto main() -> int {
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
     // camera
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
-                                     2.f);
+                                     3.f);
 
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f,0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f,-1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f,1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f,0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(-1.f,-1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f,0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(1.f,-1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f,1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f,1.f));
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
