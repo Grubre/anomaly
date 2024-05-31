@@ -70,6 +70,7 @@ void random_walk_state_system(entt::registry &registry);
 void follow_path_state_system(entt::registry &registry);
 
 void follow_entity_character_state_system(entt::registry &registry);
+
 void escape_character_state_system(entt::registry &registry);
 
 void character_states_systems(entt::registry &registry);

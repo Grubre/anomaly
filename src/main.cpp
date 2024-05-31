@@ -37,7 +37,7 @@ void load_resources(an::AssetManager &asset_manager) {
     // props
     asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/tree.png"), T::TREE);
+    asset_manager.register_texture(an::load_asset(LoadImage, "props/tree_1.png"), T::TREE);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/rock.png"), T::ROCK);
     // particles
     asset_manager.register_texture(an::load_asset(LoadImage, "particles/drunk.png"), T::DRUNK_PARTICLE);
@@ -78,6 +78,7 @@ struct Anomaly {
 auto create_connected_walk_areas(entt::registry &registry, uint32_t number) -> entt::entity {
     entt::entity entity{};
     an::WalkArea *prev_area = nullptr;
+
     for (auto i = 0u; i < number; i++) {
         entity = registry.create();
         const auto size = 1000.f;
@@ -158,16 +159,22 @@ auto main() -> int {
         float x_r = an::get_uniform_float() * 2.f - 1.f;
         float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
+        
         an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f,
                                          walk_area);
+
         if (i < num_anomalies) {
+            //an::emplace<an::ShakeTraitComponent>(registry, character, an::PropType::TREE, 100.f, 5000.f);
+            an::emplace<an::AvoidTraitComponent>(registry, character, an::PropType::TREE, 100.f, 200.f);
             an::emplace<an::Anomaly>(registry, character);
             an::emplace<an::DebugName>(registry, character, "Anomaly");
         } else {
             an::emplace<an::DebugName>(registry, character, "NPC");
         }
+        
         i++;
     }
+    an::propagate_parent_transform(registry);
 
     // particle
     auto drunk_p = an::make_particle(an::ParticleType::DRUNK, 3, 6, {20, 20}, {2, 2}, 5,
@@ -211,6 +218,8 @@ auto main() -> int {
         // ======================================
 
         BeginMode2D(registry.ctx().get<Camera2D>());
+
+        an::y_sort(registry);
 
         an::visualize_walk_areas(registry);
 
