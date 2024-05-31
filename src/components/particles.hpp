@@ -6,6 +6,7 @@
 #include "relations.hpp"
 #include "sprite.hpp"
 namespace an {
+
 enum class ParticleType : uint8_t { DRUNK, STINKY_CHEESE };
 enum class ParticleAnimationType : uint8_t { NONE, SPIN_R, SPIN_L, SHAKE, DECAY };
 struct ParticleTemplate {

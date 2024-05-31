@@ -10,8 +10,8 @@ namespace an {
 
 struct Transform {
     static constexpr auto name = "Transform";
-    Vector2 position;
-    float rotation;
+    Vector2 position{};
+    float rotation{};
     Vector2 scale = Vector2(1.0f, 1.0f);
 
     /// Aplikuje najpierw swój transform, a dopiero potem other

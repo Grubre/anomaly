@@ -1,6 +1,8 @@
 #include "character_generator.hpp"
+#include "components/common.hpp"
 #include <random>
 #include <ranges>
+#include <variant>
 #include <vector>
 
 void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
@@ -12,6 +14,10 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
         traits.shirt_color = get_random_shirt_color();
         traits.pants_color = get_random_pants_color();
         traits.hair_color = get_random_hair_color();
+
+        if (an::get_uniform_float() < get_particle_chance) {
+            traits.particles = get_random_particle();
+        }
 
         traits.accesories_mask = accesories_mask_t{};
 
@@ -28,18 +34,21 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     return std::visit(entt::overloaded{[](const an::ShirtColor &) { return "ShirtColor"; },
                                        [](const an::PantsColor &) { return "PantsColor"; },
                                        [](const an::HairColor &) { return "HairColor"; },
-                                       [](const an::Accessory &) { return "Accessory"; }},
+                                       [](const an::Accessory &) { return "Accessory"; },
+                                       [](const an::ParticleTrait &) { return "ParticleTrait"; }},
                       trait);
 }
 
 [[nodiscard]] auto an::probable_trait_to_str(const an::ProbableTrait &trait) -> std::string {
     return std::visit(
         entt::overloaded{
+            [&](const an::Accessory &accessory) { return fmt::format("Accessory: ({})", accessory.accessory_num); },
+            [&](const an::ParticleTrait &particle) { return fmt::format("ParticleTrait: ({})", (int)particle.type); },
             [&](const auto &color) {
                 return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
                                    color.color.b);
             },
-            [&](const an::Accessory &accessory) { return fmt::format("Accessory: ({})", accessory.accessory_num); },
+
         },
         trait);
 }
@@ -55,7 +64,7 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
         trait);
 }
 
-[[nodiscard]] auto generate_bool_vec(std::size_t size, std::uint32_t num_ones) -> std::vector<bool> {
+[[nodiscard]] auto an::generate_bool_vec(std::size_t size, std::uint32_t num_ones) -> std::vector<bool> {
     auto vec = std::vector<bool>(size, false);
     for (auto i = 0u; i < num_ones; i++) {
         vec[i] = true;
@@ -93,12 +102,21 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     return {0};
 }
 
-[[nodiscard]] auto get_vec_of_random_probable_traits() -> std::vector<an::ProbableTrait> {
+[[nodiscard]] auto an::get_random_particle() -> an::ParticleTrait {
+    static std::random_device rd{};
+    static std::mt19937 gen{rd()};
+    static std::uniform_int_distribution<std::uint8_t> dist{0, possible_particles.size() - 1};
+
+    return ParticleTrait{.type = possible_particles.at(dist(gen))};
+}
+
+[[nodiscard]] auto an::get_vec_of_random_probable_traits() -> std::vector<an::ProbableTrait> {
     auto probable_traits = std::vector<an::ProbableTrait>{};
     probable_traits.emplace_back(std::in_place_index<0>, an::get_random_shirt_color());
     probable_traits.emplace_back(std::in_place_index<1>, an::get_random_pants_color());
     probable_traits.emplace_back(std::in_place_index<2>, an::get_random_hair_color());
     probable_traits.emplace_back(std::in_place_index<3>, an::get_random_accessory());
+    probable_traits.emplace_back(std::in_place_index<4>, an::get_random_particle());
 
     return probable_traits;
 }
@@ -112,6 +130,7 @@ void apply_probable_trait(an::CharacterTraits &traits, const an::ProbableTrait &
                        // TODO: This does not work
                        traits.accesories_mask |= (1u << accessory.accessory_num);
                    },
+                   [&](const an::ParticleTrait &particle) { traits.particles = particle; },
                },
                trait);
 }
@@ -125,16 +144,11 @@ auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
     static std::uniform_int_distribution<std::uint32_t> guaranteed_dist{0, num_guaranteed_traits - 1};
     AnomalyTraits anomaly_traits{};
 
+    // TODO: Change it so that this part is done when creating anomalies and
+    //       the bitmask is shuffled between creating each, so that they all have
+    //       num_used_probable_traits probable traits from the random_probable_traits set
     // get random probable traits
-    auto probable_traits_mask = generate_bool_vec(config.num_probable_traits, config.num_used_probable_traits);
-    std::shuffle(probable_traits_mask.begin(), probable_traits_mask.end(), gen);
-    const auto random_probable_traits = get_vec_of_random_probable_traits();
-    for (auto i = 0u; i < probable_traits_mask.size(); i++) {
-        if (probable_traits_mask[i]) {
-            anomaly_traits.probable_traits.push_back(random_probable_traits.at(i));
-            fmt::println("Trait[{}]: {}", i, probable_trait_to_str(random_probable_traits.at(i)));
-        }
-    }
+    auto random_probable_traits = get_vec_of_random_probable_traits();
 
     // FIXME: Could possibly add two identical traits
     // get random guaranteed traits
@@ -158,11 +172,18 @@ auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
     const auto num_anomalies = config.num_anomalies;
     auto dist = std::bernoulli_distribution{emplace_probable_trait_chance};
     auto new_characters = generated_characters;
+    auto probable_traits_mask =
+        an::generate_bool_vec(std::variant_size<an::ProbableTrait>().value, config.num_used_probable_traits);
+
     for (auto &character : new_characters | std::ranges::views::take(num_anomalies)) {
-        for (const auto &random_probable_trait : random_probable_traits) {
-            apply_probable_trait(character, random_probable_trait);
+        std::shuffle(probable_traits_mask.begin(), probable_traits_mask.end(), gen);
+        for (auto i = 0u; i < probable_traits_mask.size(); i++) {
+            if (probable_traits_mask[i]) {
+                apply_probable_trait(character, random_probable_traits.at(i));
+            }
         }
     }
+
     for (auto &character : new_characters | std::ranges::views::drop(num_anomalies)) {
         for (const auto &random_probable_trait : random_probable_traits) {
             if (dist(gen)) {
@@ -171,7 +192,13 @@ auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
         }
     }
 
-    return {std::move(anomaly_traits), std::move(new_characters)};
+    anomaly_traits.probable_traits = std::move(random_probable_traits);
+
+    return {
+        .num_used_probable_traits = config.num_used_probable_traits,
+        .anomaly_traits = std::move(anomaly_traits),
+        .characters = std::move(new_characters),
+    };
 }
 
-[[nodiscard]] auto an::get_config_for_day(std::uint32_t day_number) -> an::DayConfig { return {3, 5, 3, 1}; }
+[[nodiscard]] auto an::get_config_for_day(std::uint32_t day_number) -> an::DayConfig { return {3, 3, 1}; }

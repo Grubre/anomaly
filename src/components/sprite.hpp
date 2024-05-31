@@ -133,6 +133,30 @@ struct CharacterSprite {
         draw_component(tr, hair_offset, hair, hair_color, tint_shader);
     }
 
+    TextureAsset bake_to_texture(entt::registry& registry) const {
+        auto tint_shader = registry.ctx().get<TintShader>();
+        auto tr = Transform{ {(float)base.cell_size_x/2.f, (float)base.cell_size_y/2.f}, PI };
+
+        auto texture = LoadRenderTexture(base.cell_size_x,base.cell_size_y);
+
+        BeginTextureMode(texture);
+
+        ClearBackground(ColorAlpha(WHITE, 0.f));
+
+        draw_component(tr, base_offset, base, WHITE, tint_shader);
+        draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
+        draw_component(tr, pants_offset, pants, pants_color, tint_shader);
+        draw_component(tr, hair_offset, hair, hair_color, tint_shader);
+
+        EndTextureMode();
+
+        auto asset = TextureAsset { texture.texture, (uint16_t)texture.texture.width, (uint16_t)texture.texture.height };
+        texture.texture.id = 0;
+        UnloadRenderTexture(texture);
+        
+        return asset;
+    }
+
     static constexpr auto name = "Character Sprite";
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
         ImGui::Text("Character Sprite");
@@ -165,6 +189,12 @@ inline void emplace_sprite(entt::registry &registry, entt::entity entity, const 
     emplace<Visible>(registry, entity);
     auto texture = registry.ctx().get<AssetManager>().get_texture(id);
     an::safe_emplace<Drawable>(registry, entity, Sprite{texture});
+}
+
+inline void emplace_sprite(entt::registry &registry, entt::entity entity, const TextureAsset asset) {
+    emplace<GlobalTransform>(registry, entity);
+    emplace<Visible>(registry, entity);
+    an::safe_emplace<Drawable>(registry, entity, Sprite{asset});
 }
 
 inline void emplace_character_sprite(entt::registry &registry, entt::entity entity, const TextureEnum &base_id,
