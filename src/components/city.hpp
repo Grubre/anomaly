@@ -17,12 +17,17 @@ void emplace<CityTile>(entt::registry &registry, entt::entity entity, const Text
     an::safe_emplace<CityTile>(registry, entity, texture, tile_pos);
 }
 
+void make_city_tile(entt::registry &registry, const TextureEnum &id, const Vector2 &tile_pos) {
+    auto entity = registry.create();
+    emplace<CityTile>(registry, entity, id, tile_pos);
+}
+
 void render_city_tiles(entt::registry &registry) {
     auto view = registry.view<CityTile>();
 
     for (auto &&[entity, tile] : view.each()) {
         auto vec =
-            Vector2Multiply(tile.tile_pos, Vector2((float)tile.city_asset.texture.width, (float)tile.city_asset.texture.height));
+            Vector2Multiply(Vector2Subtract(tile.tile_pos, Vector2(0.5f,0.5f)), Vector2((float)tile.city_asset.texture.width, (float)tile.city_asset.texture.height));
         DrawTextureV(tile.city_asset.texture, vec, WHITE);
     }
 }
