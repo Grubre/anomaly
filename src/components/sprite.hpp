@@ -128,16 +128,16 @@ struct CharacterSprite {
 
     void draw(const Transform &tr, const TintShader &tint_shader) const {
         draw_component(tr, base_offset, base, WHITE, tint_shader);
-        draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
-        draw_component(tr, pants_offset, pants, pants_color, tint_shader);
-        draw_component(tr, hair_offset, hair, hair_color, tint_shader);
+        // draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
+        // draw_component(tr, pants_offset, pants, pants_color, tint_shader);
+        // draw_component(tr, hair_offset, hair, hair_color, tint_shader);
     }
 
-    TextureAsset bake_to_texture(entt::registry& registry) const {
+    TextureAsset bake_to_texture(entt::registry &registry) const {
         auto tint_shader = registry.ctx().get<TintShader>();
-        auto tr = Transform{ {(float)base.cell_size_x/2.f, (float)base.cell_size_y/2.f}, PI };
+        auto tr = Transform{{(float)base.cell_size_x / 2.f, (float)base.cell_size_y / 2.f}, PI};
 
-        auto texture = LoadRenderTexture(base.cell_size_x,base.cell_size_y);
+        auto texture = LoadRenderTexture(base.cell_size_x, base.cell_size_y);
 
         BeginTextureMode(texture);
 
@@ -150,10 +150,10 @@ struct CharacterSprite {
 
         EndTextureMode();
 
-        auto asset = TextureAsset { texture.texture, (uint16_t)texture.texture.width, (uint16_t)texture.texture.height };
+        auto asset = TextureAsset{texture.texture, (uint16_t)texture.texture.width, (uint16_t)texture.texture.height};
         texture.texture.id = 0;
         UnloadRenderTexture(texture);
-        
+
         return asset;
     }
 
@@ -182,6 +182,13 @@ struct Drawable {
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
         std::visit([&](auto &drawable) { drawable.inspect(registry, entity); }, sprite);
     }
+};
+
+struct Animation {
+    float time_between_frames = 0.1f;
+    float time_acc{};
+    std::uint32_t current_frame{};
+    std::uint32_t len{};
 };
 
 inline void emplace_sprite(entt::registry &registry, entt::entity entity, const TextureEnum &id) {

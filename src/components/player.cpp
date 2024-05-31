@@ -68,6 +68,7 @@ void update_bullets(entt::registry &registry) {
                flag= true;
             }
         }
+        // FIXME: This crashes
         if(flag){
             registry.destroy(entity);
         }
