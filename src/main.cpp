@@ -137,6 +137,7 @@ auto main() -> int {
     an::init_collision_controller(registry);
     an::init_tint_shader(registry);
     an::init_edge_detection_shader(registry);
+    an::init_interrupted_state_and_menu_bridge(registry);
     auto &key_manager = registry.ctx().emplace<an::KeyManager>();
     default_keys(key_manager);
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
@@ -144,10 +145,10 @@ auto main() -> int {
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
     auto inspector =
         an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
-                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
-                      an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
+                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityState,
+                      an::EscapeState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
                       an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character, an::Mark,
-                      an::Interrupted, an::ShowUI>(&registry);
+                      an::Interrupted, an::ShowUI, an::CharacterStateMachine>(&registry);;
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -183,7 +184,7 @@ auto main() -> int {
     an::emplace<an::CharacterBody>(registry, test_char_collider, Vector2(), 50.f);
     an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 100.f);
     // an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
-    an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
+    an::emplace<an::FollowEntityState>(registry, test_char_collider, player, INFINITY, 10.f);
 
     auto walk_area_entity = create_connected_walk_areas(registry, 3);
     auto *walk_area = &registry.get<an::WalkArea>(walk_area_entity);

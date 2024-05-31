@@ -3,12 +3,12 @@
 #include <algorithm>
 #include <raylib.h>
 namespace an {
-void FollowEntityCharState::inspect(entt::registry &registry, entt::entity entity) {
+void FollowEntityState::inspect(entt::registry &registry, entt::entity entity) {
     ImGui::DragFloat("Time Left", &time_left, 1);
     ImGui::DragFloat("Speed", &speed, 1);
     ImGui::Text("Following : %d", (int)this->entity);
 }
-void EscapeCharState::inspect(entt::registry &registry, entt::entity entity) {
+void EscapeState::inspect(entt::registry &registry, entt::entity entity) {
     ImGui::DragFloat("Time Left", &time_left, 1);
     ImGui::DragFloat2("Direction", &direction.x, 1);
     ImGui::DragFloat("Speed", &speed, 1);
@@ -36,26 +36,22 @@ void RandomWalkState::inspect(entt::registry &registry, entt::entity entity) {
     ImGui::DragFloat2("Vector", &target.x, 1);
     ImGui::DragFloat("Wait Time", &wait_time, 1);
 }
-void remove_character_state(entt::registry &registry, entt::entity entity) {
-    registry.remove<EscapeCharState>(entity);
-    registry.remove<RandomWalkState>(entity);
-    registry.remove<FollowPathState>(entity);
-    registry.remove<EscapeCharState>(entity);
-    registry.remove<FollowEntityCharState>(entity);
-}
+
 void follow_player_if_bullet(entt::registry &registry, entt::entity character, entt::entity bullet) {
     if (registry.all_of<Character>(character) && registry.all_of<Bullet>(bullet)) {
-        if (registry.all_of<FollowEntityCharState>(character)) {
-            auto &state = registry.get<FollowEntityCharState>(character);
+        if (registry.all_of<FollowEntityState>(character)) {
+            auto &state = registry.get<FollowEntityState>(character);
             if (GetTime() >= state.last_speed_update_time + 0.5f) {
                 state.speed += 50.f;
                 state.time_left += 1.f;
                 state.last_speed_update_time = GetTime();
             }
         } else {
-            remove_character_state(registry, character);
+            auto &state_machine = registry.get<CharacterStateMachine>(character);
+            state_machine.save_current_state(registry, character);
+
             auto b = registry.get<Bullet>(bullet);
-            emplace<FollowEntityCharState>(registry, character, b.player, 5.f, 100.f, GetTime());
+            emplace<FollowEntityState>(registry, character, b.player, 5.f, 100.f, GetTime());
         }
     }
 }
@@ -84,8 +80,6 @@ void random_walk_state_system(entt::registry &registry) {
 
         DrawCircleV(state.target, 5, ColorAlpha(BLACK, 0.5f));
         state.time_elapsed += GetFrameTime();
-        if(registry.all_of<Interrupted>(entity)){
-            continue;}
         transform.transform.position = Vector2Add(transform.transform.position, delta);
     }
 }
@@ -111,13 +105,14 @@ void follow_path_state_system(entt::registry &registry) {
     }
 }
 void follow_entity_character_state_system(entt::registry &registry) {
-    auto view = registry.view<FollowEntityCharState, GlobalTransform, LocalTransform>();
+    auto view = registry.view<FollowEntityState, GlobalTransform, LocalTransform, CharacterStateMachine>();
 
-    for (auto &&[entity, state, global, local] : view.each()) {
+    for (auto &&[entity, state, global, local, state_machine] : view.each()) {
         state.time_left -= GetFrameTime();
 
         if (state.time_left <= 0.f) {
-            registry.remove<FollowEntityCharState>(entity);
+            registry.remove<FollowEntityState>(entity);
+            state_machine.pop_and_apply(registry, entity);
             continue;
         }
 
@@ -129,13 +124,14 @@ void follow_entity_character_state_system(entt::registry &registry) {
     }
 }
 void escape_character_state_system(entt::registry &registry) {
-    auto view = registry.view<EscapeCharState, LocalTransform>();
+    auto view = registry.view<EscapeState, LocalTransform, CharacterStateMachine>();
 
-    for (auto &&[entity, state, transform] : view.each()) {
+    for (auto &&[entity, state, transform, state_machine] : view.each()) {
         state.time_left -= GetFrameTime();
 
         if (state.time_left <= 0.f) {
-            registry.remove<EscapeCharState>(entity);
+            registry.remove<EscapeState>(entity);
+            state_machine.pop_and_apply(registry, entity);
             continue;
         }
 

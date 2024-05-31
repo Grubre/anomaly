@@ -1,9 +1,12 @@
 #include "characters.hpp"
+#include "components/character_state.hpp"
 namespace an{
 
 entt::entity make_character(entt::registry &registry, const CharacterTraits &traits) {
     auto entity = registry.create();
     an::emplace<an::Character>(registry, entity);
+    an::emplace<an::CharacterStateMachine>(registry, entity);
+
     an::emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR,
                                  TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
     auto &sprite = std::get<CharacterSprite>(registry.get<Drawable>(entity).sprite);

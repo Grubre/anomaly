@@ -36,10 +36,10 @@ struct ShakeTraitComponent {
 };
 
 inline void avoid_trait_system(entt::registry &registry) {
-    auto char_view = registry.view<AvoidTraitComponent, GlobalTransform>();
+    auto char_view = registry.view<AvoidTraitComponent, GlobalTransform, CharacterStateMachine>();
     auto prop_view = registry.view<Prop, GlobalTransform>();
 
-    for (auto &&[char_entity, avoid_trait, char_tr] : char_view.each()) {
+    for (auto &&[char_entity, avoid_trait, char_tr, state_machine] : char_view.each()) {
         for (auto &&[prop_entity, prop, prop_tr] : prop_view.each()) {
             if (prop.type != avoid_trait.prop) {
                 continue;
@@ -49,8 +49,8 @@ inline void avoid_trait_system(entt::registry &registry) {
             auto delta_len = Vector2LengthSqr(delta);
             if (delta_len <= avoid_trait.radius * avoid_trait.radius) {
                 auto escape_dir = Vector2Normalize(delta);
-                remove_character_state(registry, char_entity);
-                safe_emplace<EscapeCharState>(registry, char_entity, 5.f, escape_dir, avoid_trait.escape_speed);
+                state_machine.save_current_state(registry, char_entity);
+                safe_emplace<EscapeState>(registry, char_entity, 5.f, escape_dir, avoid_trait.escape_speed);
             }
         }
     }
