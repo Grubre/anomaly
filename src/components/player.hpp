@@ -33,6 +33,9 @@ struct Player {
     float speed = 256;
 
     float shooting_speed = 0.05f;
+    float alt_shooting_speed = 0.01f;
+    float alt_bullet_speed = 2000.f;
+    float alt_to_next_shot = alt_shooting_speed;
     float bullet_speed = 1000.f;
     float to_next_shot = shooting_speed;
 
@@ -45,6 +48,12 @@ template <> void emplace<Player>(entt::registry &registry, entt::entity entity);
 void update_player(entt::registry &registry, entt::entity &entity);
 
 struct Bullet {
+    Vector2 start_vel;
+    entt::entity player;
+    float total_time = 0.5f;
+    float time_left = total_time;
+};
+struct RealBullet {
     Vector2 start_vel;
     entt::entity player;
     float total_time = 0.5f;

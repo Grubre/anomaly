@@ -1,4 +1,5 @@
 #include "player.hpp"
+#include "characters.hpp"
 namespace an {
 
 void Health::inspect(entt::registry &registry, entt::entity entity) {
@@ -50,6 +51,23 @@ void update_bullets(entt::registry &registry) {
             registry.destroy(entity);
         }
     }
+    auto view2 = registry.view<RealBullet, Velocity,GlobalTransform>();
+    for (auto &&[entity, bullet, vel,trans] : view2.each()) {
+        bullet.time_left -= GetFrameTime();
+
+        vel = Vector2Scale(bullet.start_vel, bullet.time_left / bullet.total_time);
+
+        if (bullet.time_left <= 0.f) {
+            registry.destroy(entity);
+        }
+        auto view3 = registry.view<Character,GlobalTransform>();
+        for(auto &&[cha, cha_tran]:view3.each()){
+            if(Vector2Distance(trans.transform.position,cha_tran.transform.position)<20){
+                registry.destroy(cha);
+                registry.destroy(entity);
+            }
+        }
+    }
 }
 void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, float speed, entt::entity player) {
     static std::random_device rd{};
@@ -70,6 +88,24 @@ void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, fl
 
     tr.transform.position = Vector2Add(start, Vector2Scale(dir, 30.f));
 }
+void make_player_bullet_real(entt::registry &registry, Vector2 start, Vector2 dir, float speed, entt::entity player) {
+    static std::random_device rd{};
+    static std::mt19937 gen{rd()};
+    static std::normal_distribution<float> d{0.f, PI / 100.f};
+
+    auto bullet = registry.create();
+
+    auto spread_angle = d(gen);
+    dir = Vector2Rotate(dir, spread_angle);
+
+    emplace<GlobalTransform>(registry, bullet);
+    emplace<Velocity>(registry, bullet, dir.x * speed, dir.y * speed);
+    emplace<RealBullet>(registry, bullet, dir.x * speed, dir.y * speed, player);
+    emplace<Sprite>(registry,bullet,TextureEnum::BULLET);
+    auto &tr = registry.get<LocalTransform>(bullet);
+    tr.transform.rotation = std::atan2(dir.x,-dir.y);
+    tr.transform.position = Vector2Add(start, Vector2Scale(dir, 30.f));
+}
 void player_shooting(entt::registry &registry, entt::entity &entity) {
 
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
@@ -87,6 +123,27 @@ void player_shooting(entt::registry &registry, entt::entity &entity) {
             make_player_bullet(registry, transform.transform.position, dir, player.bullet_speed, entity);
 
             player.to_next_shot += player.shooting_speed;
+
+            auto &player_local = registry.get<LocalTransform>(entity);
+
+            player_local.transform.position = Vector2Subtract(player_local.transform.position, Vector2Scale(dir, 1.f));
+        }
+    }
+    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+        auto &player = registry.get<Player>(entity);
+
+        player.alt_to_next_shot -= GetFrameTime();
+
+        while (player.alt_to_next_shot <= 0.f) {
+            auto mouse_pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
+
+            auto &transform = registry.get<GlobalTransform>(entity);
+
+            auto dir = Vector2Normalize(Vector2Subtract(mouse_pos, transform.transform.position));
+
+            make_player_bullet_real(registry, transform.transform.position, dir, player.alt_bullet_speed, entity);
+
+            player.alt_to_next_shot += player.alt_shooting_speed;
 
             auto &player_local = registry.get<LocalTransform>(entity);
 
