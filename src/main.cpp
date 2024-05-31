@@ -42,12 +42,14 @@ void load_resources(an::AssetManager &asset_manager) {
     asset_manager.register_texture(an::load_asset(LoadImage, "particles/drunk.png"), T::DRUNK_PARTICLE);
     asset_manager.register_texture(an::load_asset(LoadImage, "particles/smrodek.png"), T::STINKY_PARTICLE);
 }
+
 void default_keys(an::KeyManager &key_manager) {
     key_manager.assign_key(KEY_W, an::KeyEnum::MOVE_UP);
     key_manager.assign_key(KEY_S, an::KeyEnum::MOVE_DOWN);
     key_manager.assign_key(KEY_A, an::KeyEnum::MOVE_LEFT);
     key_manager.assign_key(KEY_D, an::KeyEnum::MOVE_RIGHT);
 }
+
 void setup_raylib() {
     const auto display = GetCurrentMonitor();
     const int screen_width = GetMonitorWidth(display);
@@ -60,6 +62,7 @@ void setup_raylib() {
     InitWindow(screen_width, screen_height, "Hello World");
     InitAudioDevice();
 }
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -114,8 +117,8 @@ auto main() -> int {
     for (const auto &traits : char_gen.get_original_character_traits()) {
         const auto character = an::make_character(registry, traits);
         auto &local_transform = registry.get<an::LocalTransform>(character);
-        float x_r = ((float)rand() / RAND_MAX) * 2.f - 1.f;
-        float y_r = ((float)rand() / RAND_MAX) * 2.f - 1.f;
+        float x_r = an::get_uniform_float() * 2.f - 1.f;
+        float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
         an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f);
     }
