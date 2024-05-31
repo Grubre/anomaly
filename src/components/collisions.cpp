@@ -91,7 +91,7 @@ void an::character_vs_character_collision_system(entt::registry &registry) {
 
 void an::debug_draw_bodies(entt::registry &registry) {
     auto char_view = registry.view<CharacterBody, GlobalTransform>();
-    auto char_color = ColorAlpha(GREEN, 0.5f);
+    auto char_color = ColorAlpha(GREEN, 0.2f);
 
     for (auto &&[c, c_body, c_tr] : char_view.each()) {
         auto c_copy = c_body;
@@ -102,7 +102,7 @@ void an::debug_draw_bodies(entt::registry &registry) {
     }
 
     auto static_view = registry.view<StaticBody, GlobalTransform>();
-    auto static_color = ColorAlpha(BLUE, 0.5f);
+    auto static_color = ColorAlpha(BLUE, 0.2f);
 
     for (auto &&[s, s_body, s_tr] : static_view.each()) {
         auto s_copy = s_body;

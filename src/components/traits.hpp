@@ -89,8 +89,27 @@ inline void trait_systems(entt::registry& registry) {
     shake_trait_system(registry);
 } 
 
-inline void debug_trait_systems(entt::registry& registry) {
+inline void debug_shake_trait_system(entt::registry& registry) {
+    auto trait_view = registry.view<ShakeTraitComponent, GlobalTransform>();
+    auto trait_color = ColorAlpha(RED, 0.2f);
 
+    for (auto &&[entity, trait, tr] : trait_view.each()) {
+        DrawCircleV(tr.transform.position, trait.radius, trait_color);
+    }
+}
+
+inline void debug_avoid_trait_system(entt::registry& registry) {
+    auto trait_view = registry.view<AvoidTraitComponent, GlobalTransform>();
+    auto trait_color = ColorAlpha(RED, 0.2f);
+
+    for (auto &&[entity, trait, tr] : trait_view.each()) {
+        DrawCircleV(tr.transform.position, trait.radius, trait_color);
+    }
+}
+
+inline void debug_trait_systems(entt::registry& registry) {
+    debug_shake_trait_system(registry);
+    debug_avoid_trait_system(registry);
 }
 
 }

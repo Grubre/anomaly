@@ -94,11 +94,6 @@ auto main() -> int {
     an::emplace<an::ShaderComponent>(registry, player, base_shader);
     // an::emplace<an::Sprite>(registry, entity);
 
-    // test collider
-    auto test_collider = registry.create();
-    an::emplace<an::GlobalTransform>(registry, test_collider);
-    an::emplace<an::StaticBody>(registry, test_collider, Vector2(100.f, 100.f), Vector2(500.f, 300.f));
-
     // test char collider
     auto test_char_collider = registry.create();
     an::emplace<an::GlobalTransform>(registry, test_char_collider);
@@ -149,6 +144,7 @@ auto main() -> int {
 
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
+        an::debug_trait_systems(registry);
 
         EndMode2D();
         // ======================================
