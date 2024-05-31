@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/velocity.hpp"
+#include <fmt/format.h>
 #include <imgui.h>
 #include <raylib.h>
 #include <entt.hpp>
@@ -10,7 +11,7 @@ namespace an {
 
 struct FollowEntityCharState {
     entt::entity entity;
-    float time_left;    
+    float time_left;
     float speed;
 
     static constexpr auto name = "Follow Entity Character State";
@@ -36,7 +37,58 @@ struct EscapeCharState {
     }
 };
 
-inline void follow_entity_character_state_system(entt::registry& registry) {
+struct FollowPathState {
+    static constexpr auto name = "Follow Path State";
+
+    float speed;
+    std::vector<Vector2> points;
+    std::vector<float> wait_times;
+    std::uint32_t current_point{0u};
+    float time_elapsed{0.f};
+
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
+        ImGui::DragFloat("Speed", &speed, 1);
+        ImGui::Text("Number of points: %zu", points.size());
+        for (std::size_t i = 0; i < points.size(); ++i) {
+            ImGui::Text("Point %zu", i);
+            ImGui::SameLine();
+
+            std::string label_point = "Point##" + std::to_string(i);
+            ImGui::DragFloat2(label_point.c_str(), &points[i].x, 1);
+
+            std::string label_wait_time = "Wait Time##" + std::to_string(i);
+            ImGui::DragFloat(label_wait_time.c_str(), &wait_times[i], 1);
+        }
+        if (ImGui::Button("Add Point")) {
+            points.push_back({0.f, 0.f});
+            wait_times.push_back(0.f);
+        }
+    }
+};
+
+inline void follow_path_state_system(entt::registry &registry) {
+    constexpr float epsilon = 1.f;
+    auto view = registry.view<FollowPathState, LocalTransform>();
+
+    for (auto &&[entity, state, transform] : view.each()) {
+        const auto target = state.points[state.current_point];
+        const auto dir = Vector2Normalize(Vector2Subtract(target, transform.transform.position));
+        const auto delta = Vector2Scale(dir, state.speed * GetFrameTime());
+
+        if (Vector2Distance(transform.transform.position, target) < epsilon) {
+            state.time_elapsed += GetFrameTime();
+            if (state.wait_times[state.current_point] - state.time_elapsed <= 0.001f) {
+                state.time_elapsed = 0.f;
+                state.current_point = (state.current_point + 1) % state.points.size();
+            }
+            continue;
+        }
+
+        transform.transform.position = Vector2Add(transform.transform.position, delta);
+    }
+}
+
+inline void follow_entity_character_state_system(entt::registry &registry) {
     auto view = registry.view<FollowEntityCharState, GlobalTransform, LocalTransform>();
 
     for (auto &&[entity, state, global, local] : view.each()) {
@@ -52,10 +104,10 @@ inline void follow_entity_character_state_system(entt::registry& registry) {
         auto dir = Vector2Normalize(Vector2Subtract(target_position, global.transform.position));
         auto delta = Vector2Scale(dir, state.speed * GetFrameTime());
         local.transform.position = Vector2Add(local.transform.position, delta);
-    } 
+    }
 }
 
-inline void escape_character_state_system(entt::registry& registry) {
+inline void escape_character_state_system(entt::registry &registry) {
     auto view = registry.view<EscapeCharState, LocalTransform>();
 
     for (auto &&[entity, state, transform] : view.each()) {
@@ -71,9 +123,10 @@ inline void escape_character_state_system(entt::registry& registry) {
     }
 }
 
-inline void character_states_systems(entt::registry& registry) {
+inline void character_states_systems(entt::registry &registry) {
     follow_entity_character_state_system(registry);
     escape_character_state_system(registry);
+    follow_path_state_system(registry);
 }
 
-}
+} // namespace an

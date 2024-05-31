@@ -86,6 +86,7 @@ class CharacterGenerator {
         generate_characters(characters_cnt);
     }
 
+    // first `config.num_anomalies` of returned `ResolvedDay::characters` are anomalies
     [[nodiscard]] auto new_day(const DayConfig &config) -> ResolvedDay;
     [[nodiscard]] auto get_original_character_traits() const -> std::span<const CharacterTraits>;
 

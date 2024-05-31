@@ -6,6 +6,7 @@
 #include <sstream>
 #include "assets/asset_manager.hpp"
 #include "common.hpp"
+#include "components/collisions.hpp"
 #include "velocity.hpp"
 #include "sprite.hpp"
 #include "gui/inspector.hpp"
@@ -53,6 +54,21 @@ inline TextureEnum get_prop_texture(const PropType type) {
         return TextureEnum::CNT;
     }
 }
+inline StaticBody get_prop_collision(const PropType type) {
+    switch (type) {
+    case PropType::TREE:
+        return StaticBody { { -15.f, -15.f }, { 30.f, 30.f } };
+    case PropType::ROCK:
+        return StaticBody { { -15.f, -15.f }, { 30.f, 30.f } };
+    case PropType::LAMP:
+        return StaticBody { { -15.f, -15.f }, { 30.f, 30.f } };
+    case PropType::BENCH:
+        return StaticBody { { -15.f, -15.f }, { 30.f, 30.f } };
+    default:
+        return StaticBody { { -15.f, -15.f }, { 30.f, 30.f } };
+    }
+}
+
 struct Prop {
     PropType type;
     bool update;
@@ -71,6 +87,7 @@ template <> inline void emplace<Prop, PropType>(entt::registry &registry, entt::
     emplace<GlobalTransform>(registry, entity);
     emplace<Visible>(registry, entity);
     emplace<DebugName>(registry, entity, get_prop_name(type));
+    emplace<StaticBody>(registry, entity, get_prop_collision(type));
 }
 template <> inline void emplace<Prop, Prop>(entt::registry &registry, entt::entity entity, const Prop& prop) {
     registry.emplace<Prop>(entity, prop.type);
@@ -78,6 +95,7 @@ template <> inline void emplace<Prop, Prop>(entt::registry &registry, entt::enti
     emplace<GlobalTransform>(registry, entity);
     emplace<Visible>(registry, entity);
     safe_emplace<DebugName>(registry, entity, get_prop_name(prop.type));
+    emplace<StaticBody>(registry, entity, get_prop_collision(prop.type));
 }
 inline void update_props(entt::registry &registry) {
     auto view = registry.view<Prop, Sprite>();
@@ -90,6 +108,17 @@ inline void update_props(entt::registry &registry) {
             prop.update = false;
         }
     }
+}
+inline auto spawn_prop(entt::registry & registry)->entt::entity{
+    static unsigned num =0;
+    auto entity= registry.create();
+    emplace<Prop,PropType>(registry,entity,static_cast<PropType>(0));
+    auto &prop = registry.get<Prop>(entity);
+    registry.remove<DebugName>(entity);
+    emplace<DebugName>(registry, entity, get_prop_name(prop.type)+std::to_string(num++));
+    auto &transform = registry.get<LocalTransform>(entity);
+    transform.transform.position = GetScreenToWorld2D(GetMousePosition(),registry.ctx().get<Camera2D>());
+    return entity;
 }
 inline void save_props(entt::registry &registry){
 auto view = registry.view<Prop,GlobalTransform>();
