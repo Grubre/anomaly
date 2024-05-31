@@ -21,26 +21,38 @@
 #include "components/relations.hpp"
 #include "components/walk_area.hpp"
 #include "components/particles.hpp"
+#include "gui/inspect_window.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
 
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/player-test.png"), T::PLAYER_TEXTURE);
-    asset_manager.register_texture(an::load_asset(LoadImage, "map/test-tile.png"), T::TEST_TILE);
-
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man.png"), T::BASE_CHARACTER);
+    const auto load_image = [&](const char *path, an::TextureEnum id) {
+        asset_manager.register_texture(an::load_asset(LoadImage, path), id);
+    };
+    // tmp
+    load_image("player/player-test.png", T::PLAYER_TEXTURE);
+    load_image("map/test-tile.png", T::TEST_TILE);
+    // player
+    load_image("player/player_man.png", T::BASE_CHARACTER);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64,
                                    72);
     // props
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/tree.png"), T::TREE);
-    asset_manager.register_texture(an::load_asset(LoadImage, "props/rock.png"), T::ROCK);
+    load_image("props/bench.png", T::BENCH);
+    load_image("props/lamp.png", T::LAMP);
+    load_image("props/tree_1.png", T::TREE);
+    load_image("props/rock.png", T::ROCK);
     // particles
-    asset_manager.register_texture(an::load_asset(LoadImage, "particles/drunk.png"), T::DRUNK_PARTICLE);
-    asset_manager.register_texture(an::load_asset(LoadImage, "particles/smrodek.png"), T::STINKY_PARTICLE);
+    load_image("particles/drunk.png", T::DRUNK_PARTICLE);
+    load_image("particles/smrodek.png", T::STINKY_PARTICLE);
+    // ui
+    load_image("ui/back_btn.png", T::B_BACK);
+    load_image("ui/legit_btn.png", T::B_LEGIT);
+    load_image("ui/sus_btn.png", T::B_SUS);
+    // map
+    load_image("map/city-tile-N1.png", T::CITY_TILE_N1);
+    load_image("map/city-tile-square.png", T::CITY_TILE_SQUARE);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -73,6 +85,7 @@ struct Anomaly {
 auto create_connected_walk_areas(entt::registry &registry, uint32_t number) -> entt::entity {
     entt::entity entity{};
     an::WalkArea *prev_area = nullptr;
+
     for (auto i = 0u; i < number; i++) {
         entity = registry.create();
         const auto size = 1000.f;
@@ -105,10 +118,10 @@ auto main() -> int {
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
     auto inspector =
-        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health, an::Player,
+        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle>(&registry);
+                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -153,22 +166,29 @@ auto main() -> int {
         float x_r = an::get_uniform_float() * 2.f - 1.f;
         float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
+
         an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f,
                                          walk_area);
+
         if (i < num_anomalies) {
+            // an::emplace<an::ShakeTraitComponent>(registry, character, an::PropType::TREE, 100.f, 5000.f);
+            an::emplace<an::AvoidTraitComponent>(registry, character, an::PropType::TREE, 100.f, 200.f);
             an::emplace<an::Anomaly>(registry, character);
             an::emplace<an::DebugName>(registry, character, "Anomaly");
         } else {
             an::emplace<an::DebugName>(registry, character, "NPC");
         }
+
         i++;
     }
+    an::propagate_parent_transform(registry);
 
     // particle
     auto drunk_p = an::make_particle(an::ParticleType::DRUNK, 3, 6, {20, 20}, {2, 2}, 5,
                                      an::ParticleAnimationType::SPIN_R, true, true);
-    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J,
-                          [&]() { an::emit_particles(registry, player, drunk_p, 5, {0, -5}); });
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J, [&]() {
+        an::emit_particles(registry, player, drunk_p, 5, {0, -5});
+    });
     while (!WindowShouldClose()) {
         // ======================================
         // UPDATE SYSTEMS
@@ -178,7 +198,7 @@ auto main() -> int {
         an::update_player(registry, player);
         an::update_props(registry);
         an::player_shooting(registry, player);
-        
+
         an::update_particle_system(registry);
         an::update_bullets(registry);
 
@@ -206,6 +226,8 @@ auto main() -> int {
 
         BeginMode2D(registry.ctx().get<Camera2D>());
 
+        an::y_sort(registry);
+
         an::visualize_walk_areas(registry);
 
         an::render_drawables(registry);
@@ -220,7 +242,7 @@ auto main() -> int {
 
         ImGui::ShowDemoWindow();
         inspector.draw_gui();
-
+        an::draw_inspect_dialog(registry);
         rlImGuiEnd();
 
         DrawFPS(10, 10);

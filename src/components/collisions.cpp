@@ -1,4 +1,5 @@
 #include "collisions.hpp"
+#include "components/character_state.hpp"
 #include "components/common.hpp"
 #include "components/velocity.hpp"
 #include <cstddef>
@@ -144,9 +145,14 @@ void an::character_vs_character_collision_system(entt::registry &registry) {
 
             auto &local_b = registry.get<LocalTransform>(b);
             local_b.transform.position = Vector2Add(local_b.transform.position, b_move);
+
+            follow_player_if_bullet(registry, a, b);
+            follow_player_if_bullet(registry, b, a);
         }
     }
 }
+
+
 
 bool an::is_in_any_static(entt::registry &registry, Vector2 point) {
     auto static_view = registry.view<StaticBody, GlobalTransform>();
