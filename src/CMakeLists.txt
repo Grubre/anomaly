@@ -8,6 +8,7 @@ set(SOURCE_FILES
     assets/assets_loader.cpp
     character_generator.cpp
     components/collisions.cpp
+        components/particles.hpp
     components/walk_area.cpp
 )
 

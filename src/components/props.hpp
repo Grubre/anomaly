@@ -98,10 +98,10 @@ template <> inline void emplace<Prop, Prop>(entt::registry &registry, entt::enti
     emplace<StaticBody>(registry, entity, get_prop_collision(prop.type));
 }
 inline void update_props(entt::registry &registry) {
-    auto view = registry.view<Prop, Sprite>();
-    for (auto &&[entity, prop, sprite] : view.each()) {
+    auto view = registry.view<Prop, Drawable>();
+    for (auto &&[entity, prop, draw] : view.each()) {
         if (prop.update) {
-            registry.erase<Sprite>(entity);
+            registry.erase<Drawable>(entity);
             registry.erase<DebugName>(entity);
             emplace<Sprite>(registry, entity, get_prop_texture(prop.type));
             emplace<DebugName>(registry, entity, get_prop_name(prop.type));

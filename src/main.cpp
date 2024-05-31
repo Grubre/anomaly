@@ -25,21 +25,22 @@ void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
 
-    auto player_img = an::load_asset(LoadImage, "player/player-test.png");
-    auto test_tile = an::load_asset(LoadImage, "map/test-tile.png");
-    asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
-    asset_manager.register_texture(test_tile, T::TEST_TILE);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player-test.png"), T::PLAYER_TEXTURE);
+    asset_manager.register_texture(an::load_asset(LoadImage, "map/test-tile.png"), T::TEST_TILE);
 
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man.png"), T::BASE_CHARACTER);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64,
                                    72);
-
+    //props
     asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/tree.png"), T::TREE);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/rock.png"), T::ROCK);
+    //particles
+    asset_manager.register_texture(an::load_asset(LoadImage, "particles/drunk.png"), T::DRUNK_PARTICLE);
+    asset_manager.register_texture(an::load_asset(LoadImage, "particles/smrodek.png"), T::STINKY_PARTICLE);
 }
 void default_keys(an::KeyManager &key_manager) {
     key_manager.assign_key(KEY_W, an::KeyEnum::MOVE_UP);
