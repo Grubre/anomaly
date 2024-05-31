@@ -21,6 +21,7 @@
 #include "components/relations.hpp"
 #include "components/walk_area.hpp"
 #include "components/particles.hpp"
+#include "components/city.hpp"
 #include "gui/inspect_window.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
@@ -129,6 +130,9 @@ auto main() -> int {
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      2.f);
 
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f,0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f,-1.f));
+
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
@@ -225,6 +229,8 @@ auto main() -> int {
         // ======================================
 
         BeginMode2D(registry.ctx().get<Camera2D>());
+
+        an::render_city_tiles(registry);
 
         an::y_sort(registry);
 
