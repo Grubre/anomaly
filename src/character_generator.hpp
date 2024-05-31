@@ -13,14 +13,10 @@ namespace an {
 using accesories_mask_t = std::bitset<8>;
 
 constexpr std::array possible_shirt_colors{
-    RED,
-    GREEN,
-    BLUE,
+    RED, GREEN, BLUE, YELLOW, VIOLET, ORANGE,
 };
 
-constexpr std::array possible_hair_colors{
-    BLACK,
-};
+constexpr std::array possible_hair_colors{BLACK, YELLOW, RED, BROWN};
 
 using ShirtColor = Color;
 using PantsColor = Color;

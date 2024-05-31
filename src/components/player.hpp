@@ -46,7 +46,9 @@ template <> inline void emplace<Player>(entt::registry &registry, entt::entity e
     emplace<Health>(registry, entity);
     emplace<Alive>(registry, entity);
     emplace<DebugName>(registry, entity, "Player");
-    emplace<Sprite>(registry, entity, TextureEnum::PLAYER_TEXTURE);
+
+    emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR, TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
+
     emplace<CharacterBody>(registry, entity, Vector2{}, 10.f);
     safe_emplace<Player>(registry, entity);
 }

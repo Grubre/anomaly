@@ -6,7 +6,7 @@ in vec4 fragColor;
 
 // Input uniform values
 uniform sampler2D texture0;
-uniform vec4 colDiffuse;
+uniform vec4 tint;
 
 // Output fragment color
 out vec4 finalColor;
@@ -20,6 +20,6 @@ void main()
 
     // NOTE: Implement here your fragment shader code
 
-    finalColor = texelColor*colDiffuse;
+    finalColor = texelColor*tint;
 }
 

@@ -31,10 +31,11 @@ void load_resources(an::AssetManager &asset_manager) {
     asset_manager.register_texture(player_img, T::PLAYER_TEXTURE);
     asset_manager.register_texture(test_tile, T::TEST_TILE);
 
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
-    // asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man.png"), T::BASE_CHARACTER);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64,
+                                   72);
 
     asset_manager.register_texture(an::load_asset(LoadImage, "props/bench.png"), T::BENCH);
     asset_manager.register_texture(an::load_asset(LoadImage, "props/lamp.png"), T::LAMP);
@@ -57,7 +58,6 @@ void setup_raylib() {
 
     fmt::println("Resolution is: {}x{}", screen_width, screen_height);
     InitWindow(screen_width, screen_height, "Hello World");
-    ToggleFullscreen();
     InitAudioDevice();
 }
 
@@ -67,19 +67,22 @@ auto main() -> int {
 
     rlImGuiSetup(true);
     auto registry = entt::registry();
+    an::init_tint_shader(registry);
     auto &key_manager = registry.ctx().emplace<an::KeyManager>();
     default_keys(key_manager);
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
     auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health,
-                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody,an::Prop,
-                                   an::FollowEntityCharState, an::EscapeCharState, 
-                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState>(&registry);
+                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
+                                   an::FollowEntityCharState, an::EscapeCharState, an::AvoidTraitComponent,
+                                   an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState>(&registry);
 
-    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N,[&](){an::save_props(registry);});
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
     // camera
-    registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth()/2, (float)GetScreenHeight()/2), Vector2(), 0.f, 2.f);
+    registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
+                                     2.f);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
@@ -90,11 +93,6 @@ auto main() -> int {
 
     an::emplace<an::ShaderComponent>(registry, player, base_shader);
     // an::emplace<an::Sprite>(registry, entity);
-
-    // test collider
-    auto test_collider = registry.create();
-    an::emplace<an::GlobalTransform>(registry, test_collider);
-    an::emplace<an::StaticBody>(registry, test_collider, Vector2(100.f,100.f), Vector2(500.f, 300.f));
 
     // test char collider
     auto test_char_collider = registry.create();
@@ -111,6 +109,17 @@ auto main() -> int {
     //     const auto character = an::make_character(registry, traits);
     // }
 
+    auto char_gen = an::CharacterGenerator(0, 50);
+
+    for (const auto &traits : char_gen.get_original_character_traits()) {
+        const auto character = an::make_character(registry, traits);
+        auto &local_transform = registry.get<an::LocalTransform>(character);
+        float x_r = ((float)rand() / RAND_MAX) * 2.f - 1.f;
+        float y_r = ((float)rand() / RAND_MAX) * 2.f - 1.f;
+        local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
+        an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f);
+    }
+
     while (!WindowShouldClose()) {
         // ======================================
         // UPDATE SYSTEMS
@@ -125,24 +134,28 @@ auto main() -> int {
         an::trait_systems(registry);
         an::character_states_systems(registry);
 
+        an::move_things(registry);
+
+        auto pos = registry.get<an::GlobalTransform>(player);
+        registry.ctx().get<Camera2D>().target = pos.transform.position;
+
+        for (int i = 0; i < 4; i++) {
+            an::static_vs_character_collision_system(registry);
+            an::character_vs_character_collision_system(registry);
+            an::propagate_parent_transform(registry);
+        }
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
         // ======================================
         // DRAW SYSTEMS
         // ======================================
 
-        an::move_things(registry);
-
-        auto pos = registry.get<an::GlobalTransform>(player);
-        registry.ctx().get<Camera2D>().target = pos.transform.position;
-
-        an::static_vs_character_collision_system(registry);
-        an::character_vs_character_collision_system(registry);
-
         BeginMode2D(registry.ctx().get<Camera2D>());
 
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
+        an::debug_trait_systems(registry);
 
         EndMode2D();
         // ======================================
