@@ -63,6 +63,33 @@ void setup_raylib() {
     InitAudioDevice();
 }
 
+namespace an {
+struct Anomaly {
+    static constexpr auto name = "Anomaly";
+    static void inspect() { ImGui::Text("Is anomaly"); }
+};
+} // namespace an
+
+auto create_connected_walk_areas(entt::registry &registry, uint32_t number) -> entt::entity {
+    entt::entity entity{};
+    an::WalkArea *prev_area = nullptr;
+    for (auto i = 0u; i < number; i++) {
+        entity = registry.create();
+        const auto size = 1000.f;
+        an::emplace<an::WalkArea>(registry, entity, Vector2{size * (float)i, 0.f},
+                                  Vector2{size * (float)(i + 1) - 1.f, size});
+        auto *current_area = &registry.get<an::WalkArea>(entity);
+
+        if (prev_area != nullptr) {
+            an::connect_walk_areas(*current_area, *prev_area);
+        }
+
+        prev_area = current_area;
+    }
+
+    return entity;
+}
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -71,6 +98,7 @@ auto main() -> int {
     auto registry = entt::registry();
     an::init_collision_controller(registry);
     an::init_tint_shader(registry);
+    an::init_edge_detection_shader(registry);
     auto &key_manager = registry.ctx().emplace<an::KeyManager>();
     default_keys(key_manager);
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
@@ -106,22 +134,34 @@ auto main() -> int {
     // an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
     an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
 
-    // test character generator
-    // auto char_gen = an::CharacterGenerator(0, 5);
-    //
-    // for(const auto &traits : char_gen.get_original_character_traits()) {
-    //     const auto character = an::make_character(registry, traits);
-    // }
-
+    auto walk_area_entity = create_connected_walk_areas(registry, 3);
+    auto *walk_area = &registry.get<an::WalkArea>(walk_area_entity);
+    // test anomalies and npcs
+    const auto num_anomalies = 5;
     auto char_gen = an::CharacterGenerator(0, 50);
+    auto day = char_gen.new_day(an::DayConfig{
+        .num_guaranteed_traits = 1,
+        .num_probable_traits = 3,
+        .num_used_probable_traits = 2,
+        .num_anomalies = num_anomalies,
+    });
 
+    auto i = 0u;
     for (const auto &traits : char_gen.get_original_character_traits()) {
         const auto character = an::make_character(registry, traits);
         auto &local_transform = registry.get<an::LocalTransform>(character);
         float x_r = an::get_uniform_float() * 2.f - 1.f;
         float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
-        an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f);
+        an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f,
+                                         walk_area);
+        if (i < num_anomalies) {
+            an::emplace<an::Anomaly>(registry, character);
+            an::emplace<an::DebugName>(registry, character, "Anomaly");
+        } else {
+            an::emplace<an::DebugName>(registry, character, "NPC");
+        }
+        i++;
     }
 
     // particle

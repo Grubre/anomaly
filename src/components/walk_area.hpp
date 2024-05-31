@@ -18,7 +18,7 @@ struct WalkArea {
     [[nodiscard]] auto calculate_area() const -> float;
     [[nodiscard]] auto calculate_total_neighbouring_area() const -> float;
     [[nodiscard]] auto sample_random_point() const -> Vector2;
-    [[nodiscard]] auto sample_uniform_neighbourhood_point() const -> Vector2;
+    [[nodiscard]] auto sample_uniform_neighbourhood_point() const -> std::pair<Vector2, const WalkArea *>;
     [[nodiscard]] auto get_left_top() const -> Vector2 { return left_top; }
     [[nodiscard]] auto get_right_bottom() const -> Vector2 { return right_bottom; }
     void add_neighbour(WalkArea *neighbour) { neighbours.push_back(neighbour); }
@@ -47,4 +47,4 @@ struct WalkArea {
 void connect_walk_areas(WalkArea &a, WalkArea &b);
 void visualize_walk_areas(entt::registry &registry);
 
-}
+} // namespace an

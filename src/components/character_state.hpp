@@ -2,6 +2,7 @@
 
 #include "components/collisions.hpp"
 #include "components/velocity.hpp"
+#include "components/walk_area.hpp"
 #include <algorithm>
 #include <fmt/format.h>
 #include <imgui.h>
@@ -74,6 +75,8 @@ struct RandomWalkState {
     float speed{};
     Vector2 target{};
     float wait_time{};
+    const WalkArea *walk_area;
+
     float time_elapsed{0.f};
 
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
@@ -96,16 +99,12 @@ inline void random_walk_state_system(entt::registry &registry) {
             state.time_elapsed += GetFrameTime();
             if (state.time_elapsed >= state.wait_time) {
                 state.wait_time = get_uniform_float() * 3.f + 2.f;
-                state.speed = std::clamp(get_uniform_float() * 120.f + 50.f ,50.f, 120.f);
+                state.speed = std::clamp(get_uniform_float() * 120.f + 50.f, 50.f, 120.f);
                 state.time_elapsed = 0.f;
 
-                Vector2 candidate_target =
-                    Vector2Add(state.target, Vector2{get_random_float(-300.f, 300.f), get_random_float(-100.f, 100.f)});
-                while (is_in_any_static(registry, candidate_target)) {
-                    candidate_target = Vector2Add(
-                        state.target, Vector2{get_random_float(-300.f, 300.f), get_random_float(-100.f, 100.f)});
-                }
-                state.target = candidate_target;
+                auto [next_target, new_area] = state.walk_area->sample_uniform_neighbourhood_point();
+                state.target = next_target;
+                state.walk_area = new_area;
             }
             continue;
         }
