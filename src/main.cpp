@@ -101,10 +101,9 @@ void anomaly_traits_gui(an::AnomalyTraits &day) {
                    },
                    trait);
     }
-    // for (auto &trait : day.guaranteed_traits) {
-    //     ImGui::Text("Guaranteed trait");
-    //     ImGui::Text("Trait type: %s", probable_trait_name_to_str(trait).data());
-    // }
+    for (auto &trait : day.guaranteed_traits) {
+        ImGui::Text("Guaranteed trait: %s", guaranteed_trait_to_str(trait).c_str());
+    }
     ImGui::End();
 }
 
@@ -147,7 +146,8 @@ auto main() -> int {
         an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle,an::Character,an::Mark,an::Interrupted,an::ShowUI>(&registry);
+                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character, an::Mark,
+                      an::Interrupted, an::ShowUI>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -169,7 +169,8 @@ auto main() -> int {
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
-    key_manager.subscribe(an::KeyboardEvent::PRESS,an::KeyEnum::INTERACT,[&](){an::check_nearby_npc(registry, player);});
+    key_manager.subscribe(an::KeyboardEvent::PRESS, an::KeyEnum::INTERACT,
+                          [&]() { an::check_nearby_npc(registry, player); });
     // shader
     auto base_shader = an::load_asset(LoadShader, "shaders/base.vs", "shaders/base.fs");
 
@@ -208,8 +209,18 @@ auto main() -> int {
                                          walk_area);
 
         if (i < num_anomalies) {
-            // an::emplace<an::ShakeTraitComponent>(registry, character, an::PropType::TREE, 100.f, 5000.f);
-            an::emplace<an::AvoidTraitComponent>(registry, character, an::PropType::TREE, 100.f, 200.f);
+            for (const auto &trait : day.anomaly_traits.guaranteed_traits) {
+                std::visit(entt::overloaded{
+                               [&](const an::Avoid &avoid) {
+                                   an::emplace<an::AvoidTraitComponent>(registry, character, avoid.type, 100.f, 200.f);
+                               },
+                               [&](const an::TwitchNear &twitch) {
+                                   an::emplace<an::ShakeTraitComponent>(registry, character, twitch.type, 100.f,
+                                                                        5000.f);
+                               },
+                           },
+                           trait);
+            }
             an::emplace<an::Anomaly>(registry, character);
             an::emplace<an::DebugName>(registry, character, "Anomaly");
         } else {
@@ -235,7 +246,7 @@ auto main() -> int {
         an::update_player(registry, player);
         an::update_props(registry);
         an::player_shooting(registry, player);
-        an::update_marker_system(registry,player);
+        an::update_marker_system(registry, player);
         an::update_particle_system(registry);
         an::update_bullets(registry);
 
@@ -278,7 +289,7 @@ auto main() -> int {
         // DRAW GUI
         // ======================================
         rlImGuiBegin();
-        an::update_ui(registry,player);
+        an::update_ui(registry, player);
         ImGui::ShowDemoWindow();
         inspector.draw_gui();
         anomaly_traits_gui(day.anomaly_traits);

@@ -60,8 +60,12 @@ struct TwitchNear {
 using ProbableTrait = std::variant<ShirtColor, PantsColor, HairColor, Accessory>;
 using GuaranteedTrait = std::variant<Avoid, TwitchNear>;
 
+constexpr auto num_guaranteed_traits = std::variant_size<an::GuaranteedTrait>();
+constexpr auto num_probable_traits = std::variant_size<an::ProbableTrait>();
+
 [[nodiscard]] auto probable_trait_name_to_str(const an::ProbableTrait &trait) -> std::string_view;
 [[nodiscard]] auto probable_trait_to_str(const ProbableTrait &trait) -> std::string;
+[[nodiscard]] auto guaranteed_trait_to_str(const GuaranteedTrait& trait) -> std::string;
 
 struct AnomalyTraits {
     std::vector<ProbableTrait> probable_traits;

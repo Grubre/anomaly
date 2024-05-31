@@ -1,116 +1,125 @@
 #include "props.hpp"
-namespace an {
-
-const char *get_prop_name(const PropType type) {
+const char *an::get_prop_name(const an::PropType type) {
     switch (type) {
-    case PropType::TREE:
+    case an::PropType::TREE:
         return "Tree";
-    case PropType::ROCK:
+    case an::PropType::ROCK:
         return "Rock";
-    case PropType::LAMP:
+    case an::PropType::LAMP:
         return "Lamp";
-    case PropType::BENCH:
+    case an::PropType::BENCH:
         return "Bench";
     default:
         return "None";
     }
 }
-PropType get_prop_type(const std::string &name) {
+
+an::PropType an::get_prop_type(const std::string &name) {
     if (name == "Tree") {
-        return PropType::TREE;
+        return an::PropType::TREE;
     } else if (name == "Rock") {
-        return PropType::ROCK;
+        return an::PropType::ROCK;
     } else if (name == "Lamp") {
-        return PropType::LAMP;
+        return an::PropType::LAMP;
     } else if (name == "Bench") {
-        return PropType::BENCH;
+        return an::PropType::BENCH;
     } else {
-        return PropType::CNT;
+        return an::PropType::CNT;
     }
 }
-TextureEnum get_prop_texture(const PropType type) {
+
+an::TextureEnum an::get_prop_texture(const an::PropType type) {
     switch (type) {
-    case PropType::TREE:
-        return TextureEnum::TREE;
-    case PropType::ROCK:
-        return TextureEnum::ROCK;
-    case PropType::LAMP:
-        return TextureEnum::LAMP;
-    case PropType::BENCH:
-        return TextureEnum::BENCH;
+    case an::PropType::TREE:
+        return an::TextureEnum::TREE;
+    case an::PropType::ROCK:
+        return an::TextureEnum::ROCK;
+    case an::PropType::LAMP:
+        return an::TextureEnum::LAMP;
+    case an::PropType::BENCH:
+        return an::TextureEnum::BENCH;
     default:
-        return TextureEnum::CNT;
+        return an::TextureEnum::CNT;
     }
 }
-StaticBody get_prop_collision(const PropType type) {
+
+an::StaticBody an::get_prop_collision(const an::PropType type) {
     switch (type) {
-    case PropType::TREE:
-        return StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
-    case PropType::ROCK:
-        return StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
-    case PropType::LAMP:
-        return StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
-    case PropType::BENCH:
-        return StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+    case an::PropType::TREE:
+        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+    case an::PropType::ROCK:
+        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+    case an::PropType::LAMP:
+        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+    case an::PropType::BENCH:
+        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
     default:
-        return StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
     }
 }
-void update_props(entt::registry &registry) {
-    auto view = registry.view<Prop, Drawable>();
+
+void an::update_props(entt::registry &registry) {
+    auto view = registry.view<an::Prop, an::Drawable>();
     for (auto &&[entity, prop, draw] : view.each()) {
         if (prop.update) {
-            registry.erase<Drawable>(entity);
-            registry.erase<DebugName>(entity);
-            emplace<Sprite>(registry, entity, get_prop_texture(prop.type));
-            emplace<DebugName>(registry, entity, get_prop_name(prop.type));
+            registry.erase<an::Drawable>(entity);
+            registry.erase<an::DebugName>(entity);
+            emplace<an::Sprite>(registry, entity, an::get_prop_texture(prop.type));
+            an::emplace<an::DebugName>(registry, entity, an::get_prop_name(prop.type));
             prop.update = false;
         }
     }
 }
-auto spawn_prop(entt::registry &registry) -> entt::entity {
+
+auto an::spawn_prop(entt::registry &registry) -> entt::entity {
     static unsigned num = 0;
     auto entity = registry.create();
-    emplace<Prop, PropType>(registry, entity, static_cast<PropType>(0));
-    auto &prop = registry.get<Prop>(entity);
-    registry.remove<DebugName>(entity);
-    emplace<DebugName>(registry, entity, get_prop_name(prop.type) + std::to_string(num++));
-    auto &transform = registry.get<LocalTransform>(entity);
+    emplace<an::Prop, an::PropType>(registry, entity, static_cast<an::PropType>(0));
+    auto &prop = registry.get<an::Prop>(entity);
+    registry.remove<an::DebugName>(entity);
+    an::emplace<an::DebugName>(registry, entity, an::get_prop_name(prop.type) + std::to_string(num++));
+    auto &transform = registry.get<an::LocalTransform>(entity);
     transform.transform.position = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
     return entity;
 }
-void save_props(entt::registry &registry) {
-    auto view = registry.view<Prop, GlobalTransform>();
+
+void an::save_props(entt::registry &registry) {
+    auto view = registry.view<an::Prop, an::GlobalTransform>();
     std::ofstream MyFile("props.dat");
     for (auto &&[entity, prop, transform] : view.each()) {
         MyFile << static_cast<int>(prop.type) << " " << transform.transform.position.x << " "
                << transform.transform.position.y << std::endl;
     }
 }
-std::ifstream get_ifstream(const char *filename) { return std::ifstream(filename); }
-void load_props(entt::registry &registry, std::ifstream strm) {
+
+std::ifstream an::get_ifstream(const char *filename) { return std::ifstream(filename); }
+
+void an::load_props(entt::registry &registry, std::ifstream strm) {
     std::string line;
     while (getline(strm, line)) {
         auto entity = registry.create();
         std::stringstream ss(line);
         std::string tmp;
         getline(ss, tmp, ' ');
-        emplace<Prop, PropType>(registry, entity, static_cast<PropType>(std::stoi(tmp)));
-        auto &transform = registry.get<LocalTransform>(entity);
+        emplace<an::Prop, an::PropType>(registry, entity, static_cast<an::PropType>(std::stoi(tmp)));
+        auto &transform = registry.get<an::LocalTransform>(entity);
         getline(ss, tmp, ' ');
         transform.transform.position.x = std::stof(tmp);
         getline(ss, tmp, ' ');
         transform.transform.position.y = std::stof(tmp);
     }
 }
-void Prop::inspect(entt::registry &registry, entt::entity entity) {
+
+void an::Prop::inspect(entt::registry &registry, entt::entity entity) {
     const size_t minimum = 0;
     const size_t maximum = static_cast<size_t>(PropType::CNT) - 1;
     ImGui::Text("%s", get_prop_name(type));
     ImGui::SliderScalar("Type", ImGuiDataType_U8, &type, &minimum, &maximum);
     ImGui::Checkbox("Update", &update);
 }
-template <> void emplace<Prop, PropType>(entt::registry &registry, entt::entity entity, const PropType &type) {
+
+template <>
+void an::emplace<an::Prop, an::PropType>(entt::registry &registry, entt::entity entity, const PropType &type) {
     auto prop = registry.emplace<Prop>(entity, type);
     emplace<Sprite>(registry, entity, get_prop_texture(type));
     emplace<GlobalTransform>(registry, entity);
@@ -118,7 +127,8 @@ template <> void emplace<Prop, PropType>(entt::registry &registry, entt::entity 
     emplace<DebugName>(registry, entity, get_prop_name(type));
     emplace<StaticBody>(registry, entity, get_prop_collision(type));
 }
-template <> void emplace<Prop, Prop>(entt::registry &registry, entt::entity entity, const Prop &prop) {
+
+template <> void an::emplace<an::Prop, an::Prop>(entt::registry &registry, entt::entity entity, const Prop &prop) {
     registry.emplace<Prop>(entity, prop.type);
     emplace<Sprite>(registry, entity, get_prop_texture(prop.type));
     emplace<GlobalTransform>(registry, entity);
@@ -126,4 +136,11 @@ template <> void emplace<Prop, Prop>(entt::registry &registry, entt::entity enti
     safe_emplace<DebugName>(registry, entity, get_prop_name(prop.type));
     emplace<StaticBody>(registry, entity, get_prop_collision(prop.type));
 }
-} // namespace an
+
+[[nodiscard]] auto an::get_random_prop() -> Prop {
+    static std::random_device rd{};
+    static std::mt19937 gen{rd()};
+    static std::uniform_int_distribution<std::uint8_t> dist{0, static_cast<std::uint8_t>(PropType::CNT) - 1};
+
+    return Prop{.type = static_cast<PropType>(dist(gen)), .update = false};
+}

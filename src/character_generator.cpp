@@ -56,6 +56,20 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
         trait);
 }
 
+
+[[nodiscard]] auto an::guaranteed_trait_to_str(const GuaranteedTrait& trait) -> std::string {
+    return std::visit(
+        entt::overloaded{
+            [](const an::Avoid &avoid) {
+                return fmt::format("Avoid: ({})", an::get_prop_name(avoid.type));
+            },
+            [](const an::TwitchNear &twitch_near) {
+                return fmt::format("TwitchNear: ({})", an::get_prop_name(twitch_near.type));
+            },
+        },
+        trait);
+}
+
 [[nodiscard]] auto generate_bool_vec(std::size_t size, std::uint32_t num_ones) -> std::vector<bool> {
     auto vec = std::vector<bool>(size, false);
     for (auto i = 0u; i < num_ones; i++) {
@@ -123,8 +137,10 @@ auto an::CharacterGenerator::get_original_character_traits() const -> std::span<
 
 auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
     static std::mt19937 gen{seed};
+    static std::uniform_int_distribution<std::uint32_t> guaranteed_dist{0, num_guaranteed_traits - 1};
     AnomalyTraits anomaly_traits{};
 
+    // get random probable traits
     auto probable_traits_mask = generate_bool_vec(config.num_probable_traits, config.num_used_probable_traits);
     std::shuffle(probable_traits_mask.begin(), probable_traits_mask.end(), gen);
     const auto random_probable_traits = get_vec_of_random_probable_traits();
@@ -132,6 +148,25 @@ auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
         if (probable_traits_mask[i]) {
             anomaly_traits.probable_traits.push_back(random_probable_traits.at(i));
             fmt::println("Trait[{}]: {}", i, probable_trait_to_str(random_probable_traits.at(i)));
+        }
+    }
+
+    // FIXME: Could possibly add two identical traits
+    // get random guaranteed traits
+    for (auto i = 0u; i < config.num_guaranteed_traits; i++) {
+        const auto random_prop = an::get_random_prop();
+
+        const auto random_trait_num = guaranteed_dist(gen);
+
+        switch (random_trait_num) {
+        case 0:
+            anomaly_traits.guaranteed_traits.emplace_back(Avoid{.type = random_prop.type});
+            break;
+        case 1:
+            anomaly_traits.guaranteed_traits.emplace_back(TwitchNear{.type = random_prop.type});
+            break;
+        default:
+            assert(false && "Invalid guaranteed trait number");
         }
     }
 
