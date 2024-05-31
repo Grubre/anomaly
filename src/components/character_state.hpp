@@ -1,6 +1,9 @@
 #pragma once
 
+#include "components/collisions.hpp"
 #include "components/velocity.hpp"
+#include "components/walk_area.hpp"
+#include <algorithm>
 #include <fmt/format.h>
 #include <imgui.h>
 #include <raylib.h>
@@ -72,6 +75,8 @@ struct RandomWalkState {
     float speed{};
     Vector2 target{};
     float wait_time{};
+    const WalkArea *walk_area;
+
     float time_elapsed{0.f};
 
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
@@ -82,7 +87,7 @@ struct RandomWalkState {
 };
 
 inline void random_walk_state_system(entt::registry &registry) {
-    constexpr float epsilon = 1.f;
+    constexpr float epsilon = 40.f;
     auto view = registry.view<RandomWalkState, LocalTransform>();
 
     for (auto &&[entity, state, transform] : view.each()) {
@@ -93,13 +98,18 @@ inline void random_walk_state_system(entt::registry &registry) {
         if (Vector2Distance(state.target, transform.transform.position) < epsilon) {
             state.time_elapsed += GetFrameTime();
             if (state.time_elapsed >= state.wait_time) {
+                state.wait_time = get_uniform_float() * 3.f + 2.f;
+                state.speed = std::clamp(get_uniform_float() * 120.f + 50.f, 50.f, 120.f);
                 state.time_elapsed = 0.f;
-                state.target =
-                    Vector2Add(state.target, Vector2{get_random_float(-100.f, 100.f), get_random_float(-100.f, 100.f)});
+
+                auto [next_target, new_area] = state.walk_area->sample_uniform_neighbourhood_point();
+                state.target = next_target;
+                state.walk_area = new_area;
             }
             continue;
         }
 
+        DrawCircleV(state.target, 5, ColorAlpha(BLACK, 0.5f));
         transform.transform.position = Vector2Add(transform.transform.position, delta);
         state.time_elapsed += GetFrameTime();
     }

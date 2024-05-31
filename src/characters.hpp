@@ -2,6 +2,7 @@
 
 #include "character_generator.hpp"
 #include "components/common.hpp"
+#include <cstdlib>
 #include <entt.hpp>
 
 namespace an {
@@ -15,7 +16,7 @@ inline entt::entity make_character(entt::registry &registry, const CharacterTrai
                                  TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
     auto &sprite = std::get<CharacterSprite>(registry.get<Drawable>(entity).sprite);
 
-    an::emplace<an::CharacterBody>(registry, entity, Vector2{}, 10.f);
+    an::emplace<an::CharacterBody>(registry, entity, Vector2{}, 10.f, (float)rand() / RAND_MAX);
 
     sprite.hair_color = traits.hair_color;
     sprite.shirt_color = traits.shirt_color;

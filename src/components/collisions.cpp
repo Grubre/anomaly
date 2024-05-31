@@ -1,4 +1,15 @@
 #include "collisions.hpp"
+#include "components/common.hpp"
+#include "components/velocity.hpp"
+#include <cstddef>
+#include <cstdlib>
+#include <raylib.h>
+#include <raymath.h>
+
+
+bool an::is_in_static(an::StaticBody s, Vector2 point) {
+    return s.pos.x <= point.x && s.pos.y <= point.y && point.x <= s.pos.x + s.size.x && point.y <= s.pos.y + s.size.y;
+}
 
 auto an::static_vs_character_resolve_vector(an::StaticBody s, an::CharacterBody c) -> std::optional<Vector2> {
     auto px = std::clamp(c.pos.x, s.pos.x, s.pos.x + s.size.x);
@@ -13,7 +24,10 @@ auto an::static_vs_character_resolve_vector(an::StaticBody s, an::CharacterBody 
 
     auto dist = Vector2Length(diff);
     auto norm_vec = Vector2Normalize(diff);
+
     auto resolve = Vector2Scale(norm_vec, c.radius - dist);
+    auto perp = Vector2Scale(Vector2(-resolve.y, resolve.x), 0.1f);
+    resolve = Vector2Add(resolve, perp);
 
     return resolve;
 }
@@ -60,33 +74,90 @@ void an::static_vs_character_collision_system(entt::registry &registry) {
 }
 
 void an::character_vs_character_collision_system(entt::registry &registry) {
-    auto char_view = registry.view<CharacterBody, GlobalTransform>();
+    auto cc = registry.ctx().get<CollisionController>();
 
-    for (auto &&[a, a_body, a_tr] : char_view.each()) {
-        auto a_copy = a_body;
-        a_copy.pos = Vector2Add(a_copy.pos, a_tr.transform.position);
-        a_copy.radius = a_copy.radius * (a_tr.transform.scale.x + a_tr.transform.scale.y) * 0.5f;
+    ssize_t i = 0;
+    while ((size_t)i < cc.sas_list.size()) {
+        auto &sas = cc.sas_list[(size_t)i];
 
-        for (auto &&[b, b_body, b_tr] : char_view.each()) {
-            auto b_copy = b_body;
-            b_copy.pos = Vector2Add(b_copy.pos, b_tr.transform.position);
-            b_copy.radius = b_copy.radius * (b_tr.transform.scale.x + b_tr.transform.scale.y) * 0.5f;
+        if (!registry.valid(sas.entity)) {
+            std::iter_swap(cc.sas_list.begin() + i, cc.sas_list.end() - 1);
+            cc.sas_list.pop_back();
+            continue;
+        }
 
-            auto resolve = character_vs_character_resolve_vector(a_copy, b_copy);
+        auto tr = registry.get<GlobalTransform>(sas.entity);
+        auto body = registry.get<CharacterBody>(sas.entity);
 
-            if (resolve) {
-                auto vector = resolve.value();
-                auto a_move = Vector2Scale(vector, 0.5f);
-                auto b_move = Vector2Negate(a_move);
+        if (sas.kind == SASPointKind::BEGIN) {
+            sas.point = tr.transform.position.x + body.pos.x - body.radius;
+        } else {
+            sas.point = tr.transform.position.x + body.pos.x + body.radius;
+        }
 
-                auto &local_a = registry.get<LocalTransform>(a);
-                local_a.transform.position = Vector2Add(local_a.transform.position, a_move);
+        i += 1;
+    }
 
-                auto &local_b = registry.get<LocalTransform>(b);
-                local_b.transform.position = Vector2Add(local_b.transform.position, b_move);
+    std::sort(cc.sas_list.begin(), cc.sas_list.end(), 
+        [](auto& a, auto& b) {
+            return a.point < b.point;
+        }
+    );
+
+    for (auto &point : cc.sas_list) {
+        if (cc.active_sas.contains(point.entity)) {
+            //assert(point.kind == SASPointKind::End);
+            cc.active_sas.erase(point.entity);
+        } else {
+            //assert(point.kind == SASPointKind::Begin);
+            
+            for (const auto& active : cc.active_sas) {
+                cc.narrow_queue.emplace_back(point.entity, active);
             }
+            cc.active_sas.insert(point.entity);
         }
     }
+    assert(cc.active_sas.empty());
+
+    for (auto &&[a, b] : cc.narrow_queue) {
+        auto a_tr = registry.get<GlobalTransform>(a);
+        auto a_body = registry.get<CharacterBody>(a);
+        a_body.pos = Vector2Add(a_body.pos, a_tr.transform.position);
+        a_body.radius = a_body.radius * (a_tr.transform.scale.x + a_tr.transform.scale.y) * 0.5f;
+
+        auto b_tr = registry.get<GlobalTransform>(b);
+        auto b_body = registry.get<CharacterBody>(b);
+        b_body.pos = Vector2Add(b_body.pos, b_tr.transform.position);
+        b_body.radius = b_body.radius * (b_tr.transform.scale.x + b_tr.transform.scale.y) * 0.5f;
+
+        auto resolve = character_vs_character_resolve_vector(a_body, b_body);
+
+        if (resolve) {
+            auto vector = resolve.value();
+            auto total_mass = a_body.mass + b_body.mass;
+
+            auto a_move = Vector2Scale(vector, b_body.mass / total_mass);
+            auto b_move = Vector2Scale(vector, -a_body.mass / total_mass);
+
+            auto &local_a = registry.get<LocalTransform>(a);
+            local_a.transform.position = Vector2Add(local_a.transform.position, a_move);
+
+            auto &local_b = registry.get<LocalTransform>(b);
+            local_b.transform.position = Vector2Add(local_b.transform.position, b_move);
+        }
+    }
+}
+
+bool an::is_in_any_static(entt::registry &registry, Vector2 point) {
+    auto static_view = registry.view<StaticBody, GlobalTransform>();
+
+    for (auto &&[s, s_body, s_tr] : static_view.each()) {
+        if (is_in_static(s_body, point)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void an::debug_draw_bodies(entt::registry &registry) {
