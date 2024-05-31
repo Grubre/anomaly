@@ -20,7 +20,7 @@
 #include "components/player.hpp"
 #include "components/relations.hpp"
 #include "components/walk_area.hpp"
-
+#include "components/particles.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
@@ -63,13 +63,6 @@ void setup_raylib() {
     InitAudioDevice();
 }
 
-namespace an {
-struct Anomaly {
-    static constexpr auto name = "Anomaly";
-    static void inspect() { ImGui::Text("Is anomaly"); }
-};
-} // namespace an
-
 auto main() -> int {
     // setup
     setup_raylib();
@@ -86,14 +79,13 @@ auto main() -> int {
         an::Inspector<an::LocalTransform, an::GlobalTransform, an::Sprite, an::Alive, an::Health, an::Player,
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::FollowEntityCharState,
                       an::EscapeCharState, an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                      an::RandomWalkState, an::WalkArea, an::Anomaly>(&registry);
+                      an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
     // camera
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      2.f);
-    an::init_edge_detection_shader(registry);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
@@ -113,17 +105,15 @@ auto main() -> int {
     // an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
     an::emplace<an::FollowEntityCharState>(registry, test_char_collider, player, INFINITY, 10.f);
 
-    // test anomalies and npcs
-    const auto num_anomalies = 5;
-    auto char_gen = an::CharacterGenerator(0, 50);
-    auto day = char_gen.new_day(an::DayConfig{
-        .num_guaranteed_traits = 1,
-        .num_probable_traits = 3,
-        .num_used_probable_traits = 2,
-        .num_anomalies = num_anomalies,
-    });
+    // test character generator
+    // auto char_gen = an::CharacterGenerator(0, 5);
+    //
+    // for(const auto &traits : char_gen.get_original_character_traits()) {
+    //     const auto character = an::make_character(registry, traits);
+    // }
 
-    auto i = 0u;
+    auto char_gen = an::CharacterGenerator(0, 50);
+
     for (const auto &traits : char_gen.get_original_character_traits()) {
         const auto character = an::make_character(registry, traits);
         auto &local_transform = registry.get<an::LocalTransform>(character);
@@ -131,15 +121,13 @@ auto main() -> int {
         float y_r = an::get_uniform_float() * 2.f - 1.f;
         local_transform.transform.position = Vector2{x_r * 500.f, y_r * 500.f};
         an::emplace<an::RandomWalkState>(registry, character, 100.f, local_transform.transform.position, 1.f);
-        if (i < num_anomalies) {
-            an::emplace<an::Anomaly>(registry, character);
-            an::emplace<an::DebugName>(registry, character, "Anomaly");
-        } else {
-            an::emplace<an::DebugName>(registry, character, "NPC");
-        }
-        i++;
     }
 
+    // particle
+    auto drunk_p = an::make_particle(an::ParticleType::DRUNK, 3, 6, {20, 20}, {2, 2}, 5,
+                                     an::ParticleAnimationType::SPIN_R, true, true);
+    key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J,
+                          [&]() { an::emit_particles(registry, player, drunk_p, 5, {0, -5}); });
     while (!WindowShouldClose()) {
         // ======================================
         // UPDATE SYSTEMS
@@ -150,9 +138,10 @@ auto main() -> int {
         an::update_props(registry);
         an::player_shooting(registry, player);
         an::clean_bullets(registry);
-
+        an::update_particle_system(registry);
         // Characters systems
         an::trait_systems(registry);
+        an::character_states_systems(registry);
 
         an::move_things(registry);
         an::propagate_parent_transform(registry);
@@ -176,12 +165,10 @@ auto main() -> int {
 
         an::visualize_walk_areas(registry);
 
-        an::y_sort(registry);
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
         an::debug_trait_systems(registry);
 
-        an::character_states_systems(registry);
         EndMode2D();
         // ======================================
         // DRAW GUI
