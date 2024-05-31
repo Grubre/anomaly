@@ -1,5 +1,6 @@
 #pragma once
 #include <entt.hpp>
+#include <random>
 #include <raylib.h>
 
 namespace an {
@@ -17,8 +18,16 @@ void emplace(entt::registry &registry, entt::entity entity, const Args &...args)
     safe_emplace<T>(registry, entity, args...);
 }
 
+[[nodiscard]] inline auto get_uniform_float() -> float {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_real_distribution<float> dis(0.0f, 1.0f);
+
+    return dis(gen);
+}
+
 [[nodiscard]] inline auto get_random_float(float min, float max) -> float {
-    return ((float)rand() / RAND_MAX) * (max - min) + min;
+    return get_uniform_float() * (max - min) + min;
 }
 
 } // namespace an
