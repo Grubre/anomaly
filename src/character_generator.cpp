@@ -1,5 +1,6 @@
 #include "character_generator.hpp"
 #include <random>
+#include <ranges>
 #include <vector>
 
 void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
@@ -94,10 +95,6 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 }
 
 [[nodiscard]] auto get_vec_of_random_probable_traits() -> std::vector<an::ProbableTrait> {
-    static std::random_device rd{};
-    static std::mt19937 gen{rd()};
-    static std::uniform_int_distribution<std::uint8_t> dist{0, 255};
-
     auto probable_traits = std::vector<an::ProbableTrait>{};
     probable_traits.emplace_back(std::in_place_index<0>, an::get_random_shirt_color());
     probable_traits.emplace_back(std::in_place_index<1>, an::get_random_pants_color());
@@ -105,6 +102,19 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     probable_traits.emplace_back(std::in_place_index<3>, an::get_random_accessory());
 
     return probable_traits;
+}
+
+void apply_probable_trait(an::CharacterTraits &traits, const an::ProbableTrait &trait) {
+    std::visit(entt::overloaded{
+                   [&](const an::ShirtColor &color) { traits.shirt_color = color; },
+                   [&](const an::PantsColor &color) { traits.pants_color = color; },
+                   [&](const an::HairColor &color) { traits.hair_color = color; },
+                   [&](const an::Accessory &accessory) {
+                       // TODO: This does not work
+                       traits.accesories_mask |= (1u << accessory.accessory_num);
+                   },
+               },
+               trait);
 }
 
 auto an::CharacterGenerator::get_original_character_traits() const -> std::span<const CharacterTraits> {
@@ -116,7 +126,7 @@ auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
     AnomalyTraits anomaly_traits{};
 
     auto probable_traits_mask = generate_bool_vec(config.num_probable_traits, config.num_used_probable_traits);
-    std::shuffle(probable_traits_mask.begin(), probable_traits_mask.end(), std::mt19937{seed});
+    std::shuffle(probable_traits_mask.begin(), probable_traits_mask.end(), gen);
     const auto random_probable_traits = get_vec_of_random_probable_traits();
     for (auto i = 0u; i < probable_traits_mask.size(); i++) {
         if (probable_traits_mask[i]) {
@@ -125,20 +135,19 @@ auto an::CharacterGenerator::new_day(const DayConfig &config) -> ResolvedDay {
         }
     }
 
+    const auto num_anomalies = config.num_anomalies;
     auto dist = std::bernoulli_distribution{emplace_probable_trait_chance};
     auto new_characters = generated_characters;
-    for (auto &character : new_characters) {
-        if (dist(gen)) {
-            character.shirt_color = std::get<0>(random_probable_traits.at(0));
+    for (auto &character : new_characters | std::ranges::views::take(num_anomalies)) {
+        for (const auto &random_probable_trait : random_probable_traits) {
+            apply_probable_trait(character, random_probable_trait);
         }
-        if (dist(gen)) {
-            character.pants_color = std::get<1>(random_probable_traits.at(1));
-        }
-        if (dist(gen)) {
-            character.hair_color = std::get<2>(random_probable_traits.at(2));
-        }
-        if (dist(gen)) {
-            character.accesories_mask = 0;
+    }
+    for (auto &character : new_characters | std::ranges::views::drop(num_anomalies)) {
+        for (const auto &random_probable_trait : random_probable_traits) {
+            if (dist(gen)) {
+                apply_probable_trait(character, random_probable_trait);
+            }
         }
     }
 

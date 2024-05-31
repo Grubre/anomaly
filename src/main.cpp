@@ -83,6 +83,10 @@ struct Anomaly {
 };
 } // namespace an
 
+void anomaly_traits_gui(entt::registry& registry) {
+
+}
+
 auto create_connected_walk_areas(entt::registry &registry, uint32_t number) -> entt::entity {
     entt::entity entity{};
     an::WalkArea *prev_area = nullptr;
@@ -164,7 +168,7 @@ auto main() -> int {
     });
 
     auto i = 0u;
-    for (const auto &traits : char_gen.get_original_character_traits()) {
+    for (const auto &traits : day.characters) {
         const auto character = an::make_character(registry, traits);
         auto &local_transform = registry.get<an::LocalTransform>(character);
         float x_r = an::get_uniform_float() * 2.f - 1.f;
