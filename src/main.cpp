@@ -274,6 +274,7 @@ auto main() -> int {
         an::update_ui(registry,player);
         ImGui::ShowDemoWindow();
         inspector.draw_gui();
+        anomaly_traits_gui(day.anomaly_traits);
         rlImGuiEnd();
 
         DrawFPS(10, 10);
