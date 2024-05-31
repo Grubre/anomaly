@@ -7,7 +7,6 @@
 #include "components/velocity.hpp"
 #include "components/walk_area.hpp"
 #include "components/player.hpp"
-#include "fmt/base.h"
 #include "gui/inspector.hpp"
 #include <algorithm>
 #include <cmath>

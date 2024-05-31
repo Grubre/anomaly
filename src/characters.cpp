@@ -1,6 +1,6 @@
 #include "characters.hpp"
 #include "components/character_state.hpp"
-namespace an{
+namespace an {
 
 entt::entity make_character(entt::registry &registry, const CharacterTraits &traits) {
     auto entity = registry.create();
@@ -19,4 +19,4 @@ entt::entity make_character(entt::registry &registry, const CharacterTraits &tra
 
     return entity;
 }
-}
+} // namespace an

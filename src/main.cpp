@@ -150,7 +150,7 @@ auto main() -> int {
                                    an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
                                    an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
                                    an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character,
-                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker>(&registry);
+                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker, an::CharacterStateMachine>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
