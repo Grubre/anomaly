@@ -26,8 +26,6 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
         traits.pants_archetype = (an::TextureEnum)((int)an::TextureEnum::CHARACTER_PANTS_1 + dist(gen));
         traits.hair_archetype = (an::TextureEnum)((int)an::TextureEnum::CHARACTER_HAIR_1 + dist(gen));
 
-        traits.accesories_mask = accesories_mask_t{};
-
         // for (std::size_t i = 0; i < traits.accesories_mask.size(); i++) {
         //     if (std::bernoulli_distribution{accessory_gen_chance}(gen)) {
         //         traits.accesories_mask.set(i);
@@ -41,7 +39,6 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     return std::visit(entt::overloaded{[](const an::ShirtColor &) { return "ShirtColor"; },
                                        [](const an::PantsColor &) { return "PantsColor"; },
                                        [](const an::HairColor &) { return "HairColor"; },
-                                       [](const an::Accessory &) { return "Accessory"; },
                                        [](const an::ParticleTrait &) { return "ParticleTrait"; }},
                       trait);
 }
@@ -49,7 +46,6 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 [[nodiscard]] auto an::probable_trait_to_str(const an::ProbableTrait &trait) -> std::string {
     return std::visit(
         entt::overloaded{
-            [&](const an::Accessory &accessory) { return fmt::format("Accessory: ({})", accessory.accessory_num); },
             [&](const an::ParticleTrait &particle) { return fmt::format("ParticleTrait: ({})", (int)particle.type); },
             [&](const auto &color) {
                 return fmt::format("{}: ({}, {}, {})", probable_trait_name_to_str(trait), color.color.r, color.color.g,
@@ -104,10 +100,6 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     return HairColor{.color = possible_hair_colors.at(dist(gen))};
 }
 
-[[nodiscard]] auto an::get_random_accessory() -> an::Accessory {
-    // TODO:
-    return {0};
-}
 
 [[nodiscard]] auto an::get_random_particle() -> an::ParticleTrait {
     static std::random_device rd{};
@@ -122,8 +114,7 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
     probable_traits.emplace_back(std::in_place_index<0>, an::get_random_shirt_color());
     probable_traits.emplace_back(std::in_place_index<1>, an::get_random_pants_color());
     probable_traits.emplace_back(std::in_place_index<2>, an::get_random_hair_color());
-    probable_traits.emplace_back(std::in_place_index<3>, an::get_random_accessory());
-    probable_traits.emplace_back(std::in_place_index<4>, an::get_random_particle());
+    probable_traits.emplace_back(std::in_place_index<3>, an::get_random_particle());
 
     return probable_traits;
 }
@@ -133,10 +124,6 @@ void apply_probable_trait(an::CharacterTraits &traits, const an::ProbableTrait &
                    [&](const an::ShirtColor &color) { traits.shirt_color = color; },
                    [&](const an::PantsColor &color) { traits.pants_color = color; },
                    [&](const an::HairColor &color) { traits.hair_color = color; },
-                   [&](const an::Accessory &accessory) {
-                       // TODO: This does not work
-                       traits.accesories_mask |= (1u << accessory.accessory_num);
-                   },
                    [&](const an::ParticleTrait &particle) { traits.particles = particle; },
                },
                trait);
