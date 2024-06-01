@@ -3,8 +3,9 @@
 #include <fmt/core.h>
 #include <imgui.h>
 
-inline void main_menu() {
+inline bool main_menu() {
     auto io = ImGui::GetIO();
+    bool ret = false;
     ImGui::SetNextWindowSize(io.DisplaySize);
     ImGui::SetNextWindowPos({0, 0});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -14,10 +15,11 @@ inline void main_menu() {
 
     ImGui::SetCursorPos({io.DisplaySize.x / 2 - 100, io.DisplaySize.y / 2 - 50});
     if (ImGui::Button("Play Game", {200, 100})) {
-        fmt::print("Play Game button pressed\n");
+        ret=  true;
     }
 
     ImGui::End();
     ImGui::PopStyleVar();
     ImGui::PopStyleColor();
+    return ret;
 }

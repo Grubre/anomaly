@@ -62,7 +62,7 @@ struct RealBullet {
 };
 
 struct SleepingPlayer {
-    float time_left {5.f};
+    float time_left {2.2f};
 
     static constexpr auto name = "Sleeping";
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {

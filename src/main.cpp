@@ -28,6 +28,7 @@
 #include "components/marker.hpp"
 #include "components/buildings.hpp"
 #include "gui/clues.hpp"
+#include "gui/main_menu.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
@@ -416,7 +417,19 @@ auto main() -> int {
     // TESTCIK
     auto ent = registry.create();
     an::emplace_sprite(registry, ent, an::TextureEnum::STICK);
-
+    //main menu
+    while (!WindowShouldClose()) {
+        rlImGuiBegin();
+        BeginDrawing();
+        if(main_menu()){
+            rlImGuiEnd();
+            EndDrawing();
+            break;
+        }
+        rlImGuiEnd();
+        EndDrawing();
+    }
+    //game
     while (!WindowShouldClose()) {
         time -= GetFrameTime();
         // ======================================
@@ -516,7 +529,39 @@ auto main() -> int {
 
         EndDrawing();
     }
+    //end
+    while (!WindowShouldClose()) {
 
+        // ======================================
+        // DRAW SYSTEMS
+        // ======================================
+
+        BeginMode2D(registry.ctx().get<Camera2D>());
+        an::render_city_tiles(registry);
+        an::y_sort(registry);
+        an::visualize_walk_areas(registry);
+        an::render_drawables(registry);
+        an::debug_draw_bodies(registry);
+        // an::debug_trait_systems(registry);
+        // an::debug_buildings(registry);
+        EndMode2D();
+        EndTextureMode();
+        BeginDrawing();
+        BeginShaderMode(vignette);
+        DrawTextureRec(
+            post_process_texture.texture,
+            (Rectangle){0, 0, (float)post_process_texture.texture.width, (float)-post_process_texture.texture.height},
+            (Vector2){0, 0}, WHITE);
+        EndShaderMode();
+        // ======================================
+        // DRAW GUI
+        // ======================================
+        rlImGuiBegin();
+            //TODO
+        rlImGuiEnd();
+        DrawFPS(10, 10);
+        EndDrawing();
+    }
     CloseAudioDevice();
     rlImGuiShutdown();
     CloseWindow();
