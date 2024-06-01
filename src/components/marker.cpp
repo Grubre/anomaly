@@ -66,5 +66,12 @@ void mark_entity(entt::registry &registry, entt::entity entity) {
     std::get<Sprite>(sprite.sprite).offset.y = 1.8f;
     // transform.transform.scale = Vector2Scale(transform.transform.scale, 0.5f);
 }
+void halt_npc(entt::registry &registry) {
+    auto view = registry.view<Interrupted, Velocity>();
+    for (auto &&[npc, velocity] : view.each()) {
+        velocity.x = 0;
+        velocity.y = 0;
+    }
+}
 void Marker::inspect() { ImGui::Text("Marker entity"); }
 } // namespace an

@@ -130,6 +130,9 @@ void make_player_bullet_real(entt::registry &registry, Vector2 start, Vector2 di
 void player_shooting(entt::registry &registry, entt::entity &entity) {
     auto &player = registry.get<Player>(entity);
     player.cooldown-= GetFrameTime();
+    if(registry.all_of<ShowUI>(entity)){
+        return;
+    }
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         if (player.aiming_state ) {
             if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)|| player.cooldown > 0.f) {

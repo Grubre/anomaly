@@ -34,7 +34,6 @@ void draw_inspect_dialog(entt::registry &registry,entt::entity player ,entt::ent
     ImGui::SetCursorPosY((y - 72 * 6) / 3);
     ImGui::SetCursorPosX((x - 64 * 6) / 2);
     ImGui::Image((void *)&character.texture, {64 * 6, 72 * 6});
-
     ImGui::SetCursorPosX((x - 256 * 3) / 2);
     //buttons without border
     if (ImGui::ImageButton((void *)&sus_btn, {128*2, 64*2})) {

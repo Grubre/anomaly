@@ -76,15 +76,14 @@ void random_walk_state_system(entt::registry &registry) {
                 state.wait_time = get_uniform_float() * 10.f + 5.f;
                 state.speed = std::clamp(get_uniform_float() * 120.f + 50.f, 50.f, 120.f);
                 state.time_elapsed = 0.f;
-
                 auto [next_target, new_area] = state.walk_area->sample_uniform_neighbourhood_point();
                 state.target = next_target;
                 state.walk_area = new_area;
             }
             continue;
         }
-
         velocity = delta;
+
     }
 }
 
@@ -105,7 +104,9 @@ void follow_path_state_system(entt::registry &registry) {
             }
             continue;
         }
-
+        if(registry.all_of<Interrupted>(entity)){
+            continue;
+        }
         transform.transform.position = Vector2Add(transform.transform.position, delta);
     }
 }

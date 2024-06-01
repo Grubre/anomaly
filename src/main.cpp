@@ -439,7 +439,7 @@ auto main() -> int {
         // Characters systems
         an::trait_systems(registry);
         an::character_states_systems(registry);
-
+        an::halt_npc(registry);
         an::move_things(registry);
         an::propagate_parent_transform(registry);
 

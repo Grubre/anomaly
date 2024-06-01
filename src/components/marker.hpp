@@ -23,4 +23,5 @@ void check_nearby_npc(entt::registry &registry, entt::entity entity);
 void update_marker_system(entt::registry &registry, entt::entity entity);
 void remove_interrupt(entt::registry &registry, entt::entity entity);
 void add_interrupt(entt::registry &registry, entt::entity entity);
+void halt_npc(entt::registry &registry);
 } // namespace an
