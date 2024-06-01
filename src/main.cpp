@@ -282,6 +282,14 @@ auto spawn_bober(entt::registry &registry) -> entt::entity {
     return bober_entity;
 }
 
+void timer_gui(float time) {
+    ImGui::Begin("Timer");
+    auto minutes = static_cast<int>(time) / 60;
+    auto seconds = static_cast<int>(time) % 60;
+    ImGui::Text("Time: %02d:%02d", minutes, seconds);
+    ImGui::End();
+}
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -367,7 +375,12 @@ auto main() -> int {
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J, [&]() {
         an::emit_particles(registry, player, drunk_p, 5, {0, -5});
     });
+
+    const float initial_time = 2.f * 60.f;
+    float time = initial_time;
+
     while (!WindowShouldClose()) {
+        time -= GetFrameTime();
         // ======================================
         // UPDATE SYSTEMS
         // ======================================
@@ -442,6 +455,7 @@ auto main() -> int {
         inspector.draw_gui();
         an::clues_gui(day);
         an::show_equipment(registry, player);
+        timer_gui(time);
         rlImGuiEnd();
 
         DrawFPS(10, 10);
