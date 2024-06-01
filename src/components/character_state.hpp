@@ -32,6 +32,11 @@ struct FollowEntityState {
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity);
 };
 
+struct Aggresive {
+    static constexpr auto name = "Aggresive";
+    static void inspect() {}
+};
+
 struct EscapeState {
     float time_left;
     Vector2 direction;

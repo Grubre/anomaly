@@ -299,6 +299,24 @@ void timer_gui(float time) {
     ImGui::End();
 }
 
+using grand_timer_t = float;
+
+void aggresive_hit_player(entt::registry &registry) {
+    auto view = registry.view<an::Aggresive, an::LocalTransform>();
+
+    for (auto &&[entity, local_transform] : view.each()) {
+        auto player_view = registry.view<an::Player, an::LocalTransform>();
+        for (auto player : player_view) {
+            auto &player_transform = player_view.get<an::LocalTransform>(player);
+            auto distance = Vector2Distance(local_transform.transform.position, player_transform.transform.position);
+            if (distance < 30.f) {
+                registry.ctx().get<grand_timer_t>() -= 30.f;
+                registry.remove<an::Aggresive>(entity);
+            }
+        }
+    }
+}
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -314,13 +332,12 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector =
-        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
-                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::AvoidTraitComponent,
-                      an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
-                      an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
-                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState, an::Equipment, Bober>(
-            &registry);
+    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
+                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
+                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
+                                   an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character,
+                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker, an::CharacterStateMachine,
+                                   an::WalkingState, an::IdleState, an::Equipment, Bober, an::Aggresive>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -349,9 +366,9 @@ auto main() -> int {
     an::make_building_l1(registry, Vector2(1.f, -1.f), an::TextureEnum::CITY_HOUSES_NE);
     an::make_building_l2(registry, Vector2(1.f, -1.f), an::TextureEnum::CITY_HOUSES_NE2);
 
-    //auto entity = registry.create();
-    //an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
-    // player
+    // auto entity = registry.create();
+    // an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
+    //  player
     [[maybe_unused]] auto player = an::make_player(registry);
     key_manager.subscribe(an::KeyboardEvent::PRESS, an::KeyEnum::INTERACT,
                           [&]() { an::check_nearby_npc(registry, player); });
@@ -383,10 +400,10 @@ auto main() -> int {
     });
 
     const float initial_time = 2.f * 60.f;
-    float time = initial_time;
+    auto &time = registry.ctx().emplace<grand_timer_t>(initial_time);
     // TESTCIK
     auto ent = registry.create();
-    an::emplace_sprite(registry,ent, an::TextureEnum::STICK);
+    an::emplace_sprite(registry, ent, an::TextureEnum::STICK);
 
     while (!WindowShouldClose()) {
         time -= GetFrameTime();
@@ -421,6 +438,7 @@ auto main() -> int {
 
         an::set_move_state_system(registry);
         an::update_character_animations(registry);
+        aggresive_hit_player(registry);
 
         BeginTextureMode(post_process_texture);
         an::hide_buildings_if_needed(registry, player);
