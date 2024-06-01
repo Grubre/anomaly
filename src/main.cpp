@@ -38,8 +38,8 @@ void load_resources(an::AssetManager &asset_manager) {
     // tmp
     load_image("map/test-tile.png", T::TEST_TILE);
     // player
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/base_walk_animation.png"), T::BASE_CHARACTER, 64,
-                                   72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/main_char.png"), T::MAIN_CHAR, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/base_walk_animation.png"), T::BASE_CHARACTER, 64,72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_1.png"), T::CHARACTER_HAIR_1, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_2.png"), T::CHARACTER_HAIR_2, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_4.png"), T::CHARACTER_HAIR_4, 64, 72);

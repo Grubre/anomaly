@@ -8,6 +8,7 @@ namespace an {
 
 enum class TextureEnum {
     PLAYER_TEXTURE,
+    MAIN_CHAR,
     BASE_CHARACTER,
     CHARACTER_SHIRT_1,
     CHARACTER_SHIRT_2,

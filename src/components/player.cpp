@@ -1,7 +1,9 @@
 #include "player.hpp"
+#include "assets/asset_manager.hpp"
 #include "characters.hpp"
 #include "components/character_state.hpp"
 #include "components/equipment.hpp"
+#include "components/sprite.hpp"
 namespace an {
 
 void Health::inspect(entt::registry &registry, entt::entity entity) {
@@ -173,8 +175,7 @@ template <> void emplace<Player>(entt::registry &registry, entt::entity entity) 
     emplace<Alive>(registry, entity);
     emplace<DebugName>(registry, entity, "Player");
 
-    emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR_1,
-                             TextureEnum::CHARACTER_SHIRT_1, TextureEnum::CHARACTER_PANTS_1);
+    emplace_sprite(registry,entity, TextureEnum::MAIN_CHAR);
 
     emplace<CharacterBody>(registry, entity, Vector2{0.0f, 10.f}, 10.f);
     safe_emplace<Player>(registry, entity);
