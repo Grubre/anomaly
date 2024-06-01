@@ -5,7 +5,7 @@
 #include "components/character_state.hpp"
 #include "components/equipment.hpp"
 #include "components/sprite.hpp"
-#include "corpse.h"
+#include "corpse.hpp"
 namespace an {
 
 void Health::inspect(entt::registry &registry, entt::entity entity) {
@@ -84,6 +84,10 @@ void update_bullets(entt::registry &registry,entt::entity player) {
             if (Vector2Distance(trans.transform.position, cha_tran.transform.position) < 20) {
                 trans.transform.position = Vector2{-1000, -1000};
                 make_corpse(registry, cha_tran.transform.position);
+                if(!registry.all_of<Anomaly>(cha)){
+                    auto &x = registry.ctx().get<float>();
+                    x = 0.2;
+                }
                 registry.destroy(cha);
             }
         }

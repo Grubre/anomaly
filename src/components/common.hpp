@@ -2,6 +2,7 @@
 #include <entt.hpp>
 #include <random>
 #include <raylib.h>
+#include <imgui.h>
 
 namespace an {
 
@@ -29,5 +30,8 @@ void emplace(entt::registry &registry, entt::entity entity, const Args &...args)
 [[nodiscard]] inline auto get_random_float(float min, float max) -> float {
     return get_uniform_float() * (max - min) + min;
 }
-
+struct Anomaly {
+    static constexpr auto name = "Anomaly";
+    static void inspect() { ImGui::Text("Is anomaly"); }
+};
 } // namespace an

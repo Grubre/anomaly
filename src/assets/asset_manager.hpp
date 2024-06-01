@@ -56,6 +56,8 @@ enum class TextureEnum {
     DIALOG_CLOUD,
     CORPSE,
     DROPS,
+    GAME_OVER,
+    WIN,
     CNT
 };
 enum class SoundEnum { WIN = 0, CNT };

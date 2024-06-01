@@ -26,9 +26,10 @@
 #include "components/city.hpp"
 #include "gui/inspect_window.hpp"
 #include "components/marker.hpp"
-#include "components/buildings.hpp"
 #include "gui/clues.hpp"
+#include "components/corpse.hpp"
 #include "gui/main_menu.hpp"
+#include "gui/end_game.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
@@ -69,6 +70,8 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("ui/legit_btn.png", T::B_LEGIT);
     load_image("ui/sus_btn.png", T::B_SUS);
     load_image("ui/ui.png", T::UI_BACKGROUND);
+    load_image("ui/go.png",T::GAME_OVER);
+    load_image("ui/win.png",T::WIN);
     // other
     load_image("other/marker.png", T::MARKER);
     load_image("other/bullet.png", T::BULLET);
@@ -119,12 +122,6 @@ void setup_raylib() {
     InitAudioDevice();
 }
 
-namespace an {
-struct Anomaly {
-    static constexpr auto name = "Anomaly";
-    static void inspect() { ImGui::Text("Is anomaly"); }
-};
-} // namespace an
 
 auto make_walk_area(entt::registry &registry, Vector2 min, Vector2 max) -> an::WalkArea & {
     auto entity = registry.create();
@@ -403,7 +400,7 @@ auto main() -> int {
                       an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
                       an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
                       an::Marker, an::CharacterStateMachine, an::SleepingPlayer, an::WalkingState, an::IdleState,
-                      an::Equipment, Bober, an::Aggresive>(&registry);
+                      an::Equipment, Bober, an::Aggresive,an::Anomaly>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -471,12 +468,12 @@ auto main() -> int {
     });
 
     add_map_barriers(registry);
-
-    const float initial_time = 2.f * 60.f;
-    auto &time = registry.ctx().emplace<grand_timer_t>(initial_time);
+reset:
+    const float initial_time = 10.f * 60.f;
+    auto &time = registry.ctx().grand_timer_t>(initial_time);
     // TESTCIK
     auto ent = registry.create();
-    an::emplace_sprite(registry, ent, an::TextureEnum::STICK);
+    //an::emplace_sprite(registry, ent, an::TextureEnum::STICK);
     // main menu
     while (!WindowShouldClose()) {
         rlImGuiBegin();
@@ -489,6 +486,7 @@ auto main() -> int {
         rlImGuiEnd();
         EndDrawing();
     }
+    auto win = an::WinCondition::NONE;
     // game
     while (!WindowShouldClose()) {
         time -= GetFrameTime();
@@ -498,7 +496,10 @@ auto main() -> int {
         an::notify_keyboard_press_system(key_manager);
         an::destroy_unparented(registry);
         an::update_props(registry);
-
+        win = an::check_win_condition(registry);
+        if(win != an::WinCondition::NONE){
+            break;
+        }
         an::sleep_player(registry);
         if (!registry.all_of<an::SleepingPlayer>(player)) {
             an::update_player(registry, player);
@@ -614,7 +615,9 @@ auto main() -> int {
         // DRAW GUI
         // ======================================
         rlImGuiBegin();
-        // TODO
+        if(an::end_scr(registry,win)){
+            goto reset;
+        }
         rlImGuiEnd();
         DrawFPS(10, 10);
         EndDrawing();

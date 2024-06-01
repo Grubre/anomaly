@@ -21,7 +21,7 @@ set(SOURCE_FILES
         characters.cpp
         gui/inspect_window.cpp
         components/corpse.cpp
-        components/corpse.h
+        components/corpse.hpp
         gui/end_game.hpp
 )
 
