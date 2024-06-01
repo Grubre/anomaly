@@ -470,7 +470,7 @@ auto main() -> int {
     add_map_barriers(registry);
 
     const float initial_time = 10.f * 60.f;
-    auto &time = registry.ctx()<grand_timer_t>(initial_time);
+    auto &time = registry.ctx().emplace<grand_timer_t>(initial_time);
     // TESTCIK
     auto ent = registry.create();
     //an::emplace_sprite(registry, ent, an::TextureEnum::STICK);
