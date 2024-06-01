@@ -127,6 +127,8 @@ template <typename... States> struct CharacterStateMachineT {
     }
 };
 
+using CharacterStateMachine = CharacterStateMachineT<RandomWalkState, FollowPathState, FollowEntityState, EscapeState>;
+
 enum class Direction {
     UP,
     DOWN,
@@ -191,8 +193,6 @@ inline void set_move_state_system(entt::registry &registry) {
         }
     }
 }
-
-using CharacterStateMachine = CharacterStateMachineT<RandomWalkState, FollowPathState, FollowEntityState, EscapeState>;
 
 inline void init_interrupted_state_and_menu_bridge(entt::registry &registry) {
     registry.on_construct<Interrupted>().connect<[&](entt::registry &registry, entt::entity entity) {
