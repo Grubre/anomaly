@@ -79,6 +79,14 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("map/city-tile-houses-NE2.png", T::CITY_HOUSES_NE2);
     load_image("map/city-tile-houses-NW.png", T::CITY_HOUSES_NW);
     load_image("map/city-tile-houses-NW2.png", T::CITY_HOUSES_NW2);
+
+    load_image("props/bober.png", T::BOBER);
+    load_image("dialog_cloud.png", T::DIALOG_CLOUD);
+
+    load_image("props/stick.png", T::STICK);
+    load_image("props/hammer.png", T::HAMMER);
+    load_image("props/nails.png", T::NAIL);
+    load_image("props/seesaw.png", T::SEESAW);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -188,6 +196,104 @@ auto gen_npcs(entt::registry &registry, an::WalkArea *walk_area, const an::DayCo
     return day;
 }
 
+struct Bober {
+    entt::entity cloud;
+    static constexpr auto name = "Bober";
+    void inspect(entt::registry &registry, entt::entity entity) { ImGui::Text("Bober"); }
+};
+
+void interact_with_bober(entt::registry &registry) {
+    constexpr auto bober_interaction_radius = 100.f;
+
+    auto bober_view = registry.view<Bober, an::LocalTransform>();
+
+    for (auto bober : bober_view) {
+        auto player_view = registry.view<an::Player, an::LocalTransform>();
+        for (auto player : player_view) {
+            auto &bober_transform = bober_view.get<an::LocalTransform>(bober);
+            auto &player_transform = player_view.get<an::LocalTransform>(player);
+            auto &bober_component = bober_view.get<Bober>(bober);
+
+            auto distance = Vector2Distance(bober_transform.transform.position, player_transform.transform.position);
+            if (distance < bober_interaction_radius) {
+                an::safe_emplace<an::Visible>(registry, bober_component.cloud);
+            } else {
+                registry.remove<an::Visible>(bober_component.cloud);
+            }
+
+            // if (IsKeyPressed(KEY_E)) {
+            //     fmt::println("Bober interaction");
+            // }
+        }
+    }
+}
+
+auto spawn_bober(entt::registry &registry) -> entt::entity {
+    auto bober_entity = registry.create();
+
+    an::emplace<Bober>(registry, bober_entity);
+    an::emplace<an::LocalTransform>(registry, bober_entity);
+
+    auto texture = registry.ctx().get<an::AssetManager>().get_texture(an::TextureEnum::BOBER);
+
+    an::emplace<an::Drawable>(registry, bober_entity,
+                              an::Sprite{
+                                  .asset = texture,
+                                  .sprite_id = 0,
+                                  .offset = {0.f, 0.f},
+                                  .tint = WHITE,
+                                  .flip_h = false,
+                                  .flip_v = false,
+                              });
+
+    an::emplace<an::StaticBody>(registry, bober_entity, Vector2{0.f, 10.f}, Vector2{30.f, 25.f});
+    an::emplace<an::Visible>(registry, bober_entity);
+
+    Vector2 top_left = {-1000.f, -1000.f};
+    Vector2 bottom_right = {1000.f, 1000.f};
+
+    auto candidate = Vector2{an::get_uniform_float() * (bottom_right.x - top_left.x) + top_left.x,
+                             an::get_uniform_float() * (bottom_right.y - top_left.y) + top_left.y};
+    while (!an::is_in_any_static(registry, candidate)) {
+        candidate = Vector2{an::get_uniform_float() * (bottom_right.x - top_left.x) + top_left.x,
+                            an::get_uniform_float() * (bottom_right.y - top_left.y) + top_left.y};
+    }
+
+    fmt::println("Bober spawned at: {}, {}", candidate.x, candidate.y);
+
+    auto &local_transform = registry.get<an::LocalTransform>(bober_entity);
+    local_transform.transform.position = candidate;
+
+    auto dialog_cloud_entity = registry.create();
+    an::emplace<an::LocalTransform>(registry, dialog_cloud_entity);
+    auto &transform = registry.get<an::LocalTransform>(dialog_cloud_entity);
+    transform.transform.scale = {0.03f, 0.03f};
+    an::emplace<an::Drawable>(
+        registry, dialog_cloud_entity,
+        an::Sprite{
+            .asset = registry.ctx().get<an::AssetManager>().get_texture(an::TextureEnum::DIALOG_CLOUD),
+            .sprite_id = 0,
+            .offset = {0.6f, 0.8f},
+            .tint = WHITE,
+            .flip_h = false,
+            .flip_v = false,
+        });
+    an::emplace<an::Parented>(registry, dialog_cloud_entity, bober_entity);
+
+    auto &bober = registry.get<Bober>(bober_entity);
+    bober.cloud = dialog_cloud_entity;
+
+    return bober_entity;
+}
+
+void timer_gui(float time) {
+    ImGui::Begin("Timer");
+    auto minutes = static_cast<int>(time) / 60;
+    auto seconds = static_cast<int>(time) % 60;
+    ImGui::Text("Time: %02d:%02d", minutes, seconds);
+    ImGui::End();
+}
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -208,8 +314,8 @@ auto main() -> int {
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::AvoidTraitComponent,
                       an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
                       an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
-                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState,
-                      an::Equipment>(&registry);
+                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState, an::Equipment, Bober>(
+            &registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -230,11 +336,16 @@ auto main() -> int {
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f, 1.f));
 
     an::make_building_l1(registry, Vector2(0.f, -1.f), an::TextureEnum::CITY_HOUSES_N);
-
     an::make_building_l2(registry, Vector2(0.f, -1.f), an::TextureEnum::CITY_HOUSES_N2);
 
-    auto entity = registry.create();
-    an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
+    an::make_building_l1(registry, Vector2(-1.f, -1.f), an::TextureEnum::CITY_HOUSES_NW);
+    an::make_building_l2(registry, Vector2(-1.f, -1.f), an::TextureEnum::CITY_HOUSES_NW2);
+
+    an::make_building_l1(registry, Vector2(1.f, -1.f), an::TextureEnum::CITY_HOUSES_NE);
+    an::make_building_l2(registry, Vector2(1.f, -1.f), an::TextureEnum::CITY_HOUSES_NE2);
+
+    //auto entity = registry.create();
+    //an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
     key_manager.subscribe(an::KeyboardEvent::PRESS, an::KeyEnum::INTERACT,
@@ -245,16 +356,10 @@ auto main() -> int {
     an::emplace<an::ShaderComponent>(registry, player, base_shader);
     // an::emplace<an::Sprite>(registry, entity);
 
-    // test char collider
-    auto test_char_collider = registry.create();
-    an::emplace<an::GlobalTransform>(registry, test_char_collider);
-    an::emplace<an::CharacterBody>(registry, test_char_collider, Vector2(), 50.f);
-    an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 100.f);
-    // an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
-    an::emplace<an::FollowEntityState>(registry, test_char_collider, player, INFINITY, 10.f);
-
     auto walk_area_entity = create_connected_walk_areas(registry, 3);
     auto *walk_area = &registry.get<an::WalkArea>(walk_area_entity);
+
+    spawn_bober(registry);
 
     // test anomalies and npcs
     auto day = gen_npcs(registry, walk_area,
@@ -271,7 +376,15 @@ auto main() -> int {
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_J, [&]() {
         an::emit_particles(registry, player, drunk_p, 5, {0, -5});
     });
+
+    const float initial_time = 2.f * 60.f;
+    float time = initial_time;
+    // TESTCIK
+    auto ent = registry.create();
+    an::emplace_sprite(registry,ent, an::TextureEnum::STICK);
+
     while (!WindowShouldClose()) {
+        time -= GetFrameTime();
         // ======================================
         // UPDATE SYSTEMS
         // ======================================
@@ -283,6 +396,7 @@ auto main() -> int {
         an::update_marker_system(registry, player);
         an::update_particle_system(registry);
         an::update_bullets(registry);
+        interact_with_bober(registry);
 
         // Characters systems
         an::trait_systems(registry);
@@ -345,6 +459,7 @@ auto main() -> int {
         inspector.draw_gui();
         an::clues_gui(day);
         an::show_equipment(registry, player);
+        timer_gui(time);
         rlImGuiEnd();
 
         DrawFPS(10, 10);

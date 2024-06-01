@@ -68,13 +68,13 @@ inline Vector2 get_building_min(TextureEnum id) {
         case TextureEnum::CITY_HOUSES_N2: 
             return Vector2(187.f,-132.f);
         case TextureEnum::CITY_HOUSES_NE: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f,168.f);
         case TextureEnum::CITY_HOUSES_NE2: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f,-132.f);
         case TextureEnum::CITY_HOUSES_NW: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f,168.f);
         case TextureEnum::CITY_HOUSES_NW2: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f,-132.f);
         default: return Vector2(0.f,0.f);
     }
 }
@@ -86,13 +86,13 @@ inline Vector2 get_building_max(TextureEnum id) {
         case TextureEnum::CITY_HOUSES_N2: 
             return Vector2(187.f+712.f,52.f+288.f);
         case TextureEnum::CITY_HOUSES_NE: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f+712.f,168.f+425.f);
         case TextureEnum::CITY_HOUSES_NE2: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f+712.f,52.f+288.f);
         case TextureEnum::CITY_HOUSES_NW: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f+712.f,168.f+425.f);
         case TextureEnum::CITY_HOUSES_NW2: 
-            return Vector2(0.f,0.f);
+            return Vector2(187.f+712.f,52.f+288.f);
         default: return Vector2(0.f,0.f);
     }
 }
@@ -104,13 +104,13 @@ inline Vector2 get_coll_min(TextureEnum id) {
         case TextureEnum::CITY_HOUSES_N2: 
             return Vector2(191.f,96.f);
         case TextureEnum::CITY_HOUSES_NE: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f,400.f);
         case TextureEnum::CITY_HOUSES_NE2: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f,96.f);
         case TextureEnum::CITY_HOUSES_NW: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f,400.f);
         case TextureEnum::CITY_HOUSES_NW2: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f,96.f);
         default: return Vector2(0.f,0.f);
     }
 }
@@ -122,14 +122,32 @@ inline Vector2 get_coll_max(TextureEnum id) {
         case TextureEnum::CITY_HOUSES_N2: 
             return Vector2(191.f+706.f,96.f+278.f);
         case TextureEnum::CITY_HOUSES_NE: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f+706.f,400.f+278.f);
         case TextureEnum::CITY_HOUSES_NE2: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f+706.f,96.f+278.f);
         case TextureEnum::CITY_HOUSES_NW: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f+706.f,400.f+278.f);
         case TextureEnum::CITY_HOUSES_NW2: 
-            return Vector2(0.f,0.f);
+            return Vector2(191.f+706.f,96.f+278.f);
         default: return Vector2(0.f,0.f);
+    }
+}
+
+inline bool has_2coll(TextureEnum id) {
+    switch (id) {
+        case TextureEnum::CITY_HOUSES_N: 
+            return false;
+        case TextureEnum::CITY_HOUSES_N2: 
+            return false;
+        case TextureEnum::CITY_HOUSES_NE: 
+            return true;
+        case TextureEnum::CITY_HOUSES_NE2: 
+            return true;
+        case TextureEnum::CITY_HOUSES_NW: 
+            return true;
+        case TextureEnum::CITY_HOUSES_NW2: 
+            return true;
+        default: return false;
     }
 }
 
