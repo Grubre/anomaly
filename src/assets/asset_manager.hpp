@@ -43,6 +43,10 @@ enum class TextureEnum {
     CITY_HOUSES_NW2,
     MARKER,
     BULLET,
+    STICK,
+    SEESAW,
+    HAMMER,
+    NAIL,
     CNT
 };
 enum class SoundEnum { WIN = 0, CNT };

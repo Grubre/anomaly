@@ -1,6 +1,7 @@
 #include "player.hpp"
 #include "characters.hpp"
 #include "components/character_state.hpp"
+#include "components/equipment.hpp"
 namespace an {
 
 void Health::inspect(entt::registry &registry, entt::entity entity) {
@@ -19,6 +20,7 @@ auto make_player(entt::registry &registry) -> entt::entity {
     const auto entity = registry.create();
     registry.emplace<an::IdleState>(entity);
     registry.emplace<an::Animation>(entity, 0.1f, 0.f, 0u, 4u);
+    registry.emplace<an::Equipment>(entity);
     an::emplace<an::Player>(registry, entity);
     return entity;
 }

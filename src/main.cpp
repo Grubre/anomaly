@@ -5,6 +5,7 @@
 #include "components/character_state.hpp"
 #include "components/collisions.hpp"
 #include "components/common.hpp"
+#include "components/equipment.hpp"
 #include "components/props.hpp"
 #include "components/sprite.hpp"
 #include <cmath>
@@ -25,8 +26,8 @@
 #include "components/city.hpp"
 #include "gui/inspect_window.hpp"
 #include "components/marker.hpp"
-
 #include "components/buildings.hpp"
+#include "gui/clues.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
@@ -107,32 +108,6 @@ struct Anomaly {
     static void inspect() { ImGui::Text("Is anomaly"); }
 };
 } // namespace an
-
-void anomaly_traits_gui(an::ResolvedDay &day) {
-    ImGui::Begin("Anomaly traits");
-    ImGui::SeparatorText(fmt::format("Probable traits ({} of {})", day.num_used_probable_traits,
-                                     std::variant_size<an::ProbableTrait>().value)
-                             .c_str());
-    for (auto &trait : day.anomaly_traits.probable_traits) {
-        ImGui::Text("%s: ", probable_trait_name_to_str(trait).data());
-        ImGui::SameLine();
-        std::visit(entt::overloaded{
-                       [&](const auto &color) {
-                           ImGui::ColorButton("Color",
-                                              ImVec4((float)color.color.r / 255.f, (float)color.color.g / 255.f,
-                                                     (float)color.color.b / 255.f, 1.f));
-                       },
-                       [&](const an::Accessory &accessory) { ImGui::Text("Accessory: %d", accessory.accessory_num); },
-                       [&](const an::ParticleTrait &particle) { ImGui::Text("Particle: %d", (int)particle.type); },
-                   },
-                   trait);
-    }
-    ImGui::SeparatorText("Guaranteed traits");
-    for (auto &trait : day.anomaly_traits.guaranteed_traits) {
-        ImGui::Text("%s", guaranteed_trait_to_str(trait).c_str());
-    }
-    ImGui::End();
-}
 
 auto make_walk_area(entt::registry &registry, Vector2 min, Vector2 max) -> an::WalkArea & {
     auto entity = registry.create();
@@ -233,7 +208,8 @@ auto main() -> int {
                       an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::AvoidTraitComponent,
                       an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
                       an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
-                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState>(&registry);
+                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState,
+                      an::Equipment>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -367,7 +343,8 @@ auto main() -> int {
         an::update_ui(registry, player);
         // ImGui::ShowDemoWindow();
         inspector.draw_gui();
-        anomaly_traits_gui(day);
+        an::clues_gui(day);
+        an::show_equipment(registry, player);
         rlImGuiEnd();
 
         DrawFPS(10, 10);
