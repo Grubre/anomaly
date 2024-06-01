@@ -162,11 +162,7 @@ template <InspectableComponent... Component> struct Inspector {
 
         if (ImGui::Selectable(text.c_str(), current_entity == entity, ImGuiSelectableFlags_SelectOnClick)) {
             if (ImGui::IsMouseClicked(0)) {
-                if (current_entity) {
-                    registry->remove<Selected>(*current_entity);
-                }
                 current_entity = entity;
-                an::emplace<Selected>(*registry, entity);
             }
         }
 

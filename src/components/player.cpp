@@ -24,6 +24,7 @@ auto make_player(entt::registry &registry) -> entt::entity {
     registry.emplace<an::Animation>(entity, 0.1f, 0.f, 0u, 4u);
     registry.emplace<an::Equipment>(entity);
     an::emplace<an::Player>(registry, entity);
+    an::emplace<an::Selected>(registry, entity);
     return entity;
 }
 void update_player(entt::registry &registry, entt::entity &entity) {
