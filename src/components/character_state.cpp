@@ -82,7 +82,6 @@ void random_walk_state_system(entt::registry &registry) {
             continue;
         }
 
-        DrawCircleV(state.target, 5, ColorAlpha(BLACK, 0.5f));
         state.time_elapsed += GetFrameTime();
         velocity = delta;
     }
