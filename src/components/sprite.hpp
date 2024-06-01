@@ -130,9 +130,9 @@ struct CharacterSprite {
 
     void draw(const Transform &tr, const TintShader &tint_shader) const {
         draw_component(tr, base_offset, base, WHITE, tint_shader);
-        // draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
-        // draw_component(tr, pants_offset, pants, pants_color, tint_shader);
-        // draw_component(tr, hair_offset, hair, hair_color, tint_shader);
+        draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
+        draw_component(tr, pants_offset, pants, pants_color, tint_shader);
+        draw_component(tr, hair_offset, hair, hair_color, tint_shader);
     }
 
     TextureAsset bake_to_texture(entt::registry &registry) const {

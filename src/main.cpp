@@ -40,9 +40,9 @@ void load_resources(an::AssetManager &asset_manager) {
     // player
     asset_manager.register_texture(an::load_asset(LoadImage, "player/base_walk_animation.png"), T::BASE_CHARACTER, 64,
                                    72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_hair.png"), T::CHARACTER_HAIR, 64, 72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_top.png"), T::CHARACTER_SHIRT, 64, 72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/player_man_bottom.png"), T::CHARACTER_PANTS, 64,
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_1.png"), T::CHARACTER_HAIR, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/top_1.png"), T::CHARACTER_SHIRT, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/bottom_1.png"), T::CHARACTER_PANTS, 64,
                                    72);
     // props
     load_image("props/bench.png", T::BENCH);
