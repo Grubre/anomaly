@@ -6,6 +6,9 @@
 #include <vector>
 
 void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
+    static std::random_device rd{};
+    static std::mt19937 gen{rd()};
+    static std::uniform_int_distribution dist(0, 2);
     generated_characters.reserve(characters_cnt);
 
     for (auto i = 0u; i < characters_cnt; i++) {
@@ -18,6 +21,10 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
         if (an::get_uniform_float() < get_particle_chance) {
             traits.particles = get_random_particle();
         }
+
+        traits.shirt_archetype = (an::TextureEnum)((int)an::TextureEnum::CHARACTER_SHIRT_1 + dist(gen));
+        traits.pants_archetype = (an::TextureEnum)((int)an::TextureEnum::CHARACTER_PANTS_1 + dist(gen));
+        traits.hair_archetype = (an::TextureEnum)((int)an::TextureEnum::CHARACTER_HAIR_1 + dist(gen));
 
         traits.accesories_mask = accesories_mask_t{};
 
