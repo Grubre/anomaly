@@ -134,23 +134,37 @@ void anomaly_traits_gui(an::ResolvedDay &day) {
     ImGui::End();
 }
 
+auto make_walk_area(entt::registry &registry, Vector2 min, Vector2 max) -> an::WalkArea & {
+    auto entity = registry.create();
+    auto &area = registry.emplace<an::WalkArea>(entity, min, max);
+    return area;
+}
+
+auto make_walk_area(entt::registry &registry, entt::entity entity, Vector2 min, Vector2 max) -> an::WalkArea & {
+    auto &area = registry.emplace<an::WalkArea>(entity, min, max);
+    return area;
+}
+
 auto create_connected_walk_areas(entt::registry &registry, uint32_t number) -> entt::entity {
-    entt::entity entity{};
-    an::WalkArea *prev_area = nullptr;
+    auto entity = registry.create();
+    auto &first_area = make_walk_area(registry, entity, Vector2{-180.f, -150.f}, Vector2{180.f, 150.f});
 
-    for (auto i = 0u; i < number; i++) {
-        entity = registry.create();
-        const auto size = 200.f;
-        an::emplace<an::WalkArea>(registry, entity, Vector2{size * (float)i, 0.f},
-                                  Vector2{size * (float)(i + 1) - 1.f, size});
-        auto *current_area = &registry.get<an::WalkArea>(entity);
+    auto &top_area = make_walk_area(registry, Vector2{-700.f, -500.f}, Vector2{700.f, -300.f});
 
-        if (prev_area != nullptr) {
-            an::connect_walk_areas(*current_area, *prev_area);
-        }
+    auto &bottom_area = make_walk_area(registry, Vector2{-700.f, 300.f}, Vector2{700.f, 500.f});
 
-        prev_area = current_area;
-    }
+    auto &left_area = make_walk_area(registry, Vector2{-700.f, -500.f}, Vector2{-400.f, 500.f});
+
+    auto &right_area = make_walk_area(registry, Vector2{400.f, -500.f}, Vector2{700.f, 500.f});
+
+    an::connect_walk_areas(bottom_area, first_area);
+    an::connect_walk_areas(left_area, first_area);
+    an::connect_walk_areas(bottom_area, left_area);
+    an::connect_walk_areas(top_area, left_area);
+    an::connect_walk_areas(top_area, first_area);
+    an::connect_walk_areas(top_area, right_area);
+    an::connect_walk_areas(bottom_area, right_area);
+    an::connect_walk_areas(first_area, right_area);
 
     return entity;
 }
@@ -160,7 +174,7 @@ auto gen_npcs(entt::registry &registry, an::WalkArea *walk_area, const an::DayCo
     auto rd = std::random_device{};
     auto gen = std::mt19937{rd()};
     auto dis = std::uniform_int_distribution<std::uint32_t>{0, INT_MAX};
-    auto char_gen = an::CharacterGenerator(dis(gen), 100);
+    auto char_gen = an::CharacterGenerator(dis(gen), 50);
     auto day = char_gen.new_day(config);
 
     auto i = 0u;
@@ -326,7 +340,7 @@ auto main() -> int {
 
         an::y_sort(registry);
 
-        // an::visualize_walk_areas(registry);
+        an::visualize_walk_areas(registry);
 
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
