@@ -108,9 +108,9 @@ inline Vector2 get_coll_min(TextureEnum id) {
         case TextureEnum::CITY_HOUSES_NE2: 
             return Vector2(191.f,96.f);
         case TextureEnum::CITY_HOUSES_NW: 
-            return Vector2(191.f,400.f);
+            return Vector2(544.f,400.f);
         case TextureEnum::CITY_HOUSES_NW2: 
-            return Vector2(191.f,96.f);
+            return Vector2(544.f,96.f);
         default: return Vector2(0.f,0.f);
     }
 }
@@ -122,13 +122,13 @@ inline Vector2 get_coll_max(TextureEnum id) {
         case TextureEnum::CITY_HOUSES_N2: 
             return Vector2(191.f+706.f,96.f+278.f);
         case TextureEnum::CITY_HOUSES_NE: 
-            return Vector2(191.f+706.f,400.f+278.f);
+            return Vector2(191.f+352.f,400.f+278.f);
         case TextureEnum::CITY_HOUSES_NE2: 
-            return Vector2(191.f+706.f,96.f+278.f);
+            return Vector2(191.f+352.f,96.f+278.f);
         case TextureEnum::CITY_HOUSES_NW: 
-            return Vector2(191.f+706.f,400.f+278.f);
+            return Vector2(544.f+352.f,400.f+278.f);
         case TextureEnum::CITY_HOUSES_NW2: 
-            return Vector2(191.f+706.f,96.f+278.f);
+            return Vector2(544.f+352.f,96.f+278.f);
         default: return Vector2(0.f,0.f);
     }
 }
@@ -148,6 +148,42 @@ inline bool has_2coll(TextureEnum id) {
         case TextureEnum::CITY_HOUSES_NW2: 
             return true;
         default: return false;
+    }
+}
+
+inline Vector2 get_2coll_min(TextureEnum id) {
+    switch (id) {
+        case TextureEnum::CITY_HOUSES_N: 
+            return Vector2(0.f, 0.f);
+        case TextureEnum::CITY_HOUSES_N2: 
+            return Vector2(0.f, 0.f);
+        case TextureEnum::CITY_HOUSES_NE: 
+            return Vector2(592.f,400.f);
+        case TextureEnum::CITY_HOUSES_NE2: 
+            return Vector2(592.f,96.f);
+        case TextureEnum::CITY_HOUSES_NW: 
+            return Vector2(0.f,400.f);
+        case TextureEnum::CITY_HOUSES_NW2: 
+            return Vector2(0.f,96.f);
+        default: return Vector2(0.f,0.f);
+    }
+}
+
+inline Vector2 get_2coll_max(TextureEnum id) {
+    switch (id) {
+        case TextureEnum::CITY_HOUSES_N: 
+            return Vector2(0.f, 0.f);
+        case TextureEnum::CITY_HOUSES_N2: 
+            return Vector2(0.f, 0.f);
+        case TextureEnum::CITY_HOUSES_NE: 
+            return Vector2(592.f + 496.f,400.f + 278.f);
+        case TextureEnum::CITY_HOUSES_NE2: 
+            return Vector2(592.f + 496.f,96.f + 278.f);
+        case TextureEnum::CITY_HOUSES_NW: 
+            return Vector2(0.f + 496.f,400.f + 278.f);
+        case TextureEnum::CITY_HOUSES_NW2: 
+            return Vector2(0.f + 496.f,96.f + 278.f);
+        default: return Vector2(0.f,0.f);
     }
 }
 
@@ -208,6 +244,14 @@ inline void make_building_l1(entt::registry& registry, Vector2 tile, TextureEnum
     auto &local = registry.get<LocalTransform>(collision);
     local.transform.position = origin;
 
+    if (has_2coll(id)) {
+        auto collision = registry.create();
+        emplace<GlobalTransform>(registry, collision);
+        emplace<StaticBody>(registry, collision, get_2coll_min(id), Vector2Subtract(get_2coll_max(id), get_2coll_min(id)));
+        auto &local = registry.get<LocalTransform>(collision);
+        local.transform.position = origin;
+    }
+
     auto &tr = registry.get<LocalTransform>(entity);
     tr.transform.position = Vector2(origin.x, origin.y - offset_y + offset_offset_y);
 }
@@ -231,6 +275,14 @@ inline void make_building_l2(entt::registry& registry, Vector2 tile, TextureEnum
     emplace<StaticBody>(registry, collision, get_coll_min(id), Vector2Subtract(get_coll_max(id), get_coll_min(id)));
     auto &local = registry.get<LocalTransform>(collision);
     local.transform.position = origin;
+
+    if (has_2coll(id)) {
+        auto collision = registry.create();
+        emplace<GlobalTransform>(registry, collision);
+        emplace<StaticBody>(registry, collision, get_2coll_min(id), Vector2Subtract(get_2coll_max(id), get_2coll_min(id)));
+        auto &local = registry.get<LocalTransform>(collision);
+        local.transform.position = origin;
+    }
 
     auto &tr = registry.get<LocalTransform>(entity);
     tr.transform.position = Vector2(origin.x, origin.y - offset_y + offset_offset_y);

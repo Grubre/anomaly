@@ -52,8 +52,13 @@ void load_resources(an::AssetManager &asset_manager) {
     // props
     load_image("props/bench.png", T::BENCH);
     load_image("props/lamp.png", T::LAMP);
-    load_image("props/tree_1.png", T::TREE);
-    load_image("props/rock.png", T::ROCK);
+    load_image("props/bin.png", T::BIN);
+    load_image("props/bush.png", T::BUSH);
+    load_image("props/tree_1.png", T::TREE1);
+    load_image("props/tree_2.png", T::TREE2);
+    load_image("props/rock.png", T::ROCK1);
+    load_image("props/rock_2.png", T::ROCK2);
+
     // particles
     load_image("particles/drunk.png", T::DRUNK_PARTICLE);
     load_image("particles/smrodek.png", T::STINKY_PARTICLE);

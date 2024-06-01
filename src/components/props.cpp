@@ -1,10 +1,23 @@
 #include "props.hpp"
+#include "assets/asset_manager.hpp"
+#include "components/sprite.hpp"
+#include "gui/inspector.hpp"
+#include <sstream>
+
 const char *an::get_prop_name(const an::PropType type) {
     switch (type) {
-    case an::PropType::TREE:
-        return "Tree";
-    case an::PropType::ROCK:
-        return "Rock";
+    case an::PropType::TREE1:
+        return "Tree1";
+    case an::PropType::TREE2:
+        return "Tree2";
+    case an::PropType::ROCK1:
+        return "Rock1";
+    case an::PropType::ROCK2:
+        return "Rock2";
+    case an::PropType::BUSH:
+        return "Bush";
+    case an::PropType::BIN:
+        return "Bin";
     case an::PropType::LAMP:
         return "Lamp";
     case an::PropType::BENCH:
@@ -15,10 +28,18 @@ const char *an::get_prop_name(const an::PropType type) {
 }
 
 an::PropType an::get_prop_type(const std::string &name) {
-    if (name == "Tree") {
-        return an::PropType::TREE;
-    } else if (name == "Rock") {
-        return an::PropType::ROCK;
+    if (name == "Tree1") {
+        return an::PropType::TREE1;
+    } else if (name == "Tree2") {
+        return an::PropType::TREE2;
+    } else if (name == "Rock1") {
+        return an::PropType::ROCK1;
+    } else if (name == "Rock2") {
+        return an::PropType::ROCK2;
+    } else if (name == "Bush") {
+        return an::PropType::BUSH;
+    } else if (name == "Bin") { 
+        return an::PropType::BIN;
     } else if (name == "Lamp") {
         return an::PropType::LAMP;
     } else if (name == "Bench") {
@@ -29,25 +50,22 @@ an::PropType an::get_prop_type(const std::string &name) {
 }
 
 an::TextureEnum an::get_prop_texture(const an::PropType type) {
-    switch (type) {
-    case an::PropType::TREE:
-        return an::TextureEnum::TREE;
-    case an::PropType::ROCK:
-        return an::TextureEnum::ROCK;
-    case an::PropType::LAMP:
-        return an::TextureEnum::LAMP;
-    case an::PropType::BENCH:
-        return an::TextureEnum::BENCH;
-    default:
-        return an::TextureEnum::CNT;
-    }
+    return (TextureEnum)((int)type + (int)TextureEnum::TREE1);
 }
 
 an::StaticBody an::get_prop_collision(const an::PropType type) {
     switch (type) {
-    case an::PropType::TREE:
+    case an::PropType::TREE1:
         return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
-    case an::PropType::ROCK:
+    case an::PropType::TREE2:
+        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+    case an::PropType::ROCK1:
+        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+    case an::PropType::ROCK2:
+        return an::StaticBody{{-0.f, -0.f}, {0.f, 0.f}};
+    case an::PropType::BUSH:
+        return an::StaticBody{{-0.f, -0.f}, {0.f, 0.f}};
+    case an::PropType::BIN:
         return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
     case an::PropType::LAMP:
         return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
