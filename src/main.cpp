@@ -226,8 +226,6 @@ auto main() -> int {
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
-    registry.emplace<an::IdleState>(player);
-    registry.emplace<an::Animation>(player, 0.1f, 0.f, 0u, 4u);
     key_manager.subscribe(an::KeyboardEvent::PRESS, an::KeyEnum::INTERACT,
                           [&]() { an::check_nearby_npc(registry, player); });
     // shader

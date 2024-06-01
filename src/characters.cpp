@@ -6,6 +6,9 @@ entt::entity make_character(entt::registry &registry, const CharacterTraits &tra
     auto entity = registry.create();
     an::emplace<an::Character>(registry, entity);
     an::emplace<an::CharacterStateMachine>(registry, entity);
+    an::emplace<an::IdleState>(registry, entity);
+    an::emplace<an::Animation>(registry, entity, 0.1f, 0.f, 0u, 4u);
+    an::emplace<Velocity>(registry, entity, 0.f, 0.f);
 
     an::emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR,
                                  TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
