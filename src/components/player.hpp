@@ -34,11 +34,10 @@ struct Player {
     float speed = 256;
 
     float shooting_speed = 0.05f;
-    float alt_shooting_speed = 0.01f;
     float alt_bullet_speed = 2000.f;
-    float alt_to_next_shot = alt_shooting_speed;
     float bullet_speed = 1000.f;
     float to_next_shot = shooting_speed;
+    bool aiming_state= false;
 
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity);
 };
@@ -83,7 +82,7 @@ inline void sleep_player(entt::registry &registry) {
     }
 }
 
-void update_bullets(entt::registry &registry);
+void update_bullets(entt::registry &registry,entt::entity player);
 
 void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, float speed, entt::entity player);
 

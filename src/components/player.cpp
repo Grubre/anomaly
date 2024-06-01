@@ -46,9 +46,14 @@ void update_player(entt::registry &registry, entt::entity &entity) {
     }
     vel = Vector2Scale(Vector2Normalize(movement), player.speed);
 }
-void update_bullets(entt::registry &registry) {
+void update_bullets(entt::registry &registry,entt::entity player) {
+    auto pl = registry.get<Player>(player);
+    if(pl.aiming_state){
+        auto pl_trans = registry.get<GlobalTransform>(player);
+        Vector2 pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
+        DrawLineEx(pl_trans.transform.position, pos,5,RED);
+    }
     auto view = registry.view<Bullet, Velocity>();
-
     for (auto &&[entity, bullet, vel] : view.each()) {
         bullet.time_left -= GetFrameTime();
 
@@ -58,7 +63,7 @@ void update_bullets(entt::registry &registry) {
             registry.destroy(entity);
         }
     }
-    auto view2 = registry.view<RealBullet, Velocity, GlobalTransform>();
+    auto view2 = registry.view<RealBullet, Velocity, LocalTransform>();
     for (auto &&[entity, bullet, vel, trans] : view2.each()) {
         bullet.time_left -= GetFrameTime();
 
@@ -68,16 +73,12 @@ void update_bullets(entt::registry &registry) {
             registry.destroy(entity);
         }
         auto view3 = registry.view<Character, GlobalTransform>();
-        auto flag = false;
+
         for (auto &&[cha, cha_tran] : view3.each()) {
             if (Vector2Distance(trans.transform.position, cha_tran.transform.position) < 20) {
+                trans.transform.position = Vector2{-1000, -1000};
                 registry.destroy(cha);
-                flag = true;
             }
-        }
-        // FIXME: This crashes
-        if (flag) {
-            registry.destroy(entity);
         }
     }
 }
@@ -119,11 +120,27 @@ void make_player_bullet_real(entt::registry &registry, Vector2 start, Vector2 di
     tr.transform.position = Vector2Add(start, Vector2Scale(dir, 30.f));
 }
 void player_shooting(entt::registry &registry, entt::entity &entity) {
+    auto &player = registry.get<Player>(entity);
 
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        auto &player = registry.get<Player>(entity);
-
         player.to_next_shot -= GetFrameTime();
+        if (player.aiming_state) {
+            if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                return;
+            }
+            auto mouse_pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
+
+            auto &transform = registry.get<GlobalTransform>(entity);
+
+            auto dir = Vector2Normalize(Vector2Subtract(mouse_pos, transform.transform.position));
+
+            make_player_bullet_real(registry, transform.transform.position, dir, player.alt_bullet_speed, entity);
+
+            auto &player_local = registry.get<LocalTransform>(entity);
+
+            player_local.transform.position = Vector2Subtract(player_local.transform.position, Vector2Scale(dir, 1.f));
+            return;
+        }
 
         while (player.to_next_shot <= 0.f) {
             auto mouse_pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
@@ -141,26 +158,10 @@ void player_shooting(entt::registry &registry, entt::entity &entity) {
             player_local.transform.position = Vector2Subtract(player_local.transform.position, Vector2Scale(dir, 1.f));
         }
     }
-    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
-        auto &player = registry.get<Player>(entity);
-
-        player.alt_to_next_shot -= GetFrameTime();
-
-        while (player.alt_to_next_shot <= 0.f) {
-            auto mouse_pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
-
-            auto &transform = registry.get<GlobalTransform>(entity);
-
-            auto dir = Vector2Normalize(Vector2Subtract(mouse_pos, transform.transform.position));
-
-            make_player_bullet_real(registry, transform.transform.position, dir, player.alt_bullet_speed, entity);
-
-            player.alt_to_next_shot += player.alt_shooting_speed;
-
-            auto &player_local = registry.get<LocalTransform>(entity);
-
-            player_local.transform.position = Vector2Subtract(player_local.transform.position, Vector2Scale(dir, 1.f));
-        }
+    if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+        player.aiming_state = true;
+    } else {
+        player.aiming_state = false;
     }
 }
 void Player::inspect(entt::registry &registry, entt::entity entity) {

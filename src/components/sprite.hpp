@@ -66,9 +66,8 @@ struct Sprite {
             SetShaderValue(shader->shader, shader->resolution_loc, &size_vec, SHADER_UNIFORM_VEC2);
         }
 
-        DrawTexturePro(
-            asset.texture, src_rect, Rectangle{tr.position.x, tr.position.y, width, height},
-            Vector2Multiply(offset, Vector2(width, height)), RAD2DEG * tr.rotation, tint);
+        DrawTexturePro(asset.texture, src_rect, Rectangle{tr.position.x, tr.position.y, width, height},
+                       Vector2Multiply(offset, Vector2(width, height)), RAD2DEG * tr.rotation, tint);
 
         if (shader != nullptr) {
             EndShaderMode();
@@ -135,23 +134,22 @@ struct CharacterSprite {
         draw_component(tr, hair_offset, hair, hair_color, tint_shader);
     }
 
-    TextureAsset bake_to_texture(entt::registry &registry) const {
+    TextureAsset bake_to_texture(entt::registry &registry) {
         auto tint_shader = registry.ctx().get<TintShader>();
         auto tr = Transform{{(float)base.cell_size_x / 2.f, (float)base.cell_size_y / 2.f}, PI};
 
         auto texture = LoadRenderTexture(base.cell_size_x, base.cell_size_y);
-
+        auto temp = sprite_id;
+        sprite_id = 0;
         BeginTextureMode(texture);
-
         ClearBackground(ColorAlpha(WHITE, 0.f));
-
         draw_component(tr, base_offset, base, WHITE, tint_shader);
         draw_component(tr, shirt_offset, shirt, shirt_color, tint_shader);
         draw_component(tr, pants_offset, pants, pants_color, tint_shader);
         draw_component(tr, hair_offset, hair, hair_color, tint_shader);
-
         EndTextureMode();
 
+        sprite_id = temp;
         auto asset = TextureAsset{texture.texture, (uint16_t)texture.texture.width, (uint16_t)texture.texture.height};
         texture.texture.id = 0;
         UnloadRenderTexture(texture);

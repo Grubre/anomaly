@@ -428,7 +428,6 @@ auto main() -> int {
 
         an::update_marker_system(registry, player);
         an::update_particle_system(registry);
-        an::update_bullets(registry);
         interact_with_bober(registry);
 
         // Characters systems
@@ -469,6 +468,9 @@ auto main() -> int {
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
         // an::debug_trait_systems(registry);
+
+        //intended
+        an::update_bullets(registry,player);
 
         // an::debug_buildings(registry);
 
