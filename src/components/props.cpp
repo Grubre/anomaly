@@ -158,7 +158,7 @@ template <> void an::emplace<an::Prop, an::Prop>(entt::registry &registry, entt:
 [[nodiscard]] auto an::get_random_prop() -> Prop {
     static std::random_device rd{};
     static std::mt19937 gen{rd()};
-    static std::uniform_int_distribution<std::uint8_t> dist{0, static_cast<std::uint8_t>(PropType::CNT) - 1};
+    static std::uniform_int_distribution<std::uint32_t> dist{0u, static_cast<std::uint32_t>(PropType::CNT) - 1};
 
     return Prop{.type = static_cast<PropType>(dist(gen)), .update = false};
 }

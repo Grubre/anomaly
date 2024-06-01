@@ -79,7 +79,7 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 [[nodiscard]] auto an::get_random_shirt_color() -> an::ShirtColor {
     static std::random_device rd{};
     static std::mt19937 gen{rd()};
-    static std::uniform_int_distribution<std::uint8_t> dist{0, possible_shirt_colors.size() - 1};
+    static std::uniform_int_distribution<std::uint32_t> dist{0llu, possible_shirt_colors.size() - 1};
 
     return ShirtColor{.color = possible_shirt_colors.at(dist(gen))};
 }
@@ -87,7 +87,7 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 [[nodiscard]] auto an::get_random_pants_color() -> an::PantsColor {
     static std::random_device rd{};
     static std::mt19937 gen{rd()};
-    static std::uniform_int_distribution<std::uint8_t> dist{0, possible_shirt_colors.size() - 1};
+    static std::uniform_int_distribution<std::uint32_t> dist{0llu, possible_shirt_colors.size() - 1};
 
     return PantsColor{.color = possible_shirt_colors.at(dist(gen))};
 }
@@ -95,7 +95,7 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 [[nodiscard]] auto an::get_random_hair_color() -> an::HairColor {
     static std::random_device rd{};
     static std::mt19937 gen{rd()};
-    static std::uniform_int_distribution<std::uint8_t> dist{0, possible_hair_colors.size() - 1};
+    static std::uniform_int_distribution<std::uint32_t> dist{0llu, possible_hair_colors.size() - 1};
 
     return HairColor{.color = possible_hair_colors.at(dist(gen))};
 }
@@ -104,7 +104,7 @@ void an::CharacterGenerator::generate_characters(std::uint32_t characters_cnt) {
 [[nodiscard]] auto an::get_random_particle() -> an::ParticleTrait {
     static std::random_device rd{};
     static std::mt19937 gen{rd()};
-    static std::uniform_int_distribution<std::uint8_t> dist{0, possible_particles.size() - 1};
+    static std::uniform_int_distribution<std::uint32_t> dist{0, possible_particles.size() - 1};
 
     return ParticleTrait{.type = possible_particles.at(dist(gen))};
 }

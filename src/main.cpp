@@ -355,8 +355,9 @@ auto main() -> int {
                                      3.f);
 
     auto vignette = an::load_asset(LoadShader, "shaders/base.vs", "shaders/vignette.fs");
+    float resolution[2] = {static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
     int loc = GetShaderLocation(vignette, "resolution");
-    SetShaderValue(vignette, loc, (float[2]){(float)GetScreenWidth(), (float)GetScreenHeight()}, SHADER_UNIFORM_VEC2);
+    SetShaderValue(vignette, loc, &resolution, SHADER_UNIFORM_VEC2);
 
     auto post_process_texture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
@@ -503,8 +504,8 @@ auto main() -> int {
 
         DrawTextureRec(
             post_process_texture.texture,
-            (Rectangle){0, 0, (float)post_process_texture.texture.width, (float)-post_process_texture.texture.height},
-            (Vector2){0, 0}, WHITE);
+            Rectangle{0, 0, (float)post_process_texture.texture.width, (float)-post_process_texture.texture.height},
+            Vector2{0, 0}, WHITE);
 
         EndShaderMode();
 

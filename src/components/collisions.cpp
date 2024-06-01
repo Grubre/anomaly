@@ -77,7 +77,7 @@ void an::static_vs_character_collision_system(entt::registry &registry) {
 void an::character_vs_character_collision_system(entt::registry &registry) {
     auto cc = registry.ctx().get<CollisionController>();
 
-    ssize_t i = 0;
+    int i = 0;
     while ((size_t)i < cc.sas_list.size()) {
         auto &sas = cc.sas_list[(size_t)i];
 

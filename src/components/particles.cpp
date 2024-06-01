@@ -64,19 +64,19 @@ void update_emitters(entt::registry &registry) {
             particle.animation_speed = emitter.p_template.animation_speed;
             auto &drawable = registry.get<Drawable>(pa_t);
             auto &pa_transform = registry.get<LocalTransform>(pa_t);
-            if (emitter.p_template.can_flip_x && random() % 2 == 0) {
+            if (emitter.p_template.can_flip_x && rand() % 2 == 0) {
                 std::visit([](auto &sprite) { sprite.flip_v = true; }, drawable.sprite);
             }
-            if (emitter.p_template.can_flip_y && random() % 2 == 0) {
+            if (emitter.p_template.can_flip_y && rand() % 2 == 0) {
                 std::visit([](auto &sprite) { sprite.flip_h = true; }, drawable.sprite);
             }
             pa_transform.transform.position.x =
                 emitter.offset.x + transform.transform.position.x +
-                static_cast<float>(random() % ((long)(2 * emitter.p_template.dimensions.x))) -
+                static_cast<float>(rand() % ((long)(2 * emitter.p_template.dimensions.x))) -
                 emitter.p_template.dimensions.x;
             pa_transform.transform.position.y =
                 emitter.offset.y + transform.transform.position.y +
-                static_cast<float>(random() % ((long)(2 * emitter.p_template.dimensions.y))) -
+                static_cast<float>(rand() % ((long)(2 * emitter.p_template.dimensions.y))) -
                 emitter.p_template.dimensions.y;
             pa_transform.transform.scale = emitter.p_template.scale;
         }
@@ -98,8 +98,8 @@ void update_particles(entt::registry &registry) {
             transform.transform.rotation -= GetFrameTime() * pa.animation_speed;
             break;
         case ParticleAnimationType::SHAKE:
-            transform.transform.position.x += GetFrameTime() * pa.animation_speed * (random() % 2 == 0 ? 1.0f : -1.0f);
-            transform.transform.position.y += GetFrameTime() * pa.animation_speed * (random() % 2 == 0 ? 1.0f : -1.0f);
+            transform.transform.position.x += GetFrameTime() * pa.animation_speed * (rand() % 2 == 0 ? 1.0f : -1.0f);
+            transform.transform.position.y += GetFrameTime() * pa.animation_speed * (rand() % 2 == 0 ? 1.0f : -1.0f);
             break;
         case ParticleAnimationType::DECAY:
             transform.transform.scale.x -= GetFrameTime() * pa.animation_speed;

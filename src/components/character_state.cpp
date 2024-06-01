@@ -54,7 +54,7 @@ void follow_player_if_bullet(entt::registry &registry, entt::entity character, e
             state_machine.save_current_state(registry, character);
 
             auto b = registry.get<Bullet>(bullet);
-            emplace<FollowEntityState>(registry, character, b.player, 5.f, 100.f, GetTime());
+            emplace<FollowEntityState>(registry, character, b.player, 5.f, 100.f, (float)GetTime());
             emplace<Aggresive>(registry, character);
         }
     }
