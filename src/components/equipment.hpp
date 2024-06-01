@@ -1,0 +1,58 @@
+#pragma once 
+
+#include "assets/asset_manager.hpp"
+#include <unordered_set>
+#include <entt.hpp>
+#include <imgui.h>
+
+namespace an {
+
+enum class EqItem {
+    STICK = 0,
+    SEESAW,
+    HAMMER,
+    NAIL,
+};
+
+struct Equipment {
+    std::unordered_set<EqItem> eq;
+
+    void insert(EqItem item) {
+        eq.insert(item);
+    }
+
+    bool has(EqItem item) const {
+        return eq.contains(item);
+    }
+
+    static constexpr auto name = "Equipment";
+
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
+        if (ImGui::Button("Insert Stick")) {
+            insert(EqItem::STICK);
+        }
+
+        for (const auto &s : eq) {
+            ImGui::Text("%d ", (int)s);
+            ImGui::SameLine();
+        }
+    }
+};
+
+inline void show_equipment(entt::registry& registry, entt::entity player) {
+    auto equipment = registry.get<Equipment>(player);
+    auto asset_manager = registry.ctx().get<AssetManager>();
+
+    ImGui::Begin("Equipment", nullptr);
+    ImGui::Text("Hello, world!");
+    for(const auto &item : equipment.eq) {
+        auto id = (TextureEnum)((int)TextureEnum::STICK + (int)item);
+        auto item_texture = asset_manager.get_texture(id).texture;
+        ImGui::Image((void *)&item_texture, {50.f, 50.f});
+        ImGui::SameLine(0.f, 20.f);
+    }
+
+    ImGui::End();
+}
+
+}
