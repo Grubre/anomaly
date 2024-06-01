@@ -1,5 +1,6 @@
 #include "player.hpp"
 #include "characters.hpp"
+#include "components/character_state.hpp"
 namespace an {
 
 void Health::inspect(entt::registry &registry, entt::entity entity) {
@@ -16,6 +17,8 @@ void deal_damage(entt::registry &registry, entt::entity &entity, int amount) {
 }
 auto make_player(entt::registry &registry) -> entt::entity {
     const auto entity = registry.create();
+    registry.emplace<an::IdleState>(entity);
+    registry.emplace<an::Animation>(entity, 0.1f, 0.f, 0u, 4u);
     an::emplace<an::Player>(registry, entity);
     return entity;
 }
@@ -51,8 +54,8 @@ void update_bullets(entt::registry &registry) {
             registry.destroy(entity);
         }
     }
-    auto view2 = registry.view<RealBullet, Velocity,GlobalTransform>();
-    for (auto &&[entity, bullet, vel,trans] : view2.each()) {
+    auto view2 = registry.view<RealBullet, Velocity, GlobalTransform>();
+    for (auto &&[entity, bullet, vel, trans] : view2.each()) {
         bullet.time_left -= GetFrameTime();
 
         vel = Vector2Scale(bullet.start_vel, bullet.time_left / bullet.total_time);
@@ -60,16 +63,16 @@ void update_bullets(entt::registry &registry) {
         if (bullet.time_left <= 0.f) {
             registry.destroy(entity);
         }
-        auto view3 = registry.view<Character,GlobalTransform>();
+        auto view3 = registry.view<Character, GlobalTransform>();
         auto flag = false;
-        for(auto &&[cha, cha_tran]:view3.each()){
-            if(Vector2Distance(trans.transform.position,cha_tran.transform.position)<20){
+        for (auto &&[cha, cha_tran] : view3.each()) {
+            if (Vector2Distance(trans.transform.position, cha_tran.transform.position) < 20) {
                 registry.destroy(cha);
-               flag= true;
+                flag = true;
             }
         }
         // FIXME: This crashes
-        if(flag){
+        if (flag) {
             registry.destroy(entity);
         }
     }
@@ -106,9 +109,9 @@ void make_player_bullet_real(entt::registry &registry, Vector2 start, Vector2 di
     emplace<GlobalTransform>(registry, bullet);
     emplace<Velocity>(registry, bullet, dir.x * speed, dir.y * speed);
     emplace<RealBullet>(registry, bullet, dir.x * speed, dir.y * speed, player);
-    emplace<Sprite>(registry,bullet,TextureEnum::BULLET);
+    emplace<Sprite>(registry, bullet, TextureEnum::BULLET);
     auto &tr = registry.get<LocalTransform>(bullet);
-    tr.transform.rotation = std::atan2(dir.x,-dir.y);
+    tr.transform.rotation = std::atan2(dir.x, -dir.y);
     tr.transform.position = Vector2Add(start, Vector2Scale(dir, 30.f));
 }
 void player_shooting(entt::registry &registry, entt::entity &entity) {
@@ -171,7 +174,7 @@ template <> void emplace<Player>(entt::registry &registry, entt::entity entity) 
     emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR,
                              TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
 
-    emplace<CharacterBody>(registry, entity, Vector2{}, 10.f);
+    emplace<CharacterBody>(registry, entity, Vector2{0.0f, 10.f}, 10.f);
     safe_emplace<Player>(registry, entity);
 }
 } // namespace an

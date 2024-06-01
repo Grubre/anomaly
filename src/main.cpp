@@ -1,6 +1,7 @@
 #include "assets/assets_loader.hpp"
 #include "character_generator.hpp"
 #include "characters.hpp"
+#include "components/buildings.hpp"
 #include "components/character_state.hpp"
 #include "components/collisions.hpp"
 #include "components/common.hpp"
@@ -25,6 +26,7 @@
 #include "gui/inspect_window.hpp"
 #include "components/marker.hpp"
 
+#include "components/buildings.hpp"
 void load_resources(an::AssetManager &asset_manager) {
     using T = an::TextureEnum;
     using S = an::SoundEnum;
@@ -59,8 +61,19 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("other/marker.png", T::MARKER);
     load_image("other/bullet.png", T::BULLET);
     // map
-    load_image("map/city-tile-N1.png", T::CITY_TILE_N1);
+    load_image("map/city-tile-NW.png", T::CITY_TILE_NW);
+    load_image("map/city-tile-N1.png", T::CITY_TILE_N);
+    load_image("map/city-tile-NE.png", T::CITY_TILE_NE);
+    load_image("map/city-tile-W.png", T::CITY_TILE_W);
     load_image("map/city-tile-square.png", T::CITY_TILE_SQUARE);
+    load_image("map/city-tile-E.png", T::CITY_TILE_E);
+
+    load_image("map/city-tile-houses-N.png", T::CITY_HOUSES_N);
+    load_image("map/city-tile-houses-N2.png", T::CITY_HOUSES_N2);
+    load_image("map/city-tile-houses-NE.png", T::CITY_HOUSES_NE);
+    load_image("map/city-tile-houses-NE2.png", T::CITY_HOUSES_NE2);
+    load_image("map/city-tile-houses-NW.png", T::CITY_HOUSES_NW);
+    load_image("map/city-tile-houses-NW2.png", T::CITY_HOUSES_NW2);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -123,7 +136,7 @@ auto create_connected_walk_areas(entt::registry &registry, uint32_t number) -> e
 
     for (auto i = 0u; i < number; i++) {
         entity = registry.create();
-        const auto size = 1000.f;
+        const auto size = 200.f;
         an::emplace<an::WalkArea>(registry, entity, Vector2{size * (float)i, 0.f},
                                   Vector2{size * (float)(i + 1) - 1.f, size});
         auto *current_area = &registry.get<an::WalkArea>(entity);
@@ -213,21 +226,23 @@ auto main() -> int {
     auto post_process_texture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(0.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_NW, Vector2(-1.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N, Vector2(0.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_NE, Vector2(1.f, -1.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_W, Vector2(-1.f, 0.f));
+    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_E, Vector2(1.f, 0.f));
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 1.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f, 0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(-1.f, -1.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f, 0.f));
-    an::make_city_tile(registry, an::TextureEnum::CITY_TILE_N1, Vector2(1.f, -1.f));
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f, 1.f));
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f, 1.f));
+
+    an::make_building_l1(registry, Vector2(0.f,-1.f), an::TextureEnum::CITY_HOUSES_N);
+
+    an::make_building_l2(registry, Vector2(0.f,-1.f), an::TextureEnum::CITY_HOUSES_N2);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
-    registry.emplace<an::IdleState>(player);
-    registry.emplace<an::Animation>(player, 0.1f, 0.f, 0u, 4u);
     key_manager.subscribe(an::KeyboardEvent::PRESS, an::KeyEnum::INTERACT,
                           [&]() { an::check_nearby_npc(registry, player); });
     // shader
@@ -295,6 +310,7 @@ auto main() -> int {
         an::update_character_animations(registry);
 
         BeginTextureMode(post_process_texture);
+        an::hide_buildings_if_needed(registry, player);
         ClearBackground(RAYWHITE);
         // ======================================
         // DRAW SYSTEMS
@@ -306,11 +322,13 @@ auto main() -> int {
 
         an::y_sort(registry);
 
-        an::visualize_walk_areas(registry);
+        // an::visualize_walk_areas(registry);
 
         an::render_drawables(registry);
         an::debug_draw_bodies(registry);
-        an::debug_trait_systems(registry);
+        // an::debug_trait_systems(registry);
+
+        //an::debug_buildings(registry);
 
         EndMode2D();
 
@@ -329,7 +347,7 @@ auto main() -> int {
 
         rlImGuiBegin();
         an::update_ui(registry, player);
-        ImGui::ShowDemoWindow();
+        // ImGui::ShowDemoWindow();
         inspector.draw_gui();
         anomaly_traits_gui(day);
         rlImGuiEnd();

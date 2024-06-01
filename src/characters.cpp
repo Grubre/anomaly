@@ -6,12 +6,15 @@ entt::entity make_character(entt::registry &registry, const CharacterTraits &tra
     auto entity = registry.create();
     an::emplace<an::Character>(registry, entity);
     an::emplace<an::CharacterStateMachine>(registry, entity);
+    an::emplace<an::IdleState>(registry, entity);
+    an::emplace<an::Animation>(registry, entity, 0.1f, 0.f, 0u, 4u);
+    an::emplace<Velocity>(registry, entity, 0.f, 0.f);
 
     an::emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR,
                                  TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
     auto &sprite = std::get<CharacterSprite>(registry.get<Drawable>(entity).sprite);
 
-    an::emplace<an::CharacterBody>(registry, entity, Vector2{}, 10.f, get_uniform_float());
+    an::emplace<an::CharacterBody>(registry, entity, Vector2{0.0f, 10.f}, 10.f, get_uniform_float());
 
     sprite.hair_color = traits.hair_color.color;
     sprite.shirt_color = traits.shirt_color.color;

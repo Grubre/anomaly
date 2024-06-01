@@ -12,6 +12,7 @@
 #include <cmath>
 #include <fmt/format.h>
 #include <imgui.h>
+#include <numbers>
 #include <raylib.h>
 #include <entt.hpp>
 #include <raymath.h>
@@ -143,33 +144,44 @@ struct WalkingState {
 
 struct IdleState {
     static constexpr auto name = "Idle state";
+    Direction direction{};
 
-    static void inspect() {}
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
+        // up, down, left, right list selection
+        static const char *directions[] = {"UP", "DOWN", "LEFT", "RIGHT"};
+        int current_direction = static_cast<int>(direction);
+        ImGui::Combo("Direction", &current_direction, directions, IM_ARRAYSIZE(directions));
+        direction = static_cast<Direction>(current_direction);
+    }
 };
 
 inline void set_move_state_system(entt::registry &registry) {
     auto walking_view = registry.view<WalkingState, const Velocity>();
 
     for (auto &&[entity, walking_state, velocity] : walking_view.each()) {
-        if (velocity.x > 0) {
+        if (velocity.x == 0 && velocity.y == 0) {
+            registry.remove<WalkingState>(entity);
+            an::emplace<IdleState>(registry, entity, walking_state.direction);
+            continue;
+        }
+        const auto atan2 = std::atan2(velocity.y, velocity.x);
+        const auto pi = std::numbers::pi_v<float>;
+        if (-pi / 4.f <= atan2 && atan2 <= pi / 4.f) {
             walking_state.direction = Direction::RIGHT;
-        } else if (velocity.x < 0) {
-            walking_state.direction = Direction::LEFT;
-        } else if (velocity.y > 0) {
+        } else if (pi / 4.f < atan2 && atan2 <= 3 * pi / 4.f) {
             walking_state.direction = Direction::DOWN;
-        } else if (velocity.y < 0) {
+        } else if (-3.f * pi / 4.f <= atan2 && atan2 < -pi / 4.f) {
             walking_state.direction = Direction::UP;
         } else {
-            registry.remove<WalkingState>(entity);
-            registry.emplace<IdleState>(entity);
+            walking_state.direction = Direction::LEFT;
         }
     }
 
     auto idle_view = registry.view<IdleState, const Velocity>();
 
-    for (auto &&[entity, velocity] : idle_view.each()) {
+    for (auto &&[entity, idle, velocity] : idle_view.each()) {
         if (velocity.x != 0 || velocity.y != 0) {
-            registry.emplace<WalkingState>(entity);
+            an::emplace<WalkingState>(registry, entity);
             registry.remove<IdleState>(entity);
         }
     }
@@ -217,11 +229,11 @@ inline void update_character_animations(entt::registry &registry) {
         std::visit([&](auto &drawable) { drawable.sprite_id = animation.current_frame; }, drawable.sprite);
     }
 
-    // auto idle = registry.view<Animation, IdleState, Drawable>();
-    //
-    // for (auto &&[entity, animation, drawable] : idle.each()) {
-    //     std::visit([&](auto &drawable) { drawable.sprite_id = animation.current_frame; }, drawable.sprite);
-    // }
+    auto idle = registry.view<IdleState, Drawable>();
+
+    for (auto &&[entity, idle, drawable] : idle.each()) {
+        std::visit([&](auto &drawable) { drawable.sprite_id = get_frame_offset(idle.direction); }, drawable.sprite);
+    }
 }
 
 void follow_player_if_bullet(entt::registry &registry, entt::entity character, entt::entity bullet);
