@@ -56,21 +56,21 @@ an::TextureEnum an::get_prop_texture(const an::PropType type) {
 an::StaticBody an::get_prop_collision(const an::PropType type) {
     switch (type) {
     case an::PropType::TREE1:
-        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+        return an::StaticBody{{-25.f, 30.f}, {50.f, 22.f}};
     case an::PropType::TREE2:
-        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+        return an::StaticBody{{-7.f, 30.f}, {60.f, 24.f}};
     case an::PropType::ROCK1:
-        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+        return an::StaticBody{{-20.f, 2.f}, {46.f, 19.f}};
     case an::PropType::ROCK2:
         return an::StaticBody{{-0.f, -0.f}, {0.f, 0.f}};
     case an::PropType::BUSH:
-        return an::StaticBody{{-0.f, -0.f}, {0.f, 0.f}};
+        return an::StaticBody{{-23.f, -3.f}, {50.f, 13.f}};
     case an::PropType::BIN:
-        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+        return an::StaticBody{{-10.f, 6.f}, {20.f, 14.f}};
     case an::PropType::LAMP:
-        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+        return an::StaticBody{{-7.f, 34.f}, {14.f, 43.f}};
     case an::PropType::BENCH:
-        return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
+        return an::StaticBody{{-36.f, 12.f}, {72.f, 16.f}};
     default:
         return an::StaticBody{{-15.f, -15.f}, {30.f, 30.f}};
     }

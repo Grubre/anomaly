@@ -14,7 +14,7 @@ entt::entity make_character(entt::registry &registry, const CharacterTraits &tra
                                  traits.shirt_archetype, traits.pants_archetype);
     auto &sprite = std::get<CharacterSprite>(registry.get<Drawable>(entity).sprite);
 
-    an::emplace<an::CharacterBody>(registry, entity, Vector2{0.0f, 10.f}, 10.f, get_uniform_float());
+    an::emplace<an::CharacterBody>(registry, entity, Vector2{0.0f, 25.f}, 10.f, get_uniform_float());
 
     sprite.hair_color = traits.hair_color.color;
     sprite.shirt_color = traits.shirt_color.color;

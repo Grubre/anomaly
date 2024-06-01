@@ -22,6 +22,7 @@ set(SOURCE_FILES
         gui/inspect_window.cpp
         components/corpse.cpp
         components/corpse.h
+        gui/end_game.hpp
 )
 
 file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
