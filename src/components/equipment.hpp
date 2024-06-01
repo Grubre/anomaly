@@ -44,15 +44,14 @@ struct Equipment {
 };
 
 inline void show_equipment(entt::registry& registry, entt::entity player) {
-    auto equipment = registry.get<Equipment>(player);
-    auto asset_manager = registry.ctx().get<AssetManager>();
+    auto &equipment = registry.get<Equipment>(player);
+    auto &asset_manager = registry.ctx().get<AssetManager>();
 
     ImGui::Begin("Equipment", nullptr);
-    ImGui::Text("Hello, world!");
     for(const auto &item : equipment.eq) {
         auto id = (TextureEnum)((int)TextureEnum::STICK + (int)item);
         auto *item_texture = asset_manager.get_texture_ptr(id);
-        ImGui::Image((void *)item_texture, {100.f, 100.f});
+        ImGui::Image((void *)item_texture, {100.f, 64.f});
         ImGui::SameLine(0.f, 20.f);
     }
 
