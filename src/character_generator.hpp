@@ -14,10 +14,10 @@ namespace an {
 using accesories_mask_t = std::bitset<8>;
 
 constexpr std::array possible_shirt_colors{
-    RED, GREEN, BLUE, YELLOW, VIOLET, ORANGE,
+    RED, GREEN, BLUE, YELLOW, VIOLET, ORANGE, BROWN, LIME, MAGENTA, RAYWHITE, BEIGE, MAROON, DARKGREEN, LIGHTGRAY, GOLD
 };
 
-constexpr std::array possible_hair_colors{BLACK, YELLOW, RED, BROWN};
+constexpr std::array possible_hair_colors{BLACK, YELLOW, RED, BROWN, GOLD, BEIGE, PINK, DARKBROWN, LIGHTGRAY, BLANK };
 constexpr std::array possible_particles{an::ParticleType::DRUNK, an::ParticleType::STINKY_CHEESE};
 
 struct ShirtColor {
@@ -100,7 +100,7 @@ struct ResolvedDay {
 class CharacterGenerator {
   public:
     constexpr static float accessory_gen_chance = 0.1f;
-    constexpr static double emplace_probable_trait_chance = 0.5;
+    constexpr static double emplace_probable_trait_chance = 0.1f;
     constexpr static double get_particle_chance = 0.05;
 
     explicit CharacterGenerator(std::uint32_t seed, std::uint32_t characters_cnt) : seed(seed) {

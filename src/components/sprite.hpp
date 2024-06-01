@@ -50,6 +50,7 @@ struct Sprite {
     TextureAsset asset;
     uint16_t sprite_id = 0;
     Vector2 offset = Vector2(0.5f, 0.5f);
+    Color tint = WHITE;
     bool flip_h = false;
     bool flip_v = false;
 
@@ -65,8 +66,9 @@ struct Sprite {
             SetShaderValue(shader->shader, shader->resolution_loc, &size_vec, SHADER_UNIFORM_VEC2);
         }
 
-        DrawTexturePro(asset.texture, src_rect, Rectangle{tr.position.x, tr.position.y, width, height},
-                       Vector2Multiply(offset, Vector2(width, height)), RAD2DEG * tr.rotation, WHITE);
+        DrawTexturePro(
+            asset.texture, src_rect, Rectangle{tr.position.x, tr.position.y, width, height},
+            Vector2Multiply(offset, Vector2(width, height)), RAD2DEG * tr.rotation, tint);
 
         if (shader != nullptr) {
             EndShaderMode();
@@ -77,7 +79,7 @@ struct Sprite {
 
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
         ImGui::Text("Sprite");
-        ImGui::DragFloat2("Offset", &offset.x, 1.0f);
+        ImGui::DragFloat2("Offset", &offset.x, 0.01f);
         ImGui::Checkbox("Flip H", &flip_h);
         ImGui::SameLine();
         ImGui::Checkbox("Flip V", &flip_v);

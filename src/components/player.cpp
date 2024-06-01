@@ -174,7 +174,7 @@ template <> void emplace<Player>(entt::registry &registry, entt::entity entity) 
     emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR,
                              TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
 
-    emplace<CharacterBody>(registry, entity, Vector2{}, 10.f);
+    emplace<CharacterBody>(registry, entity, Vector2{0.0f, 10.f}, 10.f);
     safe_emplace<Player>(registry, entity);
 }
 } // namespace an
