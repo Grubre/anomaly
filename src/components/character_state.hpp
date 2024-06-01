@@ -167,8 +167,9 @@ inline void set_move_state_system(entt::registry &registry) {
 
     for (auto &&[entity, walking_state, velocity] : walking_view.each()) {
         if (velocity.x == 0 && velocity.y == 0) {
+            const auto dir = walking_state.direction;
             registry.remove<WalkingState>(entity);
-            an::emplace<IdleState>(registry, entity, walking_state.direction);
+            an::emplace<IdleState>(registry, entity, dir);
             continue;
         }
         const auto atan2 = std::atan2(velocity.y, velocity.x);
