@@ -13,12 +13,18 @@ void add_interrupt(entt::registry &registry, entt::entity entity) { registry.emp
 void check_nearby_npc(entt::registry &registry, entt::entity entity) {
     auto view = registry.view<Character, GlobalTransform>();
     auto co = 0;
+    bool flag = registry.all_of<ShowUI>(entity);
     for (auto &&[npc, transform] : view.each()) {
         auto dis =
             Vector2Distance(registry.get<GlobalTransform>(entity).transform.position, transform.transform.position);
         if (dis < 70) {
+            if(!flag){
+                registry.emplace<ShowUI>(entity);
+                add_interrupt(registry, npc);
+                return;
+            }
             co++;
-            if ((co == 1 || dis > 30) && registry.all_of<ShowUI>(entity)) {
+            if ((co == 1 || dis > 10) && registry.all_of<ShowUI>(entity)) {
                 registry.erase<ShowUI>(entity);
                 continue;
             }
@@ -63,7 +69,7 @@ void mark_entity(entt::registry &registry, entt::entity entity) {
     emplace<Parented>(registry, mark_e, entity);
     emplace<Marker>(registry, mark_e);
     auto &sprite = registry.get<Drawable>(mark_e);
-    std::get<Sprite>(sprite.sprite).offset.y = 1.8f;
+    std::get<Sprite>(sprite.sprite).offset.y = 1.3f;
     // transform.transform.scale = Vector2Scale(transform.transform.scale, 0.5f);
 }
 void halt_npc(entt::registry &registry) {
