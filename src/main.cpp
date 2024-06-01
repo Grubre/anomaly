@@ -353,6 +353,10 @@ auto main() -> int {
     registry.ctx().emplace<Camera2D>(Vector2((float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2), Vector2(), 0.f,
                                      3.f);
 
+    auto vignette = an::load_asset(LoadShader, "shaders/base.vs", "shaders/vignette.fs");
+    int loc = GetShaderLocation(vignette, "resolution");
+    SetShaderValue(vignette, loc, (float[2]){(float)GetScreenWidth(), (float)GetScreenHeight()}, SHADER_UNIFORM_VEC2);
+
     auto post_process_texture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(0.f, 0.f));
@@ -482,10 +486,14 @@ auto main() -> int {
 
         BeginDrawing();
 
+        BeginShaderMode(vignette);
+
         DrawTextureRec(
             post_process_texture.texture,
             (Rectangle){0, 0, (float)post_process_texture.texture.width, (float)-post_process_texture.texture.height},
             (Vector2){0, 0}, WHITE);
+
+        EndShaderMode();
 
         // ======================================
         // DRAW GUI
