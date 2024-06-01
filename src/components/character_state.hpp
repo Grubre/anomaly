@@ -210,10 +210,10 @@ inline void update_character_animations(entt::registry &registry) {
             return 0u;
         case Direction::UP:
             return 4u;
-        case Direction::LEFT:
-            return 8u;
         case Direction::RIGHT:
             return 8u;
+        case Direction::LEFT:
+            return 12u;
         }
         return 0u;
     };
