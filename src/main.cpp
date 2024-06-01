@@ -66,10 +66,12 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("ui/back_btn.png", T::B_BACK);
     load_image("ui/legit_btn.png", T::B_LEGIT);
     load_image("ui/sus_btn.png", T::B_SUS);
-    load_image("ui/tlo.png", T::UI_BACKGROUND);
+    load_image("ui/ui.png", T::UI_BACKGROUND);
     // other
     load_image("other/marker.png", T::MARKER);
     load_image("other/bullet.png", T::BULLET);
+    load_image("other/corpse.png", T::CORPSE);
+    load_image("other/droplets.png", T::DROPS);
     // map
     load_image("map/city-tile-NW.png", T::CITY_TILE_NW);
     load_image("map/city-tile-N1.png", T::CITY_TILE_N);

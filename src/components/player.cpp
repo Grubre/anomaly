@@ -48,10 +48,13 @@ void update_player(entt::registry &registry, entt::entity &entity) {
 }
 void update_bullets(entt::registry &registry,entt::entity player) {
     auto pl = registry.get<Player>(player);
-    if(pl.aiming_state){
+    if(pl.aiming_state && pl.cooldown<= 0.f){
         auto pl_trans = registry.get<GlobalTransform>(player);
         Vector2 pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
-        DrawLineEx(pl_trans.transform.position, pos,5,RED);
+        pos = Vector2Subtract(pos,pl_trans.transform.position);
+        pos = Vector2Scale(pos,10);
+        pos = Vector2Add(pos,pl_trans.transform.position);
+        DrawLineEx(pl_trans.transform.position, pos,2.2f,RED);
     }
     auto view = registry.view<Bullet, Velocity>();
     for (auto &&[entity, bullet, vel] : view.each()) {
@@ -96,9 +99,9 @@ void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, fl
     emplace<CharacterBody>(registry, bullet, Vector2(), 10.f, 10.f);
     emplace<Velocity>(registry, bullet, dir.x * speed, dir.y * speed);
     emplace<Bullet>(registry, bullet, dir.x * speed, dir.y * speed, player);
-
+    emplace<Sprite>(registry, bullet, TextureEnum::DROPS);
     auto &tr = registry.get<LocalTransform>(bullet);
-
+    tr.transform.rotation = std::atan2(dir.x, -dir.y);
     tr.transform.position = Vector2Add(start, Vector2Scale(dir, 30.f));
 }
 void make_player_bullet_real(entt::registry &registry, Vector2 start, Vector2 dir, float speed, entt::entity player) {
@@ -121,11 +124,10 @@ void make_player_bullet_real(entt::registry &registry, Vector2 start, Vector2 di
 }
 void player_shooting(entt::registry &registry, entt::entity &entity) {
     auto &player = registry.get<Player>(entity);
-
+    player.cooldown-= GetFrameTime();
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        player.to_next_shot -= GetFrameTime();
-        if (player.aiming_state) {
-            if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (player.aiming_state ) {
+            if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)|| player.cooldown > 0.f) {
                 return;
             }
             auto mouse_pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
@@ -137,11 +139,11 @@ void player_shooting(entt::registry &registry, entt::entity &entity) {
             make_player_bullet_real(registry, transform.transform.position, dir, player.alt_bullet_speed, entity);
 
             auto &player_local = registry.get<LocalTransform>(entity);
-
+            player.cooldown = 3.1f;
             player_local.transform.position = Vector2Subtract(player_local.transform.position, Vector2Scale(dir, 1.f));
             return;
         }
-
+        player.to_next_shot -= GetFrameTime();
         while (player.to_next_shot <= 0.f) {
             auto mouse_pos = GetScreenToWorld2D(GetMousePosition(), registry.ctx().get<Camera2D>());
 

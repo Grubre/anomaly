@@ -35,19 +35,19 @@ void draw_inspect_dialog(entt::registry &registry,entt::entity player ,entt::ent
     ImGui::SetCursorPosX((x - 64 * 6) / 2);
     ImGui::Image((void *)&character.texture, {64 * 6, 72 * 6});
 
-    ImGui::SetCursorPosX((x - 300 * 3) / 2);
+    ImGui::SetCursorPosX((x - 256 * 3) / 2);
     //buttons without border
-    if (ImGui::ImageButton((void *)&sus_btn, {300, 200})) {
+    if (ImGui::ImageButton((void *)&sus_btn, {128*2, 64*2})) {
         mark_entity(registry, npc);
         registry.remove<ShowUI>(player);
     }
     ImGui::SameLine();
-    if (ImGui::ImageButton((void *)&legit_btn, {300, 200})) {
+    if (ImGui::ImageButton((void *)&legit_btn, {128*2, 64*2})) {
         registry.remove<Marked>(npc);
         registry.remove<ShowUI>(player);
     }
     ImGui::SameLine();
-    if (ImGui::ImageButton((void *)&back_btn, {300, 200})) {
+    if (ImGui::ImageButton((void *)&back_btn, {128*2, 64*2})) {
         registry.remove<ShowUI>(player);
         remove_interrupt(registry,npc);
     }

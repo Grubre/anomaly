@@ -54,6 +54,8 @@ enum class TextureEnum {
     NAIL,
     BOBER,
     DIALOG_CLOUD,
+    CORPSE,
+    DROPS,
     CNT
 };
 enum class SoundEnum { WIN = 0, CNT };

@@ -20,6 +20,8 @@ set(SOURCE_FILES
         components/marker.hpp
         characters.cpp
         gui/inspect_window.cpp
+        components/corpse.cpp
+        components/corpse.h
 )
 
 file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
