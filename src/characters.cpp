@@ -10,8 +10,8 @@ entt::entity make_character(entt::registry &registry, const CharacterTraits &tra
     an::emplace<an::Animation>(registry, entity, 0.1f, 0.f, 0u, 4u);
     an::emplace<Velocity>(registry, entity, 0.f, 0.f);
 
-    an::emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, TextureEnum::CHARACTER_HAIR,
-                                 TextureEnum::CHARACTER_SHIRT, TextureEnum::CHARACTER_PANTS);
+    an::emplace_character_sprite(registry, entity, TextureEnum::BASE_CHARACTER, traits.hair_archetype,
+                                 traits.shirt_archetype, traits.pants_archetype);
     auto &sprite = std::get<CharacterSprite>(registry.get<Drawable>(entity).sprite);
 
     an::emplace<an::CharacterBody>(registry, entity, Vector2{0.0f, 10.f}, 10.f, get_uniform_float());

@@ -13,11 +13,10 @@
 namespace an {
 using accesories_mask_t = std::bitset<8>;
 
-constexpr std::array possible_shirt_colors{
-    RED, GREEN, BLUE, YELLOW, VIOLET, ORANGE, BROWN, LIME, MAGENTA, RAYWHITE, BEIGE, MAROON, DARKGREEN, LIGHTGRAY, GOLD
-};
+constexpr std::array possible_shirt_colors{RED,     GREEN,    BLUE,  YELLOW, VIOLET,    ORANGE,    BROWN, LIME,
+                                           MAGENTA, RAYWHITE, BEIGE, MAROON, DARKGREEN, LIGHTGRAY, GOLD};
 
-constexpr std::array possible_hair_colors{BLACK, YELLOW, RED, BROWN, GOLD, BEIGE, PINK, DARKBROWN, LIGHTGRAY, BLANK };
+constexpr std::array possible_hair_colors{BLACK, YELLOW, RED, BROWN, GOLD, BEIGE, PINK, DARKBROWN, LIGHTGRAY, BLANK};
 constexpr std::array possible_particles{an::ParticleType::DRUNK, an::ParticleType::STINKY_CHEESE};
 
 struct ShirtColor {
@@ -46,6 +45,10 @@ struct CharacterTraits {
     an::ShirtColor shirt_color{};
     an::PantsColor pants_color{};
     HairColor hair_color{};
+
+    TextureEnum hair_archetype{};
+    TextureEnum shirt_archetype{};
+    TextureEnum pants_archetype{};
 
     std::optional<ParticleTrait> particles = std::nullopt;
 
