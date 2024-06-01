@@ -82,6 +82,11 @@ void load_resources(an::AssetManager &asset_manager) {
 
     load_image("props/bober.png", T::BOBER);
     load_image("dialog_cloud.png", T::DIALOG_CLOUD);
+
+    load_image("props/stick.png", T::STICK);
+    load_image("props/hammer.png", T::HAMMER);
+    load_image("props/nails.png", T::NAIL);
+    load_image("props/seesaw.png", T::SEESAW);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -335,8 +340,8 @@ auto main() -> int {
 
     an::make_building_l2(registry, Vector2(0.f, -1.f), an::TextureEnum::CITY_HOUSES_N2);
 
-    auto entity = registry.create();
-    an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
+    //auto entity = registry.create();
+    //an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
     // player
     [[maybe_unused]] auto player = an::make_player(registry);
     key_manager.subscribe(an::KeyboardEvent::PRESS, an::KeyEnum::INTERACT,
@@ -346,14 +351,6 @@ auto main() -> int {
 
     an::emplace<an::ShaderComponent>(registry, player, base_shader);
     // an::emplace<an::Sprite>(registry, entity);
-
-    // test char collider
-    auto test_char_collider = registry.create();
-    an::emplace<an::GlobalTransform>(registry, test_char_collider);
-    an::emplace<an::CharacterBody>(registry, test_char_collider, Vector2(), 50.f);
-    an::emplace<an::AvoidTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 100.f);
-    // an::emplace<an::ShakeTraitComponent>(registry, test_char_collider, an::PropType::TREE, 100.f, 1.f);
-    an::emplace<an::FollowEntityState>(registry, test_char_collider, player, INFINITY, 10.f);
 
     auto walk_area_entity = create_connected_walk_areas(registry, 3);
     auto *walk_area = &registry.get<an::WalkArea>(walk_area_entity);
@@ -378,6 +375,9 @@ auto main() -> int {
 
     const float initial_time = 2.f * 60.f;
     float time = initial_time;
+    // TESTCIK
+    auto ent = registry.create();
+    an::emplace_sprite(registry,ent, an::TextureEnum::STICK);
 
     while (!WindowShouldClose()) {
         time -= GetFrameTime();

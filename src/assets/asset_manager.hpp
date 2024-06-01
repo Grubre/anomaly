@@ -91,6 +91,7 @@ class AssetManager {
     void register_texture(const Image &image, TextureEnum id);
     void register_texture(const Image &image, TextureEnum id, uint16_t cell_size_x, uint16_t cell_size_y);
     auto get_texture(TextureEnum id) -> TextureAsset;
+    auto get_texture_ptr(TextureEnum id) -> TextureAsset*;
     void register_sound(const Sound &sound, const SoundEnum id);
     auto get_sound(const SoundEnum id) -> Sound;
 

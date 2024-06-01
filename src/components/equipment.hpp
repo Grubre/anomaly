@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "assets/asset_manager.hpp"
+#include "fmt/base.h"
 #include <unordered_set>
 #include <entt.hpp>
 #include <imgui.h>
@@ -28,8 +29,11 @@ struct Equipment {
     static constexpr auto name = "Equipment";
 
     void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
-        if (ImGui::Button("Insert Stick")) {
+        if (ImGui::Button("Insert All")) {
             insert(EqItem::STICK);
+            insert(EqItem::SEESAW);
+            insert(EqItem::HAMMER);
+            insert(EqItem::NAIL);
         }
 
         for (const auto &s : eq) {
@@ -47,8 +51,8 @@ inline void show_equipment(entt::registry& registry, entt::entity player) {
     ImGui::Text("Hello, world!");
     for(const auto &item : equipment.eq) {
         auto id = (TextureEnum)((int)TextureEnum::STICK + (int)item);
-        auto item_texture = asset_manager.get_texture(id).texture;
-        ImGui::Image((void *)&item_texture, {50.f, 50.f});
+        auto *item_texture = asset_manager.get_texture_ptr(id);
+        ImGui::Image((void *)item_texture, {100.f, 100.f});
         ImGui::SameLine(0.f, 20.f);
     }
 

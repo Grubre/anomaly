@@ -17,4 +17,8 @@ void an::AssetManager::register_texture(const Image &image, TextureEnum id, uint
 
 auto an::AssetManager::get_texture(TextureEnum id) -> TextureAsset { return textures.at(static_cast<size_t>(id)); }
 
+auto an::AssetManager::get_texture_ptr(TextureEnum id) -> TextureAsset* { 
+    return &textures.at(static_cast<size_t>(id)); 
+}
+
 auto an::AssetManager::get_sound(SoundEnum id) -> Sound { return sounds.at(static_cast<size_t>(id)); }
