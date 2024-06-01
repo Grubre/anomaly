@@ -545,10 +545,10 @@ reset:
 
         an::y_sort(registry);
 
-        an::visualize_walk_areas(registry);
+        //an::visualize_walk_areas(registry);
 
         an::render_drawables(registry);
-        an::debug_draw_bodies(registry);
+        //an::debug_draw_bodies(registry);
         // an::debug_trait_systems(registry);
 
         // intended
@@ -582,7 +582,7 @@ reset:
         rlImGuiBegin();
         draw_ui(registry, player, day, time);
         an::update_ui(registry, player);
-        inspector.draw_gui();
+        //inspector.draw_gui();
         rlImGuiEnd();
 
         DrawFPS(10, 10);
@@ -599,9 +599,9 @@ reset:
         BeginMode2D(registry.ctx().get<Camera2D>());
         an::render_city_tiles(registry);
         an::y_sort(registry);
-        an::visualize_walk_areas(registry);
+        //an::visualize_walk_areas(registry);
         an::render_drawables(registry);
-        an::debug_draw_bodies(registry);
+        //an::debug_draw_bodies(registry);
         // an::debug_trait_systems(registry);
         // an::debug_buildings(registry);
         EndMode2D();
@@ -610,8 +610,8 @@ reset:
         BeginShaderMode(vignette);
         DrawTextureRec(
             post_process_texture.texture,
-            (Rectangle){0, 0, (float)post_process_texture.texture.width, (float)-post_process_texture.texture.height},
-            (Vector2){0, 0}, WHITE);
+            Rectangle{0, 0, (float)post_process_texture.texture.width, (float)-post_process_texture.texture.height},
+            Vector2{0, 0}, WHITE);
         EndShaderMode();
         // ======================================
         // DRAW GUI
