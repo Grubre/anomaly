@@ -268,13 +268,12 @@ auto spawn_bober(entt::registry &registry) -> entt::entity {
     an::emplace<an::LocalTransform>(registry, dialog_cloud_entity);
     auto &transform = registry.get<an::LocalTransform>(dialog_cloud_entity);
     transform.transform.scale = {0.03f, 0.03f};
-    transform.transform.position = {-20.f, -30.f};
     an::emplace<an::Drawable>(
         registry, dialog_cloud_entity,
         an::Sprite{
             .asset = registry.ctx().get<an::AssetManager>().get_texture(an::TextureEnum::DIALOG_CLOUD),
             .sprite_id = 0,
-            .offset = {0.f, 0.f},
+            .offset = {0.6f, 0.8f},
             .tint = WHITE,
             .flip_h = false,
             .flip_v = false,
@@ -337,8 +336,13 @@ auto main() -> int {
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f, 1.f));
 
     an::make_building_l1(registry, Vector2(0.f, -1.f), an::TextureEnum::CITY_HOUSES_N);
-
     an::make_building_l2(registry, Vector2(0.f, -1.f), an::TextureEnum::CITY_HOUSES_N2);
+
+    an::make_building_l1(registry, Vector2(-1.f, -1.f), an::TextureEnum::CITY_HOUSES_NW);
+    an::make_building_l2(registry, Vector2(-1.f, -1.f), an::TextureEnum::CITY_HOUSES_NW2);
+
+    an::make_building_l1(registry, Vector2(1.f, -1.f), an::TextureEnum::CITY_HOUSES_NE);
+    an::make_building_l2(registry, Vector2(1.f, -1.f), an::TextureEnum::CITY_HOUSES_NE2);
 
     //auto entity = registry.create();
     //an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
