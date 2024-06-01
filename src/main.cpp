@@ -81,6 +81,7 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("map/city-tile-houses-NW2.png", T::CITY_HOUSES_NW2);
 
     load_image("props/bober.png", T::BOBER);
+    load_image("dialog_cloud.png", T::DIALOG_CLOUD);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -191,19 +192,46 @@ auto gen_npcs(entt::registry &registry, an::WalkArea *walk_area, const an::DayCo
 }
 
 struct Bober {
+    entt::entity cloud;
     static constexpr auto name = "Bober";
-    static void inspect() { ImGui::Text("Bober"); }
+    void inspect(entt::registry &registry, entt::entity entity) { ImGui::Text("Bober"); }
 };
 
-auto spawn_bober(entt::registry &registry) -> entt::entity {
-    auto entity = registry.create();
+void interact_with_bober(entt::registry &registry) {
+    constexpr auto bober_interaction_radius = 100.f;
 
-    an::emplace<Bober>(registry, entity);
-    an::emplace<an::LocalTransform>(registry, entity);
+    auto bober_view = registry.view<Bober, an::LocalTransform>();
+
+    for (auto bober : bober_view) {
+        auto player_view = registry.view<an::Player, an::LocalTransform>();
+        for (auto player : player_view) {
+            auto &bober_transform = bober_view.get<an::LocalTransform>(bober);
+            auto &player_transform = player_view.get<an::LocalTransform>(player);
+            auto &bober_component = bober_view.get<Bober>(bober);
+
+            auto distance = Vector2Distance(bober_transform.transform.position, player_transform.transform.position);
+            if (distance < bober_interaction_radius) {
+                an::safe_emplace<an::Visible>(registry, bober_component.cloud);
+            } else {
+                registry.remove<an::Visible>(bober_component.cloud);
+            }
+
+            // if (IsKeyPressed(KEY_E)) {
+            //     fmt::println("Bober interaction");
+            // }
+        }
+    }
+}
+
+auto spawn_bober(entt::registry &registry) -> entt::entity {
+    auto bober_entity = registry.create();
+
+    an::emplace<Bober>(registry, bober_entity);
+    an::emplace<an::LocalTransform>(registry, bober_entity);
 
     auto texture = registry.ctx().get<an::AssetManager>().get_texture(an::TextureEnum::BOBER);
 
-    an::emplace<an::Drawable>(registry, entity,
+    an::emplace<an::Drawable>(registry, bober_entity,
                               an::Sprite{
                                   .asset = texture,
                                   .sprite_id = 0,
@@ -213,8 +241,8 @@ auto spawn_bober(entt::registry &registry) -> entt::entity {
                                   .flip_v = false,
                               });
 
-    an::emplace<an::StaticBody>(registry, entity, Vector2{0.f, 10.f}, Vector2{30.f, 25.f});
-    an::emplace<an::Visible>(registry, entity);
+    an::emplace<an::StaticBody>(registry, bober_entity, Vector2{0.f, 10.f}, Vector2{30.f, 25.f});
+    an::emplace<an::Visible>(registry, bober_entity);
 
     Vector2 top_left = {-1000.f, -1000.f};
     Vector2 bottom_right = {1000.f, 1000.f};
@@ -228,10 +256,30 @@ auto spawn_bober(entt::registry &registry) -> entt::entity {
 
     fmt::println("Bober spawned at: {}, {}", candidate.x, candidate.y);
 
-    auto &local_transform = registry.get<an::LocalTransform>(entity);
+    auto &local_transform = registry.get<an::LocalTransform>(bober_entity);
     local_transform.transform.position = candidate;
 
-    return entity;
+    auto dialog_cloud_entity = registry.create();
+    an::emplace<an::LocalTransform>(registry, dialog_cloud_entity);
+    auto &transform = registry.get<an::LocalTransform>(dialog_cloud_entity);
+    transform.transform.scale = {0.03f, 0.03f};
+    transform.transform.position = {-20.f, -30.f};
+    an::emplace<an::Drawable>(
+        registry, dialog_cloud_entity,
+        an::Sprite{
+            .asset = registry.ctx().get<an::AssetManager>().get_texture(an::TextureEnum::DIALOG_CLOUD),
+            .sprite_id = 0,
+            .offset = {0.f, 0.f},
+            .tint = WHITE,
+            .flip_h = false,
+            .flip_v = false,
+        });
+    an::emplace<an::Parented>(registry, dialog_cloud_entity, bober_entity);
+
+    auto &bober = registry.get<Bober>(bober_entity);
+    bober.cloud = dialog_cloud_entity;
+
+    return bober_entity;
 }
 
 auto main() -> int {
@@ -249,12 +297,13 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
-                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
-                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                                   an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character,
-                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker, an::CharacterStateMachine,
-                                   an::WalkingState, an::IdleState, an::Equipment, Bober> (&registry);
+    auto inspector =
+        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
+                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::AvoidTraitComponent,
+                      an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
+                      an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
+                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState, an::Equipment, Bober>(
+            &registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -330,6 +379,7 @@ auto main() -> int {
         an::update_marker_system(registry, player);
         an::update_particle_system(registry);
         an::update_bullets(registry);
+        interact_with_bober(registry);
 
         // Characters systems
         an::trait_systems(registry);
