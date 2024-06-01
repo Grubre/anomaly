@@ -79,6 +79,8 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("map/city-tile-houses-NE2.png", T::CITY_HOUSES_NE2);
     load_image("map/city-tile-houses-NW.png", T::CITY_HOUSES_NW);
     load_image("map/city-tile-houses-NW2.png", T::CITY_HOUSES_NW2);
+
+    load_image("props/bober.png", T::BOBER);
 }
 
 void default_keys(an::KeyManager &key_manager) {
@@ -188,6 +190,50 @@ auto gen_npcs(entt::registry &registry, an::WalkArea *walk_area, const an::DayCo
     return day;
 }
 
+struct Bober {
+    static constexpr auto name = "Bober";
+    static void inspect() { ImGui::Text("Bober"); }
+};
+
+auto spawn_bober(entt::registry &registry) -> entt::entity {
+    auto entity = registry.create();
+
+    an::emplace<Bober>(registry, entity);
+    an::emplace<an::LocalTransform>(registry, entity);
+
+    auto texture = registry.ctx().get<an::AssetManager>().get_texture(an::TextureEnum::BOBER);
+
+    an::emplace<an::Drawable>(registry, entity,
+                              an::Sprite{
+                                  .asset = texture,
+                                  .sprite_id = 0,
+                                  .offset = {0.f, 0.f},
+                                  .tint = WHITE,
+                                  .flip_h = false,
+                                  .flip_v = false,
+                              });
+
+    an::emplace<an::StaticBody>(registry, entity, Vector2{0.f, 10.f}, Vector2{30.f, 25.f});
+    an::emplace<an::Visible>(registry, entity);
+
+    Vector2 top_left = {-1000.f, -1000.f};
+    Vector2 bottom_right = {1000.f, 1000.f};
+
+    auto candidate = Vector2{an::get_uniform_float() * (bottom_right.x - top_left.x) + top_left.x,
+                             an::get_uniform_float() * (bottom_right.y - top_left.y) + top_left.y};
+    while (!an::is_in_any_static(registry, candidate)) {
+        candidate = Vector2{an::get_uniform_float() * (bottom_right.x - top_left.x) + top_left.x,
+                            an::get_uniform_float() * (bottom_right.y - top_left.y) + top_left.y};
+    }
+
+    fmt::println("Bober spawned at: {}, {}", candidate.x, candidate.y);
+
+    auto &local_transform = registry.get<an::LocalTransform>(entity);
+    local_transform.transform.position = candidate;
+
+    return entity;
+}
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -203,13 +249,12 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector =
-        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
-                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::AvoidTraitComponent,
-                      an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
-                      an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
-                      an::Marker, an::CharacterStateMachine, an::WalkingState, an::IdleState,
-                      an::Equipment>(&registry);
+    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
+                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
+                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
+                                   an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character,
+                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker, an::CharacterStateMachine,
+                                   an::WalkingState, an::IdleState, an::Equipment, Bober> (&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -255,6 +300,8 @@ auto main() -> int {
 
     auto walk_area_entity = create_connected_walk_areas(registry, 3);
     auto *walk_area = &registry.get<an::WalkArea>(walk_area_entity);
+
+    spawn_bober(registry);
 
     // test anomalies and npcs
     auto day = gen_npcs(registry, walk_area,

@@ -47,6 +47,7 @@ enum class TextureEnum {
     SEESAW,
     HAMMER,
     NAIL,
+    BOBER,
     CNT
 };
 enum class SoundEnum { WIN = 0, CNT };
