@@ -302,16 +302,22 @@ void timer_gui(float time) {
 using grand_timer_t = float;
 
 void aggresive_hit_player(entt::registry &registry) {
-    auto view = registry.view<an::Aggresive, an::LocalTransform>();
+    auto view = registry.view<an::Aggresive, an::CharacterStateMachine, an::LocalTransform>();
 
-    for (auto &&[entity, local_transform] : view.each()) {
-        auto player_view = registry.view<an::Player, an::LocalTransform>();
-        for (auto player : player_view) {
-            auto &player_transform = player_view.get<an::LocalTransform>(player);
+    for (auto &&[entity, state_mach, local_transform] : view.each()) {
+        auto player_view = registry.view<an::Player, an::LocalTransform, an::Velocity>();
+        for (auto &&[player, player_player, player_transform, player_vel] : player_view.each()) {
             auto distance = Vector2Distance(local_transform.transform.position, player_transform.transform.position);
             if (distance < 30.f) {
-                registry.ctx().get<grand_timer_t>() -= 30.f;
                 registry.remove<an::Aggresive>(entity);
+                registry.remove<an::FollowEntityState>(entity);
+                state_mach.pop_and_apply(registry, entity);
+                if (!registry.all_of<an::SleepingPlayer>(player)) {
+                    registry.ctx().get<grand_timer_t>() -= 30.f;
+                    registry.emplace<an::SleepingPlayer>(player);
+                    player_vel = Vector2();
+                    player_transform.transform.rotation = PI / 2.f;
+                }
             }
         }
     }
@@ -336,7 +342,7 @@ auto main() -> int {
                                    an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
                                    an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
                                    an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character,
-                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker, an::CharacterStateMachine,
+                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker, an::CharacterStateMachine, an::SleepingPlayer,
                                    an::WalkingState, an::IdleState, an::Equipment, Bober, an::Aggresive>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
@@ -412,9 +418,14 @@ auto main() -> int {
         // ======================================
         an::notify_keyboard_press_system(key_manager);
         an::destroy_unparented(registry);
-        an::update_player(registry, player);
         an::update_props(registry);
-        an::player_shooting(registry, player);
+
+        an::sleep_player(registry);
+        if (!registry.all_of<an::SleepingPlayer>(player)) {
+            an::update_player(registry, player);
+            an::player_shooting(registry, player);
+        }
+
         an::update_marker_system(registry, player);
         an::update_particle_system(registry);
         an::update_bullets(registry);
@@ -475,6 +486,10 @@ auto main() -> int {
         // ======================================
         // DRAW GUI
         // ======================================
+
+        if (registry.all_of<an::SleepingPlayer>(player)) {
+            DrawText("-30 seconds", GetScreenWidth() * 0.4, GetScreenHeight() * 0.3, 50, RED);
+        }
 
         rlImGuiBegin();
         an::update_ui(registry, player);

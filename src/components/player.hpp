@@ -9,6 +9,7 @@
 #include "keyinput.hpp"
 #include <cstdlib>
 #include <fmt/printf.h>
+#include <imgui.h>
 #include <random>
 #include <raylib.h>
 #include <raymath.h>
@@ -62,9 +63,14 @@ struct RealBullet {
 
 struct SleepingPlayer {
     float time_left {5.f};
+
+    static constexpr auto name = "Sleeping";
+    void inspect([[maybe_unused]] entt::registry &registry, [[maybe_unused]] entt::entity entity) {
+        ImGui::DragFloat("Time Left", &time_left);
+    }
 };
 
-void sleep_player(entt::registry &registry) {
+inline void sleep_player(entt::registry &registry) {
     auto view = registry.view<SleepingPlayer>();
 
     for (auto &&[entity, sleep] : view.each()) {
