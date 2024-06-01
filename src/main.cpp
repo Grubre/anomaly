@@ -197,6 +197,7 @@ auto gen_npcs(entt::registry &registry, an::WalkArea *walk_area, const an::DayCo
 }
 
 struct Bober {
+    static constexpr auto interaction_key = KEY_T;
     entt::entity cloud;
     static constexpr auto name = "Bober";
     void inspect(entt::registry &registry, entt::entity entity) { ImGui::Text("Bober"); }
@@ -221,9 +222,8 @@ void interact_with_bober(entt::registry &registry) {
                 registry.remove<an::Visible>(bober_component.cloud);
             }
 
-            // if (IsKeyPressed(KEY_E)) {
-            //     fmt::println("Bober interaction");
-            // }
+            if (IsKeyPressed(Bober::interaction_key)) {
+            }
         }
     }
 }
