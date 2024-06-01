@@ -40,7 +40,8 @@ void load_resources(an::AssetManager &asset_manager) {
     load_image("map/test-tile.png", T::TEST_TILE);
     // player
     asset_manager.register_texture(an::load_asset(LoadImage, "player/main_char.png"), T::MAIN_CHAR, 64, 72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/base_walk_animation.png"), T::BASE_CHARACTER, 64,72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/base_walk_animation.png"), T::BASE_CHARACTER, 64,
+                                   72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_1.png"), T::CHARACTER_HAIR_1, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_2.png"), T::CHARACTER_HAIR_2, 64, 72);
     asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_4.png"), T::CHARACTER_HAIR_4, 64, 72);
@@ -326,6 +327,26 @@ void aggresive_hit_player(entt::registry &registry) {
     }
 }
 
+void add_map_barriers(entt::registry &registry) {
+    fmt::println("Adding map barriers");
+    const auto barriers = std::array{
+        std::pair<Vector2, Vector2>{Vector2{-1650.f, -1260.f}, Vector2{3300.f, 30.f}},
+        std::pair<Vector2, Vector2>{Vector2{-1660.f, -1260.f}, Vector2{30.f, 2520.f}},
+        std::pair<Vector2, Vector2>{Vector2{-1660.f, 1200.f}, Vector2{3300.f, 30.f}},
+        std::pair<Vector2, Vector2>{Vector2{1620.f, -1260.f}, Vector2{30.f, 2520.f}},
+    };
+
+    for (const auto &[pos, size] : barriers) {
+        auto entity = registry.create();
+        an::emplace<an::DebugName>(registry, entity, "Map barrier");
+        an::emplace<an::LocalTransform>(registry, entity);
+        auto &transform = registry.get<an::LocalTransform>(entity);
+        fmt::println("Barrier at: {}, {}", pos.x, pos.y);
+        transform.transform.position = pos;
+        an::emplace<an::StaticBody>(registry, entity, Vector2{0.f, 0.f}, size);
+    }
+}
+
 auto main() -> int {
     // setup
     setup_raylib();
@@ -341,12 +362,13 @@ auto main() -> int {
     auto &asset_manager = registry.ctx().emplace<an::AssetManager>();
     load_resources(asset_manager);
     an::load_props(registry, an::load_asset(an::get_ifstream, "props.dat"));
-    auto inspector = an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health,
-                                   an::Player, an::Velocity, an::CharacterBody, an::StaticBody, an::Prop,
-                                   an::AvoidTraitComponent, an::ShakeTraitComponent, an::FollowPathState,
-                                   an::RandomWalkState, an::WalkArea, an::ParticleEmitter, an::Particle, an::Character,
-                                   an::Marked, an::Interrupted, an::ShowUI, an::Marker, an::CharacterStateMachine, an::SleepingPlayer,
-                                   an::WalkingState, an::IdleState, an::Equipment, Bober, an::Aggresive>(&registry);
+    auto inspector =
+        an::Inspector<an::LocalTransform, an::GlobalTransform, an::Drawable, an::Alive, an::Health, an::Player,
+                      an::Velocity, an::CharacterBody, an::StaticBody, an::Prop, an::AvoidTraitComponent,
+                      an::ShakeTraitComponent, an::FollowPathState, an::RandomWalkState, an::WalkArea,
+                      an::ParticleEmitter, an::Particle, an::Character, an::Marked, an::Interrupted, an::ShowUI,
+                      an::Marker, an::CharacterStateMachine, an::SleepingPlayer, an::WalkingState, an::IdleState,
+                      an::Equipment, Bober, an::Aggresive>(&registry);
 
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_N, [&]() { an::save_props(registry); });
     key_manager.subscribe(an::KeyboardEvent::PRESS, KEY_Q, [&]() { an::spawn_prop(registry); });
@@ -413,16 +435,18 @@ auto main() -> int {
         an::emit_particles(registry, player, drunk_p, 5, {0, -5});
     });
 
+    add_map_barriers(registry);
+
     const float initial_time = 2.f * 60.f;
     auto &time = registry.ctx().emplace<grand_timer_t>(initial_time);
     // TESTCIK
     auto ent = registry.create();
     an::emplace_sprite(registry, ent, an::TextureEnum::STICK);
-    //main menu
+    // main menu
     while (!WindowShouldClose()) {
         rlImGuiBegin();
         BeginDrawing();
-        if(main_menu()){
+        if (main_menu()) {
             rlImGuiEnd();
             EndDrawing();
             break;
@@ -430,7 +454,7 @@ auto main() -> int {
         rlImGuiEnd();
         EndDrawing();
     }
-    //game
+    // game
     while (!WindowShouldClose()) {
         time -= GetFrameTime();
         // ======================================
@@ -489,8 +513,8 @@ auto main() -> int {
         an::debug_draw_bodies(registry);
         // an::debug_trait_systems(registry);
 
-        //intended
-        an::update_bullets(registry,player);
+        // intended
+        an::update_bullets(registry, player);
 
         // an::debug_buildings(registry);
 
@@ -530,7 +554,7 @@ auto main() -> int {
 
         EndDrawing();
     }
-    //end
+    // end
     while (!WindowShouldClose()) {
 
         // ======================================
@@ -558,7 +582,7 @@ auto main() -> int {
         // DRAW GUI
         // ======================================
         rlImGuiBegin();
-            //TODO
+        // TODO
         rlImGuiEnd();
         DrawFPS(10, 10);
         EndDrawing();
