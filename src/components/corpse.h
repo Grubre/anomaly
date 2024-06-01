@@ -8,6 +8,6 @@ struct Corpse {
         ImGui::Text("Corpse");
     }
 };
-auto make_cropse(entt::registry &registry,Vector2 pos) -> entt::entity;
+auto make_corpse(entt::registry &registry,Vector2 pos) -> entt::entity;
 
 }

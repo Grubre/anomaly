@@ -1,9 +1,11 @@
 #include "player.hpp"
+#include <cmath>
 #include "assets/asset_manager.hpp"
 #include "characters.hpp"
 #include "components/character_state.hpp"
 #include "components/equipment.hpp"
 #include "components/sprite.hpp"
+#include "corpse.h"
 namespace an {
 
 void Health::inspect(entt::registry &registry, entt::entity entity) {
@@ -81,6 +83,7 @@ void update_bullets(entt::registry &registry,entt::entity player) {
         for (auto &&[cha, cha_tran] : view3.each()) {
             if (Vector2Distance(trans.transform.position, cha_tran.transform.position) < 20) {
                 trans.transform.position = Vector2{-1000, -1000};
+                make_corpse(registry, cha_tran.transform.position);
                 registry.destroy(cha);
             }
         }
@@ -121,6 +124,7 @@ void make_player_bullet_real(entt::registry &registry, Vector2 start, Vector2 di
     emplace<Sprite>(registry, bullet, TextureEnum::BULLET);
     auto &tr = registry.get<LocalTransform>(bullet);
     tr.transform.rotation = std::atan2(dir.x, -dir.y);
+    tr.transform.scale = Vector2{8.0f, 8.0f};
     tr.transform.position = Vector2Add(start, Vector2Scale(dir, 30.f));
 }
 void player_shooting(entt::registry &registry, entt::entity &entity) {
