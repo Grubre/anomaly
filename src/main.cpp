@@ -35,15 +35,19 @@ void load_resources(an::AssetManager &asset_manager) {
         asset_manager.register_texture(an::load_asset(LoadImage, path), id);
     };
     // tmp
-    load_image("player/player-test.png", T::PLAYER_TEXTURE);
     load_image("map/test-tile.png", T::TEST_TILE);
     // player
     asset_manager.register_texture(an::load_asset(LoadImage, "player/base_walk_animation.png"), T::BASE_CHARACTER, 64,
                                    72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_1.png"), T::CHARACTER_HAIR, 64, 72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/top_1.png"), T::CHARACTER_SHIRT, 64, 72);
-    asset_manager.register_texture(an::load_asset(LoadImage, "player/bottom_1.png"), T::CHARACTER_PANTS, 64,
-                                   72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_1.png"), T::CHARACTER_HAIR_1, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_2.png"), T::CHARACTER_HAIR_2, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/hair_4.png"), T::CHARACTER_HAIR_4, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/top_1.png"), T::CHARACTER_SHIRT_1, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/top_2.png"), T::CHARACTER_SHIRT_2, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/top_4.png"), T::CHARACTER_SHIRT_4, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/bottom_1.png"), T::CHARACTER_PANTS_1, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/bottom_2.png"), T::CHARACTER_PANTS_2, 64, 72);
+    asset_manager.register_texture(an::load_asset(LoadImage, "player/bottom_4.png"), T::CHARACTER_PANTS_4, 64, 72);
     // props
     load_image("props/bench.png", T::BENCH);
     load_image("props/lamp.png", T::LAMP);
@@ -235,9 +239,9 @@ auto main() -> int {
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(1.f, 1.f));
     an::make_city_tile(registry, an::TextureEnum::CITY_TILE_SQUARE, Vector2(-1.f, 1.f));
 
-    an::make_building_l1(registry, Vector2(0.f,-1.f), an::TextureEnum::CITY_HOUSES_N);
+    an::make_building_l1(registry, Vector2(0.f, -1.f), an::TextureEnum::CITY_HOUSES_N);
 
-    an::make_building_l2(registry, Vector2(0.f,-1.f), an::TextureEnum::CITY_HOUSES_N2);
+    an::make_building_l2(registry, Vector2(0.f, -1.f), an::TextureEnum::CITY_HOUSES_N2);
 
     auto entity = registry.create();
     an::emplace<an::Sprite>(registry, entity, an::TextureEnum::TEST_TILE);
@@ -328,7 +332,7 @@ auto main() -> int {
         an::debug_draw_bodies(registry);
         // an::debug_trait_systems(registry);
 
-        //an::debug_buildings(registry);
+        // an::debug_buildings(registry);
 
         EndMode2D();
 
