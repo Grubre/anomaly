@@ -5,7 +5,6 @@
 namespace an {
 
 inline void clues_gui(ResolvedDay &day) {
-    ImGui::Begin("Anomaly traits");
     ImGui::SeparatorText(fmt::format("Probable traits ({} of {})", day.num_used_probable_traits,
                                      std::variant_size<an::ProbableTrait>().value)
                              .c_str());
@@ -26,7 +25,6 @@ inline void clues_gui(ResolvedDay &day) {
     for (auto &trait : day.anomaly_traits.guaranteed_traits) {
         ImGui::Text("%s", guaranteed_trait_to_str(trait).c_str());
     }
-    ImGui::End();
 }
 
-}
+} // namespace an

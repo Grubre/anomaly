@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include "assets/asset_manager.hpp"
 #include <unordered_set>
@@ -17,13 +17,9 @@ enum class EqItem {
 struct Equipment {
     std::unordered_set<EqItem> eq;
 
-    void insert(EqItem item) {
-        eq.insert(item);
-    }
+    void insert(EqItem item) { eq.insert(item); }
 
-    bool has(EqItem item) const {
-        return eq.contains(item);
-    }
+    bool has(EqItem item) const { return eq.contains(item); }
 
     static constexpr auto name = "Equipment";
 
@@ -42,19 +38,19 @@ struct Equipment {
     }
 };
 
-inline void show_equipment(entt::registry& registry, entt::entity player) {
+inline void show_equipment(entt::registry &registry, entt::entity player) {
     auto &equipment = registry.get<Equipment>(player);
     auto &asset_manager = registry.ctx().get<AssetManager>();
 
-    ImGui::Begin("Equipment", nullptr);
-    for(const auto &item : equipment.eq) {
+    ImGui::BeginGroup();
+    for (const auto &item : equipment.eq) {
         auto id = (TextureEnum)((int)TextureEnum::STICK + (int)item);
         auto *item_texture = asset_manager.get_texture_ptr(id);
         ImGui::Image((void *)item_texture, {100.f, 64.f});
         ImGui::SameLine(0.f, 20.f);
     }
 
-    ImGui::End();
+    ImGui::EndGroup();
 }
 
-}
+} // namespace an

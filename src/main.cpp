@@ -296,11 +296,11 @@ auto spawn_bober(entt::registry &registry) -> entt::entity {
 }
 
 void timer_gui(float time) {
-    ImGui::Begin("Timer");
+    ImGui::BeginGroup();
     auto minutes = static_cast<int>(time) / 60;
     auto seconds = static_cast<int>(time) % 60;
     ImGui::Text("Time: %02d:%02d", minutes, seconds);
-    ImGui::End();
+    ImGui::EndGroup();
 }
 
 using grand_timer_t = float;
@@ -345,6 +345,41 @@ void add_map_barriers(entt::registry &registry) {
         transform.transform.position = pos;
         an::emplace<an::StaticBody>(registry, entity, Vector2{0.f, 0.f}, size);
     }
+}
+
+void draw_ui(entt::registry &registry, entt::entity player, an::ResolvedDay &day, float time) {
+    auto io = ImGui::GetIO();
+    auto asset_manager = registry.ctx().get<an::AssetManager>();
+    auto background = asset_manager.get_texture(an::TextureEnum::UI_BACKGROUND).texture;
+    float size_x = io.DisplaySize.x * 0.3f;
+    float size_y = io.DisplaySize.y * 0.3f;
+    ImGui::SetNextWindowSize({size_x, size_y});
+    ImGui::SetNextWindowPos({10, 10});
+    auto *font = ImGui::GetFont();
+    font->Scale = 2.f;
+    ImGui::PushFont(font);
+
+    ImGui::Begin("UI", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+    // ImGui::Image((void *)&background, {size_x, size_y});
+    ImGui::SetCursorPosX(50);
+    ImGui::SetCursorPosY(50);
+
+    ImGui::Separator();
+    an::clues_gui(day);
+    ImGui::Separator();
+    an::show_equipment(registry, player);
+    ImGui::PopFont();
+    font->Scale = 4.f;
+    ImGui::Separator();
+    ImGui::PushFont(font);
+    timer_gui(time);
+    ImGui::End();
+
+    ImGui::PopFont();
+    ImGui::PushFont(font);
+    font->Scale = 1.f;
+    ImGui::PopFont();
 }
 
 auto main() -> int {
@@ -542,12 +577,9 @@ auto main() -> int {
         }
 
         rlImGuiBegin();
+        draw_ui(registry, player, day, time);
         an::update_ui(registry, player);
-        // ImGui::ShowDemoWindow();
         inspector.draw_gui();
-        an::clues_gui(day);
-        an::show_equipment(registry, player);
-        timer_gui(time);
         rlImGuiEnd();
 
         DrawFPS(10, 10);
