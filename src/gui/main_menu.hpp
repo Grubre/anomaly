@@ -13,11 +13,29 @@ inline bool main_menu() {
     ImGui::Begin("Main Menu", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
     ImGui::SetWindowFontScale(2.0f);
 
+    auto *font = ImGui::GetFont();
+    font->Scale = 5.f;
+    ImGui::PushFont(font);
+
+    static constexpr auto *title = "Impostor Anomaly";
+
+    auto window_width = ImGui::GetWindowSize().x;
+    auto text_width = ImGui::CalcTextSize(title).x;
+
+    ImGui::SetCursorPos({(window_width - text_width) * 0.5f, 100.f});
+    ImGui::Text("Impostor Anomaly");
+
+    ImGui::PopFont();
+
+    font->Scale = 1.f;
+    ImGui::PushFont(font);
+
     ImGui::SetCursorPos({io.DisplaySize.x / 2 - 100, io.DisplaySize.y / 2 - 50});
     if (ImGui::Button("Play Game", {200, 100})) {
-        ret=  true;
+        ret = true;
     }
 
+    ImGui::PopFont();
     ImGui::End();
     ImGui::PopStyleVar();
     ImGui::PopStyleColor();
