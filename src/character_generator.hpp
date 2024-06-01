@@ -1,7 +1,6 @@
 #pragma once
 
 #include <raylib.h>
-#include <bitset>
 #include <array>
 #include <cstdint>
 #include <span>
@@ -11,8 +10,6 @@
 #include "components/props.hpp"
 
 namespace an {
-using accesories_mask_t = std::bitset<8>;
-
 constexpr std::array possible_shirt_colors{RED,     GREEN,    BLUE,  YELLOW, VIOLET,    ORANGE,    BROWN, LIME,
                                            MAGENTA, RAYWHITE, BEIGE, MAROON, DARKGREEN, LIGHTGRAY, GOLD};
 
@@ -28,9 +25,6 @@ struct PantsColor {
 struct HairColor {
     Color color;
 };
-struct Accessory {
-    std::uint32_t accessory_num;
-};
 struct ParticleTrait {
     ParticleType type;
 };
@@ -38,7 +32,6 @@ struct ParticleTrait {
 [[nodiscard]] auto get_random_shirt_color() -> ShirtColor;
 [[nodiscard]] auto get_random_pants_color() -> PantsColor;
 [[nodiscard]] auto get_random_hair_color() -> HairColor;
-[[nodiscard]] auto get_random_accessory() -> Accessory;
 [[nodiscard]] auto get_random_particle() -> ParticleTrait;
 
 struct CharacterTraits {
@@ -51,8 +44,6 @@ struct CharacterTraits {
     TextureEnum pants_archetype{};
 
     std::optional<ParticleTrait> particles = std::nullopt;
-
-    an::accesories_mask_t accesories_mask{};
 };
 
 template <typename T>
@@ -68,7 +59,7 @@ struct TwitchNear {
     PropType type;
 };
 
-using ProbableTrait = std::variant<ShirtColor, PantsColor, HairColor, Accessory, ParticleTrait>;
+using ProbableTrait = std::variant<ShirtColor, PantsColor, HairColor, ParticleTrait>;
 using GuaranteedTrait = std::variant<Avoid, TwitchNear>;
 
 constexpr auto num_guaranteed_traits = std::variant_size<an::GuaranteedTrait>();

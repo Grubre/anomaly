@@ -60,6 +60,23 @@ struct RealBullet {
     float time_left = total_time;
 };
 
+struct SleepingPlayer {
+    float time_left {5.f};
+};
+
+void sleep_player(entt::registry &registry) {
+    auto view = registry.view<SleepingPlayer>();
+
+    for (auto &&[entity, sleep] : view.each()) {
+        sleep.time_left -= GetFrameTime();
+        if (sleep.time_left <= 0.f) {
+            registry.remove<SleepingPlayer>(entity);
+            auto& local = registry.get<LocalTransform>(entity);
+            local.transform.rotation = 0.f;
+        }
+    }
+}
+
 void update_bullets(entt::registry &registry);
 
 void make_player_bullet(entt::registry &registry, Vector2 start, Vector2 dir, float speed, entt::entity player);

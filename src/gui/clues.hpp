@@ -18,7 +18,6 @@ inline void clues_gui(ResolvedDay &day) {
                                               ImVec4((float)color.color.r / 255.f, (float)color.color.g / 255.f,
                                                      (float)color.color.b / 255.f, 1.f));
                        },
-                       [&](const an::Accessory &accessory) { ImGui::Text("Accessory: %d", accessory.accessory_num); },
                        [&](const an::ParticleTrait &particle) { ImGui::Text("Particle: %d", (int)particle.type); },
                    },
                    trait);

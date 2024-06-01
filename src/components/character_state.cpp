@@ -55,6 +55,7 @@ void follow_player_if_bullet(entt::registry &registry, entt::entity character, e
 
             auto b = registry.get<Bullet>(bullet);
             emplace<FollowEntityState>(registry, character, b.player, 5.f, 100.f, GetTime());
+            emplace<Aggresive>(registry, character);
         }
     }
 }
@@ -117,6 +118,7 @@ void follow_entity_character_state_system(entt::registry &registry) {
 
         if (state.time_left <= 0.f) {
             registry.remove<FollowEntityState>(entity);
+            registry.remove<Aggresive>(entity);
             state_machine.pop_and_apply(registry, entity);
             continue;
         }

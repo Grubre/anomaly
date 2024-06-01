@@ -1,7 +1,6 @@
 #pragma once 
 
 #include "assets/asset_manager.hpp"
-#include "fmt/base.h"
 #include <unordered_set>
 #include <entt.hpp>
 #include <imgui.h>
